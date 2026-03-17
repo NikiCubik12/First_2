@@ -112,6 +112,7 @@ void test_double_minus()
 void test_double_mult()
 {
     TypeInfo* type_info = get_double_type_info();
+    TypeInfo* type_info222 = get_int_type_info();
     double _a[3] = {1.,2.,3.};
     double coef = 1.5;
 

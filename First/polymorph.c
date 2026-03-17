@@ -39,6 +39,7 @@ void double_print(const void *in)
 TypeInfo* get_int_type_info() 
 {
     static TypeInfo info; 
+
     info.size = sizeof(int);
     info.input = int_input;
     info.print = int_print;
