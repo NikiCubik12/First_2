@@ -27,14 +27,17 @@ void check_int(int expected, int got)
 
 void test_int_plus()
 {
-    TypeInfo* type_info = get_int_type_info();
+    int err_code;
+
+    TypeInfo* type_info1 = get_int_type_info();
+    TypeInfo* type_info2 = get_int_type_info();
 
     int _a[3] = {1,2,3};
-    int _b[3] = {5,6,7};
+    int _b[4] = {5,6,7};
 
-    Linear_form* a = create (_a, 3, type_info);
-    Linear_form* b = create (_b, 3,  type_info);
-    Linear_form* c = plus(a, b);
+    Linear_form* a = create (_a, 3, type_info1, &err_code);
+    Linear_form* b = create (_b, 3, type_info2, &err_code);
+    Linear_form* c = plus(a, b, &err_code);
 
     int* c_coeffs = (int*) c->coeffs;
     check_int(c_coeffs[0], 6);
@@ -48,14 +51,17 @@ void test_int_plus()
 
 void test_int_minus()
 {
-    TypeInfo* type_info = get_int_type_info();
+    int err_code;
+
+    TypeInfo* type_info1 = get_int_type_info();
+    TypeInfo* type_info2 = get_int_type_info();
 
     int _a[3] = {1,2,3};
     int _b[3] = {5,6,7};
 
-    Linear_form* a = create (_a, 3, type_info);
-    Linear_form* b = create (_b, 3, type_info);
-    Linear_form* c = minus(a, b);
+    Linear_form* a = create (_a, 3, type_info1, &err_code);
+    Linear_form* b = create (_b, 3, type_info2, &err_code);
+    Linear_form* c = minus(a, b, &err_code);
 
     int* c_coeffs = (int*) c->coeffs;
     check_int(c_coeffs[0], -4);
@@ -69,14 +75,17 @@ void test_int_minus()
 
 void test_double_plus()
 {
-    TypeInfo* type_info = get_double_type_info();
+    int err_code;
+
+    TypeInfo* type_info1 = get_double_type_info();
+    TypeInfo* type_info2 = get_double_type_info();
 
     double _a[3] = {1.5,2.5,3.5};
     double _b[3] = {5.0,6.0,7.0};
 
-    Linear_form* a = create (_a, 3, type_info);
-    Linear_form* b = create (_b, 3, type_info);
-    Linear_form* c = plus(a, b);
+    Linear_form* a = create (_a, 3, type_info1, &err_code);
+    Linear_form* b = create (_b, 3, type_info2, &err_code);
+    Linear_form* c = plus(a, b, &err_code);
 
     double* c_coeffs = (double*) c->coeffs;
     check_double(c_coeffs[0], 6.5);
@@ -90,14 +99,17 @@ void test_double_plus()
 
 void test_double_minus()
 {
-    TypeInfo* type_info = get_double_type_info();
+    int err_code;
+
+    TypeInfo* type_info1 = get_double_type_info();
+    TypeInfo* type_info2 = get_double_type_info();
 
     double _a[3] = {1.5,2.5,3.5};
     double _b[3] = {5.0,6.0,7.0};
 
-    Linear_form* a = create (_a, 3, type_info);
-    Linear_form* b = create (_b, 3, type_info);
-    Linear_form* c = minus(a, b);
+    Linear_form* a = create (_a, 3, type_info1, &err_code);
+    Linear_form* b = create (_b, 3, type_info2, &err_code);
+    Linear_form* c = minus(a, b, &err_code);
 
     double* c_coeffs = (double*) c->coeffs;
     check_double(c_coeffs[0], -3.5);
@@ -111,13 +123,14 @@ void test_double_minus()
 
 void test_double_mult()
 {
+    int err_code;
+
     TypeInfo* type_info = get_double_type_info();
-    TypeInfo* type_info222 = get_int_type_info();
     double _a[3] = {1.,2.,3.};
     double coef = 1.5;
 
-    Linear_form* a = create (_a, 3, type_info);
-    Linear_form* c = mult(a, &coef);
+    Linear_form* a = create (_a, 3, type_info, &err_code);
+    Linear_form* c = mult(a, &coef, &err_code);
 
     double* c_coeffs = (double*) c->coeffs;
     check_double(c_coeffs[0], 1.5);
@@ -130,12 +143,14 @@ void test_double_mult()
 
 void test_int_mult()
 {
+    int err_code;
+
     TypeInfo* type_info = get_int_type_info();
     int _a[3] = {1,2,3};
     int coef = 2;
 
-    Linear_form* a = create (_a, 3, type_info);
-    Linear_form* c = mult(a, &coef);
+    Linear_form* a = create (_a, 3, type_info, &err_code);
+    Linear_form* c = mult(a, &coef, &err_code);
 
     int* c_coeffs = (int*) c->coeffs;
     check_int(c_coeffs[0], 2);
@@ -148,9 +163,11 @@ void test_int_mult()
 
 void test_create_int()
 {
+    int err_code;
+
     TypeInfo* type_info = get_int_type_info();
     int _a[3] = {1,2,3};
-    Linear_form* a = create (_a, 3, type_info);
+    Linear_form* a = create (_a, 3, type_info, &err_code);
 
     if (a != NULL)
     {
@@ -174,10 +191,12 @@ void test_create_int()
 
 void test_destroy()
 {
+    int err_code;
+
     TypeInfo* type_info = get_int_type_info();
     int _a[3] = {1,2,3};
 
-    Linear_form* a = create(_a, 3, type_info);
+    Linear_form* a = create(_a, 3, type_info, &err_code);
 
     destroy (a);
     totalTests++;
@@ -189,9 +208,11 @@ void test_destroy()
 
 void test_create_double()
 {
+    int err_code;
+
     TypeInfo* type_info = get_double_type_info();
     double _a[3] = {1.,2.,3.};
-    Linear_form* a = create (_a, 3, type_info);
+    Linear_form* a = create (_a, 3, type_info, &err_code);
 
     if (a != NULL)
     {
@@ -216,27 +237,84 @@ void test_create_double()
 
 void test_calculate_int()
 {
+    int err_code;
+
     TypeInfo* type_info = get_int_type_info();
     int _a[3] = {1,2,3};
-    Linear_form* a = create (_a, 3, type_info);
+    Linear_form* a = create (_a, 3, type_info, &err_code);
 
     int x = 2;
-    int result = Calculate_int (a, x);
+    int result = Calculate_int (a, x, &err_code);
     check_int (result, 11);
     destroy (a);
 }
 
 void test_calculate_double()
 {
+    int err_code;
+
     TypeInfo* type_info = get_double_type_info();
     double _a[3] = {1.5,2.5,3.5};
-    Linear_form* a = create (_a, 3, type_info);
+    Linear_form* a = create (_a, 3, type_info, &err_code);
 
     double x = 2;
-    double result = Calculate_double (a, x);
+    double result = Calculate_double (a, x, &err_code);
     check_int (result, 13.5);
     destroy (a);
 }
+
+// f(x+y) = f(x) + f(y)
+void test_of_Additivity()
+{
+    int err_code;
+
+    TypeInfo* type_info = get_int_type_info();
+    int _a[3] = {0, 2, 3}; 
+    Linear_form* a = create(_a, 3, type_info, &err_code);
+
+    int x = 1, y = 2;
+    int calcul1 = Calculate_int(a, (x+y), &err_code);
+    int calcul2 = Calculate_int(a, x, &err_code) + Calculate_int(a, y, &err_code);
+
+    check_int(calcul1, calcul2);
+    destroy(a);
+}
+
+// f(a*x) = a * f(x)
+void test_of_Uniformity()
+{
+    int err_code;
+
+    TypeInfo* type_info = get_int_type_info();
+    int _a[3] = {0, 2, 3}; 
+    Linear_form* a = create(_a, 3, type_info, &err_code);
+
+    int x = 2, alpha = 3;
+
+    Linear_form* b = mult(a, &alpha, &err_code);
+    int calcul1 = Calculate_int(a, alpha*x, &err_code);
+    int calcul2 = Calculate_int(b, x, &err_code);
+
+    check_int(calcul1, calcul2);
+    destroy(a);
+    destroy(b);
+}
+
+// f(0) = 0
+void test_of_Null()
+{
+    int err_code;
+
+    TypeInfo* type_info = get_int_type_info();
+    int _a[3] = {1, 2, 3}; 
+    Linear_form* a = create(_a, 3, type_info, &err_code);
+
+    int calcul = Calculate_int(a, 0, &err_code);
+
+    check_int(calcul, 1);
+    destroy(a);
+}
+
 
 void print_test_stats()
 {

@@ -1,7 +1,8 @@
 #ifndef MENU
 #define MENU
 
-void clear_buffer();
+int Int_input(int min, int max, char* message);
+double Double_input(double min, double max, char* message);
 int menu();
 
 #endif

@@ -14,6 +14,10 @@ int main()
     test_create_double();
     test_calculate_int();
     test_calculate_double();
+    test_of_Additivity();
+    test_of_Uniformity();
+    test_of_Null();
+
     
     print_test_stats();
 

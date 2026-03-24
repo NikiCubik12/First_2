@@ -38,19 +38,18 @@ void double_print(const void *in)
 
 TypeInfo* get_int_type_info() 
 {
-    static TypeInfo info; 
-
-    info.size = sizeof(int);
-    info.input = int_input;
-    info.print = int_print;
-    return &info;
+    static TypeInfo int_info; 
+    int_info.size = sizeof(int);
+    int_info.input = int_input;
+    int_info.print = int_print;
+    return &int_info;
 }
 
 TypeInfo* get_double_type_info() 
 {
-    static TypeInfo info;
-    info.size = sizeof(double);
-    info.input = double_input;
-    info.print = double_print;
-    return &info;
+    static TypeInfo double_info;
+    double_info.size = sizeof(double);
+    double_info.input = double_input;
+    double_info.print = double_print;
+    return &double_info;
 }

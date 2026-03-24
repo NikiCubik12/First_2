@@ -71,6 +71,7 @@ int Double_input(double min, double max, char* message)
 
 int menu()
 {
+    int err_code;
     int type_choice, size, operation;
     int int_scalar, int_x;
     double double_scalar, double_x;
@@ -98,7 +99,7 @@ int menu()
         {
             coeffs[i] = Int_input(INT_MIN, INT_MAX, "ќшибка: ¬ведено неккоректное значение. ¬ведите ещЄ раз:\n");
         }
-        form1 = create(coeffs, size, get_int_type_info());
+        form1 = create(coeffs, size, get_int_type_info(), &err_code);
         free(coeffs);
     } 
     else 
@@ -109,7 +110,7 @@ int menu()
         {
             coeffs[i] = Double_input(DBL_MIN, 1e6, "ќшибка: ¬ведено неккоректное значение. ¬ведите ещЄ раз:\n");
         }
-        form1 = create(coeffs, size, get_double_type_info());
+        form1 = create(coeffs, size, get_double_type_info(), &err_code);
         free(coeffs);
     }
     
@@ -123,7 +124,7 @@ int menu()
         {
             coeffs[i] = Int_input(INT_MIN, INT_MAX, "ќшибка: ¬ведено неккоректное значение. ¬ведите ещЄ раз:\n");
         }
-        form2 = create(coeffs, size, get_int_type_info());
+        form2 = create(coeffs, size, get_int_type_info(), &err_code);
         free(coeffs);
     } 
     else 
@@ -134,7 +135,7 @@ int menu()
         {
             coeffs[i] = Double_input(DBL_MIN, 1e6, "ќшибка: ¬ведено неккоректное значение. ¬ведите ещЄ раз:\n");
         }
-        form2 = create(coeffs, size, get_double_type_info());
+        form2 = create(coeffs, size, get_double_type_info(), &err_code);
         free(coeffs);
     }
     
@@ -157,14 +158,14 @@ int menu()
             {
                 if (type_choice == 1) 
                 {
-                    Linear_form* result = plus(form1, form2);
+                    Linear_form* result = plus(form1, form2, &err_code);
                     printf("–езультат: ");
                     Print(result);
                     destroy(result);
                 } 
                 else 
                 {
-                    Linear_form* result = plus(form1, form2);
+                    Linear_form* result = plus(form1, form2, &err_code);
                     printf("–езультат: ");
                     Print(result);
                     destroy(result);
@@ -176,14 +177,14 @@ int menu()
             {
                 if (type_choice == 1) 
                 {
-                    Linear_form* result = minus(form1, form2);
+                    Linear_form* result = minus(form1, form2, &err_code);
                     printf("–езультат: ");
                     Print(result);
                     destroy(result);
                 } 
                 else 
                 {
-                    Linear_form* result = minus(form1, form2);
+                    Linear_form* result = minus(form1, form2, &err_code);
                     printf("–езультат: ");
                     Print(result);
                     destroy(result);
@@ -204,7 +205,7 @@ int menu()
                 {
                     printf("¬ведите скал€р: ");
                     int_scalar = Int_input(INT_MIN, INT_MAX, "ќшибка: ¬ведено неккоректное значение. ¬ведите ещЄ раз:\n");
-                    Linear_form* result = mult(target, &int_scalar);
+                    Linear_form* result = mult(target, &int_scalar, &err_code);
                     printf("–езультат: ");
                     Print(result);
                     destroy(result);
@@ -213,7 +214,7 @@ int menu()
                 {
                     printf("¬ведите скал€р: ");
                     double_scalar = Double_input(DBL_MIN, 1e6, "ќшибка: ¬ведено неккоректное значение. ¬ведите ещЄ раз:\n");
-                    Linear_form* result = mult(target, &double_scalar);
+                    Linear_form* result = mult(target, &double_scalar, &err_code);
                     printf("–езультат: ");
                     Print(result);
                     destroy(result);
@@ -233,14 +234,14 @@ int menu()
                 {
                     printf("¬ведите x: ");
                     int_x = Int_input(INT_MIN, INT_MAX, "ќшибка: ¬ведено неккоректное значение. ¬ведите ещЄ раз:\n");
-                    int result = Calculate_int(target, int_x);
+                    int result = Calculate_int(target, int_x, &err_code);
                     printf("«начение = %d\n", result);
                 } 
                 else 
                 {
                     printf("¬ведите x: ");
                     double_x = Double_input(DBL_MIN, 1e6, "ќшибка: ¬ведено неккоректное значение. ¬ведите ещЄ раз:\n");
-                    double result = Calculate_double(target, double_x);
+                    double result = Calculate_double(target, double_x, &err_code);
                     printf("«начение = %.2f\n", result);
                 }
                 break;
