@@ -21,14 +21,8 @@ void int_print(const void *in)
 
 int double_input(void *out) 
 {
-    if (scanf("%lf", (double*)out) > 0)
-    {
-        return 1;
-    }
-    else 
-    {
-        return 0;
-    }
+    return  (scanf("%lf", (double*)out) > 0)
+    
 }
 
 void double_print(const void *in) 
