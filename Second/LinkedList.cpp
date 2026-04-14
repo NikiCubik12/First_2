@@ -1,37 +1,46 @@
 #include <iostream>
 #include <string>
 using namespace std;
-#include "LinkedList.h"
+using std::cin, std::cout, std::out_of_range, std::invalid_argument
+#include "LinkedList.hpp"
 
-
+template <typename T> 
 Node<T> :: Node ()
 {
     key = 0;
     next = nullptr;
 }
+
+template <typename T> 
 Node<T> :: Node (T key)
 {
     this->key = key;
     next = nullptr;
 }
 
-
+template <typename T> 
 LinkedList<T> :: LinkedList ()
 {
     head = nullptr;
     tail = nullptr;
     length = 0;
 }
+
+template <typename T> 
 LinkedList<T> :: LinkedList (T* items, int count)
 {
-    if (count >=0)
+    if (count >= 0)
     {
-        for (int i=0; i<count; i++)
+        for (int i = 0; i < count; i++)
             Append (items[i]);
     }
     else
-    // кидаем исключение через throw
+    {
+        throw invalid_argument("Неверный размер"); 
+    }
 }
+
+template <typename T> 
 LinkedList<T> :: LinkedList (LinkedList <T>& list const)
 {
     head = nullptr;
@@ -39,26 +48,32 @@ LinkedList<T> :: LinkedList (LinkedList <T>& list const)
     length = 0;
     // указатель, который двигается по списку list
     Node <T>* t = list.head;
-    while (t!=nullptr)
+    while (t != nullptr)
     {
         Append (t->key);
         t = t->next;
     }
 }
+
+template <typename T> 
 T LinkedList<T> :: GetFirst()
 {
-    if (length !=0)
+    if (length != 0)
         return head->key;
     else
-        // кидаем исключение
+        throw invalid_argument("Последовательность пуста");
 }
+
+template <typename T> 
 T LinkedList<T> :: GetLast()
 {
-    if (length !=0)
+    if (length != 0)
         return tail->key;
     else
-        // кидаем исключение
+        throw invalid_argument("Последовательность пуста");
 }
+
+template <typename T> 
 T LinkedList<T> :: Get (int index)
 {
     if (index < length)
@@ -74,25 +89,32 @@ T LinkedList<T> :: Get (int index)
         return t->key;
     }
     else
-        // исключение, выход за границы списка
+        throw out_of_range("Index out of range in LinkedList::Get");
 }
+
+template <typename T> 
 LinkedList <T>* LinkedList<T> :: GetSubList (int start, int end)
 {
-    if ((start>=0) && (end <length))
+    if ((start >= 0) && (end < length))
     {
         LinkedList <T>* result = new LinkedList <T> ();
         for (int i=start; i<=end; i++)
             result->Append(Get(i));
     }
     else
-    // исключение
+    {
+        throw out_of_range("Неправильные индексы для начала и конца в LinkedList::GetSubList");    
+    }
 }
 
+template <typename T> 
 int LinkedList<T> :: GetLength()
 {
     return length;
 }
+
 // добавление в конец списка
+template <typename T> 
 void LinkedList<T> :: Append (T item)
 {
     if ((head == nullptr) && (tail == nullptr))
@@ -108,6 +130,8 @@ void LinkedList<T> :: Append (T item)
     }   
     length++;
 }
+
+template <typename T> 
 void LinkedList<T> :: Prepend (T item)
 {
     if ((head == nullptr) && (tail == nullptr))
@@ -123,14 +147,22 @@ void LinkedList<T> :: Prepend (T item)
     }
     length++;
 }
+
+template <typename T> 
 void LinkedList<T> :: InsertAt (T item, int index)
 {
     if (index >=length)
-        // исключение, выход за границы
+    {
+        throw out_of_range("Index out of range in LinjedList::InsertAt");
+    }
+        
     else
     {
         if (index == 0)
+        {
             Prepend (item);
+        }
+            
         else
         {
             Node <T>* p = new Node <T> (item);
@@ -146,6 +178,8 @@ void LinkedList<T> :: InsertAt (T item, int index)
         }
     }
 }
+
+template <typename T> 
 LinkedList <T>* LinkedList<T> :: Concat (LinkedList <T>* list)
 {
     LinkedList<T> result = new LinkedList<T>(*this)
@@ -158,10 +192,12 @@ LinkedList <T>* LinkedList<T> :: Concat (LinkedList <T>* list)
     }
     return result;
 }
+
+template <typename T> 
 void LinkedList<T> :: ClearList()
 {
     Node <T>* t = head;
-    while (t!=nullptr)
+    while (t != nullptr)
     {
         Node<T>* next = t->next;
         delete (t);
@@ -172,9 +208,8 @@ void LinkedList<T> :: ClearList()
     length = 0;
 }
 
+template <typename T> 
 LinkedList<T> :: ~LinkedList()
 {
     ClearList();
 }
-
-

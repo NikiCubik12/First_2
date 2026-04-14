@@ -70,6 +70,10 @@ template <class T> class MutableArraySequence : public ArraySequence<T>
 {
     protected:
     virtual Sequence<T> *instance() override;
+    public:
+    MutableArraySequence() : ArraySequence<T>() {}
+    MutableArraySequence(T* items, int count) : ArraySequence<T>(items, count) {}
+    MutableArraySequence(const DynamicArray<T>& list) : ArraySequence<T>(list) {}
 };
 
 template <class T> class ImmutableArraySequence : public ArraySequence<T> 
@@ -77,7 +81,38 @@ template <class T> class ImmutableArraySequence : public ArraySequence<T>
     protected:
     virtual Sequence<T> *instance() override;
     public:
-    ImmutableArraySequence( const ImmutableArraySequence<T> &other );
+    ImmutableArraySequence(const ImmutableArraySequence<T> &other);
+    ImmutableArraySequence() : ArraySequence<T>() {}
+    ImmutableArraySequence(T* items, int count) : ArraySequence<T>(items, count) {}
+    ImmutableArraySequence(const DynamicArray<T>& list) : ArraySequence<T>(list) {}
 };
+
+
+class BitSequence: public Sequence <bool>
+{
+   private:
+   DynamycArray <bool>* bits;
+
+   public:
+   BitSequence ();
+   BitSequence (unsigned a);
+   BitSequence (bool* items, int size);
+   BitSequence (const BitSequence & rhs);
+   T GetFirst () override;
+   T GetLast () override;
+   T Get (int index) override;
+   BitSequence* GetSubsequence (int start, int end) override;
+   int GetLength() override;
+   BitSequence* AppendImpl (const bool& item) override;
+   BitSequence* InsertAtImpl(const bool& item, int index) override;
+   BitSequence* PrependImpl(const bool& item) override;
+   BitSequence* Concat (Sequence<bool>* rhs);
+
+   BitSequence* BitAnd (const BitSequence* rhs);
+   BitSequence* BitOr (const BitSequence* rhs);
+   BitSequence* BitXor (const BitSequence* rhs);
+   BitSequence* BitNot ();
+   void Print ();
+}
 
 #endif
