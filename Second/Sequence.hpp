@@ -91,7 +91,7 @@ template <class T> class ImmutableArraySequence : public ArraySequence<T>
 class BitSequence: public Sequence <bool>
 {
    private:
-   DynamycArray <bool>* bits;
+   DynamicArray <bool>* bits;
 
    public:
    BitSequence ();
