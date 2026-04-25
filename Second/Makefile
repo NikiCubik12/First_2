@@ -1,28 +1,22 @@
-all: program
+all: program.exe
 
-program: main.o DynamicArray.o LinkedList.o Sequence.o
-	g++ -o program main.o DynamicArray.o LinkedList.o Sequence.o
+program.exe: main.o
+	g++ -o program.exe main.o
 
-tests: Run_Tests.o Tests.o DynamicArray.o LinkedList.o Sequence.o
-	g++ -o tests Run_Tests.o Tests.o DynamicArray.o LinkedList.o Sequence.o
+tests.exe: Run_Tests.o
+	g++ -o tests.exe Run_Tests.o
 
 main.o: main.cpp Sequence.hpp DynamicArray.hpp LinkedList.hpp
 	g++ -c main.cpp
 
-DynamicArray.o: DynamicArray.cpp DynamicArray.hpp LinkedList.hpp
-	g++ -c DynamicArray.cpp
+Run_Tests.o: Run_Tests.cpp Tests.hpp Sequence.hpp DynamicArray.hpp LinkedList.hpp
+	g++ -c Run_Tests.cpp
 
-LinkedList.o: LinkedList.cpp LinkedList.hpp
-	g++ -c LinkedList.cpp
-
-Sequence.o: Sequence.cpp Sequence.hpp DynamicArray.hpp LinkedList.hpp
-	g++ -c Sequence.cpp
-
-run: program
-	./program
+run: program.exe
+	./program.exe
 
 test: tests.exe
 	./tests.exe
-	
+
 clean:
-	rm -f main.o DynamicArray.o LinkedList.o Sequence.o program
+	rm -f *.o *.exe

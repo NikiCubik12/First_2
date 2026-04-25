@@ -3,81 +3,489 @@
 
 #include <iostream>
 using namespace std;
-using std::cin, std::cout, std::out_of_range, std::invalid_argument
+using std::cin;
+using std::cout;
+using out_of_range = std::out_of_range;
+using invalid_argument = std::invalid_argument;
 #include "Sequence.hpp"
 #include "DynamicArray.hpp"
 #include "LinkedList.hpp"
 
-extern int totalTests = 0;
-extern int passedTests = 0;
+int totalTests = 0;
+int passedTests = 0;
 
-void check_double(double expected, double got)
-void check_int(int expected, int got);
+void check_int(int expected, int got)
+{
+    totalTests++;
+    if (expected == got) 
+        passedTests++;
+}
 
-void check_DynamicArray ();
-void check_DynamicArray_user ();
-void check_DynamicArray_copy ();
-void check_DynamicArray_copy_list ();
-void check_Get_DynamicArray ();
-void check_GetSize_DynamicArray ();
-void check_Set_DynamicArray ();
-void check_Resize_DynamicArray ();
+void check_bool(bool expected, bool got)
+{
+    totalTests++;
+    if (expected == got) 
+        passedTests++;
+    else
+        cout << "Test failed: expected " << expected << ", got " << got << endl;
+}
 
-void check_LinkedList ();
-void check_LinkedList_user ();
-void check_LinkedList_copy ();
-void check_GetFirst_copy_list ();
-void check_GetLast_LinkedList ();
-void check_Get_LinkedList ();
-void check_GetSubList_LinkedList ();
-void check_GetLength_LinkedList ();
-void check_Append_LinkedList ();
-void check_Prepend_LinkedList ();
-void check_InsertAt_LinkedList ();
-void check_Concat_LinkedList ();
-void check_ClearList();
+void check_DynamicArray ()
+{
+    DynamicArray <int>* arr = new DynamicArray<int>();
 
-void check_ArraySequence ();
-void check_ArraySequence_user ();
-void check_ArraySequence_copy ();
-void check_GetFirst_ArraySequence ();
-void check_GetLast_ArraySequence ();
-void check_Get_ArraySequence ();
-void check_GetSubsequence_ArraySequence ();
-void check_GetLength_ArraySequence ();
-void check_AppendImpl_ArraySequence ();
-void check_InsertAtImpl_ArraySequence ();
-void check_PrependImpl_ArraySequence ();
-void check_Concat_ArraySequence ();
+    check_int(arr->GetSize(), 0);
+    delete arr;
+}
 
-void check_ListSequence ();
-void check_ListSequence_user ();
-void check_ListSequence_copy ();
-void check_GetFirst_ListSequence ();
-void check_GetLast_ListSequence ();
-void check_Get_ListSequence ();
-void check_GetSubsequence_ListSequence ();
-void check_GetLength_ListSequence ();
-void check_AppendImpl_ListSequence ();
-void check_InsertAtImpl_ListSequence ();
-void check_PrependImpl_ListSequence ();
-void check_Concat_ListSequence ();
+void check_DynamicArray_user ()
+{
+    int mas[3] = {1, 2, 3};
+    DynamicArray <int>* arr = new DynamicArray<int>(mas, 3);
 
-void check_BitSequence ();
-void check_BitSequence_user ();
-void check_BitSequence_copy ();
-void check_GetFirst_BitSequence ();
-void check_GetLast_BitSequence();
-void check_Get_BitSequence ();
-void check_GetSubsequence_BitSequence ();
-void check_GetLength_BitSequence ();
-void check_AppendImpl_BitSequence ();
-void check_InsertAtImpl_BitSequence ();
-void check_PrependImpl_BitSequence ();
-void check_Concat_BitSequence ();
-void check_BitAnd ();
-void check_BitOr ();
-void check_BitXor ();
-void check_BitNot ();
+    check_int(arr->GetSize(), 3);
+    check_int(arr->Get(0), 1);
+    check_int(arr->Get(1), 2);
+    check_int(arr->Get(2), 3);
+    delete arr;
+}
+
+void check_DynamicArray_copy ()
+{
+    int mas[3] = {1, 2, 3};
+    DynamicArray <int>* arr1 = new DynamicArray<int>(mas, 3);
+    DynamicArray <int>* arr2 = new DynamicArray<int>(*arr1);
+
+    check_int(arr2->GetSize(), 3);
+    check_int(arr2->Get(0), 1);
+    check_int(arr2->Get(1), 2);
+    check_int(arr2->Get(2), 3);
+    delete arr1;
+    delete arr2;
+}
+
+void check_DynamicArray_copy_list ()
+{
+    int mas[3] = {1, 2, 3};
+    LinkedList <int>* list = new LinkedList<int>(mas, 3);
+    DynamicArray <int>* arr = new DynamicArray<int>(*list);
+    
+    check_int(arr->GetSize(), 3);
+    check_int(arr->Get(0), 1);
+    check_int(arr->Get(1), 2);
+    check_int(arr->Get(2), 3);
+    delete arr;
+    delete list;
+}
+
+void check_Get_DynamicArray ()
+{
+    int mas[3] = {1, 2, 3};
+    DynamicArray <int>* arr = new DynamicArray<int>(mas, 3);
+    
+    check_int(arr->Get(1), 2);
+    delete arr;
+}
+
+void check_GetSize_DynamicArray ()
+{
+    int mas[3] = {1, 2, 3};
+    DynamicArray <int>* arr = new DynamicArray<int>(mas, 3);
+    
+    check_int(arr->GetSize(), 3);
+    delete arr;
+}
+
+void check_Set_DynamicArray ()
+{
+    int mas[3] = {1, 2, 3};
+    DynamicArray <int>* arr = new DynamicArray<int>(mas, 3);
+
+    arr->Set(2, 4);
+    check_int(arr->Get(2), 4);
+    delete arr;
+}
+
+void check_Resize_DynamicArray ()
+{
+    int mas[3] = {1, 2, 3};
+    DynamicArray <int>* arr = new DynamicArray<int>(mas, 3);
+
+    arr->Resize(2);
+    check_int(arr->GetSize(), 2);
+    delete arr;
+}
+
+
+
+void check_LinkedList()
+{
+    LinkedList<int>* list = new LinkedList<int>();
+    check_int(list->GetLength(), 0);
+    delete list;
+}
+
+void check_LinkedList_user()
+{
+    int mas[3] = {1, 2, 3};
+    LinkedList<int>* list = new LinkedList<int>(mas, 3);
+    
+    check_int(list->GetLength(), 3);
+    check_int(list->Get(0), 1);
+    check_int(list->Get(1), 2);
+    check_int(list->Get(2), 3);
+    delete list;
+}
+
+void check_LinkedList_copy()
+{
+    int mas[3] = {1, 2, 3};
+    LinkedList<int>* list1 = new LinkedList<int>(mas, 3);
+    LinkedList<int>* list2 = new LinkedList<int>(*list1);
+    
+    check_int(list2->GetLength(), 3);
+    check_int(list2->Get(0), 1);
+    check_int(list2->Get(1), 2);
+    check_int(list2->Get(2), 3);
+    delete list1;
+    delete list2;
+}
+
+void check_GetFirst_LinkedList()
+{
+    int mas[3] = {1, 2, 3};
+    LinkedList<int>* list = new LinkedList<int>(mas, 3);
+    
+    check_int(list->GetFirst(), 1);
+    delete list;
+}
+
+void check_GetLast_LinkedList()
+{
+    int mas[3] = {1, 2, 3};
+    LinkedList<int>* list = new LinkedList<int>(mas, 3);
+    
+    check_int(list->GetLast(), 3);
+    delete list;
+}
+
+void check_Get_LinkedList()
+{
+    int mas[3] = {1, 2, 3};
+    LinkedList<int>* list = new LinkedList<int>(mas, 3);
+    
+    check_int(list->Get(1), 2);
+    delete list;
+}
+
+void check_GetSubList_LinkedList()
+{
+    int mas[5] = {1, 2, 3, 4, 5};
+    LinkedList<int>* list = new LinkedList<int>(mas, 5);
+    LinkedList<int>* sublist = list->GetSubList(1, 3);
+    
+    check_int(sublist->GetLength(), 3);
+    check_int(sublist->Get(0), 2);
+    check_int(sublist->Get(1), 3);
+    check_int(sublist->Get(2), 4);
+    delete list;
+    delete sublist;
+}
+
+void check_GetLength_LinkedList()
+{
+    int mas[3] = {1, 2, 3};
+    LinkedList<int>* list = new LinkedList<int>(mas, 3);
+    
+    check_int(list->GetLength(), 3);
+    delete list;
+}
+
+void check_Append_LinkedList()
+{
+    LinkedList<int>* list = new LinkedList<int>();
+    list->Append(1);
+    list->Append(2);
+    list->Append(3);
+    
+    check_int(list->GetLength(), 3);
+    check_int(list->Get(0), 1);
+    check_int(list->Get(1), 2);
+    check_int(list->Get(2), 3);
+    delete list;
+}
+
+void check_Prepend_LinkedList()
+{
+    LinkedList<int>* list = new LinkedList<int>();
+    list->Prepend(3);
+    list->Prepend(2);
+    list->Prepend(1);
+    
+    check_int(list->GetLength(), 3);
+    check_int(list->Get(0), 1);
+    check_int(list->Get(1), 2);
+    check_int(list->Get(2), 3);
+    delete list;
+}
+
+void check_InsertAt_LinkedList()
+{
+    int mas[2] = {1, 3};
+    LinkedList<int>* list = new LinkedList<int>(mas, 2);
+    list->InsertAt(2, 1);
+    
+    check_int(list->GetLength(), 3);
+    check_int(list->Get(0), 1);
+    check_int(list->Get(1), 2);
+    check_int(list->Get(2), 3);
+    delete list;
+}
+
+void check_Concat_LinkedList()
+{
+    int mas1[2] = {1, 2};
+    int mas2[2] = {3, 4};
+    LinkedList<int>* list1 = new LinkedList<int>(mas1, 2);
+    LinkedList<int>* list2 = new LinkedList<int>(mas2, 2);
+    LinkedList<int>* result = list1->Concat(list2);
+    
+    check_int(result->GetLength(), 4);
+    check_int(result->Get(0), 1);
+    check_int(result->Get(1), 2);
+    check_int(result->Get(2), 3);
+    check_int(result->Get(3), 4);
+    delete list1;
+    delete list2;
+    delete result;
+}
+
+void check_ClearList()
+{
+    int mas[3] = {1, 2, 3};
+    LinkedList<int>* list = new LinkedList<int>(mas, 3);
+    list->ClearList();
+    
+    check_int(list->GetLength(), 0);
+    delete list;
+}
+
+
+void check_BitSequence()
+{
+    BitSequence* bits = new BitSequence();
+    check_int(bits->GetLength(), 0);
+    delete bits;
+}
+
+void check_BitSequence_user()
+{
+    bool mas[3] = {1, 0, 1};
+    BitSequence* bits = new BitSequence(mas, 3);
+    
+    check_int(bits->GetLength(), 3);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
+    delete bits;
+}
+
+void check_BitSequence_copy()
+{
+    bool mas[3] = {1, 0, 1};
+    BitSequence* bits1 = new BitSequence(mas, 3);
+    BitSequence* bits2 = new BitSequence(*bits1);
+    
+    check_int(bits2->GetLength(), 3);
+    check_bool(bits2->Get(0), 1);
+    check_bool(bits2->Get(1), 0);
+    check_bool(bits2->Get(2), 1);
+    delete bits1;
+    delete bits2;
+}
+
+void check_BitSequence_unsigned()
+{
+    BitSequence* bits = new BitSequence(5); // 101 в двоичной
+    
+    check_int(bits->GetLength(), 3);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
+    delete bits;
+}
+
+void check_GetFirst_BitSequence()
+{
+    bool mas[3] = {1, 0, 1};
+    BitSequence* bits = new BitSequence(mas, 3);
+    
+    check_bool(bits->GetFirst(), 1);
+    delete bits;
+}
+
+void check_GetLast_BitSequence()
+{
+    bool mas[3] = {1, 0, 1};
+    BitSequence* bits = new BitSequence(mas, 3);
+    
+    check_bool(bits->GetLast(), 1);
+    delete bits;
+}
+
+void check_Get_BitSequence()
+{
+    bool mas[3] = {1, 0, 1};
+    BitSequence* bits = new BitSequence(mas, 3);
+    
+    check_bool(bits->Get(1), 0);
+    delete bits;
+}
+
+void check_GetSubsequence_BitSequence()
+{
+    bool mas[5] = {1, 0, 1, 0, 1};
+    BitSequence* bits = new BitSequence(mas, 5);
+    BitSequence* sub = bits->GetSubsequence(1, 3);
+    
+    check_int(sub->GetLength(), 3);
+    check_bool(sub->Get(0), 0);
+    check_bool(sub->Get(1), 1);
+    check_bool(sub->Get(2), 0);
+    delete bits;
+    delete sub;
+}
+
+void check_GetLength_BitSequence()
+{
+    bool mas[3] = {1, 0, 1};
+    BitSequence* bits = new BitSequence(mas, 3);
+    
+    check_int(bits->GetLength(), 3);
+    delete bits;
+}
+
+void check_AppendImpl_BitSequence()
+{
+    BitSequence* bits = new BitSequence();
+    bits->AppendImpl(1);
+    bits->AppendImpl(0);
+    bits->AppendImpl(1);
+    
+    check_int(bits->GetLength(), 3);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
+    delete bits;
+}
+
+void check_InsertAtImpl_BitSequence()
+{
+    bool mas[2] = {1, 1};
+    BitSequence* bits = new BitSequence(mas, 2);
+    bits = bits->InsertAtImpl(0, 1);
+
+    check_int(bits->GetLength(), 3);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
+    delete bits;
+}
+
+void check_PrependImpl_BitSequence()
+{
+    BitSequence* bits = new BitSequence();
+    bits->PrependImpl(1);
+    bits->PrependImpl(0);
+    bits->PrependImpl(1);
+    
+    check_int(bits->GetLength(), 3);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
+    delete bits;
+}
+
+void check_Concat_BitSequence()
+{
+    bool mas1[2] = {1, 0};
+    bool mas2[2] = {1, 1};
+    BitSequence* bits1 = new BitSequence(mas1, 2);
+    BitSequence* bits2 = new BitSequence(mas2, 2);
+    bits1 = bits1->Concat(bits2);
+    
+    check_int(bits1->GetLength(), 4);
+    check_bool(bits1->Get(0), 1);
+    check_bool(bits1->Get(1), 0);
+    check_bool(bits1->Get(2), 1);
+    check_bool(bits1->Get(3), 1);
+    delete bits1;
+    delete bits2;
+}
+
+void check_BitAnd()
+{
+    bool mas1[3] = {1, 0, 1};
+    bool mas2[3] = {1, 1, 0};
+    BitSequence* bits1 = new BitSequence(mas1, 3);
+    BitSequence* bits2 = new BitSequence(mas2, 3);
+    BitSequence* result = bits1->BitAnd(bits2);
+    
+    check_int(result->GetLength(), 3);
+    check_bool(result->Get(0), 1);
+    check_bool(result->Get(1), 0);
+    check_bool(result->Get(2), 0);
+    delete bits1;
+    delete bits2;
+    delete result;
+}
+
+void check_BitOr()
+{
+    bool mas1[3] = {1, 0, 1};
+    bool mas2[3] = {1, 1, 0};
+    BitSequence* bits1 = new BitSequence(mas1, 3);
+    BitSequence* bits2 = new BitSequence(mas2, 3);
+    BitSequence* result = bits1->BitOr(bits2);
+    
+    check_int(result->GetLength(), 3);
+    check_bool(result->Get(0), 1);
+    check_bool(result->Get(1), 1);
+    check_bool(result->Get(2), 1);
+    delete bits1;
+    delete bits2;
+    delete result;
+}
+
+void check_BitXor()
+{
+    bool mas1[3] = {1, 0, 1};
+    bool mas2[3] = {1, 1, 0};
+    BitSequence* bits1 = new BitSequence(mas1, 3);
+    BitSequence* bits2 = new BitSequence(mas2, 3);
+    BitSequence* result = bits1->BitXor(bits2);
+    
+    check_int(result->GetLength(), 3);
+    check_bool(result->Get(0), 0);
+    check_bool(result->Get(1), 1);
+    check_bool(result->Get(2), 1);
+    delete bits1;
+    delete bits2;
+    delete result;
+}
+
+void check_BitNot()
+{
+    bool mas[3] = {1, 0, 1};
+    BitSequence* bits = new BitSequence(mas, 3);
+    BitSequence* result = bits->BitNot();
+    
+    check_int(result->GetLength(), 3);
+    check_bool(result->Get(0), 0);
+    check_bool(result->Get(1), 1);
+    check_bool(result->Get(2), 0);
+    delete bits;
+    delete result;
+}
 
 #endif
