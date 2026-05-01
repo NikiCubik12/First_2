@@ -395,11 +395,18 @@ void handleLinkedListAction(int selected, Screen& screen, LinkedList<int>& list,
 
 void createSequence()
 {
-    if (intSequence) delete intSequence;
-    if (bitSequence) delete bitSequence;
+    if (intSequence) {
+        delete intSequence;
+        intSequence = nullptr;
+    }
+
+    if (bitSequence) {
+        delete bitSequence;
+        bitSequence = nullptr;
+    }
     
     if (currentSeqType == SequenceType::BitSequence) {
-        Sequence<int>* bitSequence = nullptr;
+        bitSequence = new BitSequence();
         sequenceCreated = true;
     } else {
         if (currentSeqImpl == SequenceImplType::Mutable) {
