@@ -5,11 +5,15 @@
 using namespace std;
 #include <string>
 #include "LinkedList.hpp"
+#include "Sequence.hpp"
 
 template <class T> class LinkedList;
+template <class T> class ArraySequence;
 
 template <class T> class DynamicArray
 {
+    friend class ArraySequence<T>;
+
     private:
     T* items;
     int size;
@@ -41,7 +45,7 @@ template <class T> class DynamicArray
 
     DynamicArray(LinkedList<T>& list)
     {
-        if (list.GetLength() == 0) 
+        if (list.GetLength() == 0)  // Исправлено: было length, нужно list.GetLength()
         {
             items = nullptr;
             size = 0;
@@ -62,7 +66,6 @@ template <class T> class DynamicArray
         T* arr = new T[size + 1];
         for (int i = 0; i < size; i++)
             arr[i] = Get(i);
-            
         arr[size] = item;
 
         delete [] items;
@@ -126,6 +129,8 @@ template <class T> class DynamicArray
     {
         return size;
     }
+
+    
 
     void Set(int index, T value)
     {

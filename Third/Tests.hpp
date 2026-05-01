@@ -7,7 +7,6 @@ using std::cin;
 using std::cout;
 using out_of_range = std::out_of_range;
 using invalid_argument = std::invalid_argument;
-using runtime_error = std::runtime_error;
 #include "Sequence.hpp"
 #include "DynamicArray.hpp"
 #include "LinkedList.hpp"
@@ -18,11 +17,17 @@ int passedTests = 0;
 void check_int(int expected, int got)
 {
     totalTests++;
-    if (expected == got)
+    if (expected == got) 
         passedTests++;
-    else 
-        cout << "FAILED: expected " << expected << ", got " << got << endl;
-    
+}
+
+void check_bool(bool expected, bool got)
+{
+    totalTests++;
+    if (expected == got) 
+        passedTests++;
+    else
+        cout << "Test failed: expected " << expected << ", got " << got << endl;
 }
 
 void check_DynamicArray ()
@@ -39,7 +44,7 @@ void check_DynamicArray_user ()
     DynamicArray <int>* arr = new DynamicArray<int>(mas, 3);
 
     check_int(arr->GetSize(), 3);
-    check_int(arr->Get(0), 2);
+    check_int(arr->Get(0), 1);
     check_int(arr->Get(1), 2);
     check_int(arr->Get(2), 3);
     delete arr;
@@ -265,6 +270,190 @@ void check_ClearList()
     delete list;
 }
 
+void check_ArraySequence()
+{
+    ArraySequence<int>* arr = new ArraySequence<int>();
+    check_int(arr->GetLength(), 0);
+    delete arr;
+}
+
+void check_ArraySequence_user()
+{
+    int mas[3] = {1, 2, 3};
+    ArraySequence<int>* arr = new ArraySequence<int>(mas, 3);
+    
+    check_int(arr->GetLength(), 3);
+    check_int(arr->Get(0), 1);
+    check_int(arr->Get(1), 2);
+    check_int(arr->Get(2), 3);
+    delete arr;
+}
+
+void check_ArraySequence_copy()
+{
+    int mas[3] = {1, 2, 3};
+    ArraySequence<int>* arr1 = new ArraySequence<int>(mas, 3);
+    ArraySequence<int>* arr2 = new ArraySequence<int>(*arr1);
+    
+    check_int(arr2->GetLength(), 3);
+    check_int(arr2->Get(0), 1);
+    check_int(arr2->Get(1), 2);
+    check_int(arr2->Get(2), 3);
+    delete arr1;
+    delete arr2;
+}
+
+void check_ArraySequence_from_LinkedList()
+{
+    LinkedList<int> list;
+    list.Append(1);
+    list.Append(2);
+    list.Append(3);
+    
+    ArraySequence<int>* arr = new ArraySequence<int>(list);
+    
+    check_int(arr->GetLength(), 3);
+    check_int(arr->Get(0), 1);
+    check_int(arr->Get(1), 2);
+    check_int(arr->Get(2), 3);
+    delete arr;
+}
+
+void check_GetFirst_ArraySequence()
+{
+    int mas[3] = {1, 2, 3};
+    ArraySequence<int>* arr = new ArraySequence<int>(mas, 3);
+    
+    check_int(arr->GetFirst(), 1);
+    delete arr;
+}
+
+void check_GetLast_ArraySequence()
+{
+    int mas[3] = {1, 2, 3};
+    ArraySequence<int>* arr = new ArraySequence<int>(mas, 3);
+    
+    check_int(arr->GetLast(), 3);
+    delete arr;
+}
+
+void check_Get_ArraySequence()
+{
+    int mas[3] = {1, 2, 3};
+    ArraySequence<int>* arr = new ArraySequence<int>(mas, 3);
+    
+    check_int(arr->Get(1), 2);
+    delete arr;
+}
+
+void check_GetSubsequence_ArraySequence()
+{
+    int mas[5] = {1, 2, 3, 4, 5};
+    ArraySequence<int>* arr = new ArraySequence<int>(mas, 5);
+    Sequence<int>* sub = arr->GetSubsequence(1, 3);
+    
+    check_int(sub->GetLength(), 3);
+    check_int(sub->Get(0), 2);
+    check_int(sub->Get(1), 3);
+    check_int(sub->Get(2), 4);
+    delete arr;
+    delete sub;
+}
+
+void check_GetLength_ArraySequence()
+{
+    int mas[3] = {1, 2, 3};
+    ArraySequence<int>* arr = new ArraySequence<int>(mas, 3);
+    
+    check_int(arr->GetLength(), 3);
+    delete arr;
+}
+
+void check_AppendImpl_ArraySequence()
+{
+    ArraySequence<int>* arr = new ArraySequence<int>();
+    arr->AppendImpl(1);
+    arr->AppendImpl(2);
+    arr->AppendImpl(3);
+    
+    check_int(arr->GetLength(), 3);
+    check_int(arr->Get(0), 1);
+    check_int(arr->Get(1), 2);
+    check_int(arr->Get(2), 3);
+    delete arr;
+}
+
+void check_InsertAtImpl_ArraySequence()
+{
+    int mas[2] = {1, 3};
+    ArraySequence<int>* arr = new ArraySequence<int>(mas, 2);
+    arr->InsertAtImpl(2, 1);
+    
+    check_int(arr->GetLength(), 3);
+    check_int(arr->Get(0), 1);
+    check_int(arr->Get(1), 2);
+    check_int(arr->Get(2), 3);
+    delete arr;
+}
+
+void check_PrependImpl_ArraySequence()
+{
+    ArraySequence<int>* arr = new ArraySequence<int>();
+    arr->PrependImpl(3);
+    arr->PrependImpl(2);
+    arr->PrependImpl(1);
+    
+    check_int(arr->GetLength(), 3);
+    check_int(arr->Get(0), 1);
+    check_int(arr->Get(1), 2);
+    check_int(arr->Get(2), 3);
+    delete arr;
+}
+
+void check_Concat_ArraySequence()
+{
+    int mas1[2] = {1, 2};
+    int mas2[2] = {3, 4};
+    ArraySequence<int>* arr1 = new ArraySequence<int>(mas1, 2);
+    ArraySequence<int>* arr2 = new ArraySequence<int>(mas2, 2);
+    arr1->Concat(arr2);
+    
+    check_int(arr1->GetLength(), 4);
+    check_int(arr1->Get(0), 1);
+    check_int(arr1->Get(1), 2);
+    check_int(arr1->Get(2), 3);
+    check_int(arr1->Get(3), 4);
+    delete arr1;
+    delete arr2;
+}
+
+void check_Concat_empty_ArraySequence()
+{
+    ArraySequence<int>* arr1 = new ArraySequence<int>();
+    int mas[2] = {1, 2};
+    ArraySequence<int>* arr2 = new ArraySequence<int>(mas, 2);
+    arr1->Concat(arr2);
+    
+    check_int(arr1->GetLength(), 2);
+    check_int(arr1->Get(0), 1);
+    check_int(arr1->Get(1), 2);
+    delete arr1;
+    delete arr2;
+}
+
+void check_instance_ArraySequence()
+{
+    int mas[3] = {1, 2, 3};
+    ArraySequence<int>* arr1 = new ArraySequence<int>(mas, 3);
+    Sequence<int>* arr2 = arr1->instance();
+    
+    check_int(arr2->GetLength(), 3);
+    check_int(arr2->Get(0), 1);
+    check_int(arr2->Get(1), 2);
+    check_int(arr2->Get(2), 3);
+    delete arr1;
+    delete arr2;
+}
 
 void check_BitSequence()
 {
@@ -275,26 +464,26 @@ void check_BitSequence()
 
 void check_BitSequence_user()
 {
-    int mas[3] = {1, 0, 1};
+    bool mas[3] = {1, 0, 1};
     BitSequence* bits = new BitSequence(mas, 3);
     
     check_int(bits->GetLength(), 3);
-    check_int(bits->Get(0), 1);
-    check_int(bits->Get(1), 0);
-    check_int(bits->Get(2), 1);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
     delete bits;
 }
 
 void check_BitSequence_copy()
 {
-    int mas[3] = {1, 0, 1};
+    bool mas[3] = {1, 0, 1};
     BitSequence* bits1 = new BitSequence(mas, 3);
     BitSequence* bits2 = new BitSequence(*bits1);
     
     check_int(bits2->GetLength(), 3);
-    check_int(bits2->Get(0), 1);
-    check_int(bits2->Get(1), 0);
-    check_int(bits2->Get(2), 1);
+    check_bool(bits2->Get(0), 1);
+    check_bool(bits2->Get(1), 0);
+    check_bool(bits2->Get(2), 1);
     delete bits1;
     delete bits2;
 }
@@ -304,56 +493,56 @@ void check_BitSequence_unsigned()
     BitSequence* bits = new BitSequence(5); // 101 в двоичной
     
     check_int(bits->GetLength(), 3);
-    check_int(bits->Get(0), 1);
-    check_int(bits->Get(1), 0);
-    check_int(bits->Get(2), 1);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
     delete bits;
 }
 
 void check_GetFirst_BitSequence()
 {
-    int mas[3] = {1, 0, 1};
+    bool mas[3] = {1, 0, 1};
     BitSequence* bits = new BitSequence(mas, 3);
     
-    check_int(bits->GetFirst(), 1);
+    check_bool(bits->GetFirst(), 1);
     delete bits;
 }
 
 void check_GetLast_BitSequence()
 {
-    int mas[3] = {1, 0, 1};
+    bool mas[3] = {1, 0, 1};
     BitSequence* bits = new BitSequence(mas, 3);
     
-    check_int(bits->GetLast(), 1);
+    check_bool(bits->GetLast(), 1);
     delete bits;
 }
 
 void check_Get_BitSequence()
 {
-    int mas[3] = {1, 0, 1};
+    bool mas[3] = {1, 0, 1};
     BitSequence* bits = new BitSequence(mas, 3);
     
-    check_int(bits->Get(1), 0);
+    check_bool(bits->Get(1), 0);
     delete bits;
 }
 
 void check_GetSubsequence_BitSequence()
 {
-    int mas[5] = {1, 0, 1, 0, 1};
+    bool mas[5] = {1, 0, 1, 0, 1};
     BitSequence* bits = new BitSequence(mas, 5);
     BitSequence* sub = bits->GetSubsequence(1, 3);
     
     check_int(sub->GetLength(), 3);
-    check_int(sub->Get(0), 0);
-    check_int(sub->Get(1), 1);
-    check_int(sub->Get(2), 0);
+    check_bool(sub->Get(0), 0);
+    check_bool(sub->Get(1), 1);
+    check_bool(sub->Get(2), 0);
     delete bits;
     delete sub;
 }
 
 void check_GetLength_BitSequence()
 {
-    int mas[3] = {1, 0, 1};
+    bool mas[3] = {1, 0, 1};
     BitSequence* bits = new BitSequence(mas, 3);
     
     check_int(bits->GetLength(), 3);
@@ -368,22 +557,22 @@ void check_AppendImpl_BitSequence()
     bits->AppendImpl(1);
     
     check_int(bits->GetLength(), 3);
-    check_int(bits->Get(0), 1);
-    check_int(bits->Get(1), 0);
-    check_int(bits->Get(2), 1);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
     delete bits;
 }
 
 void check_InsertAtImpl_BitSequence()
 {
-    int mas[2] = {1, 1};
+    bool mas[2] = {1, 1};
     BitSequence* bits = new BitSequence(mas, 2);
-    bits->InsertAtImpl(0, 1);  // Убрал присваивание, т.к. InsertAtImpl возвращает this
+    bits = bits->InsertAtImpl(0, 1);
 
     check_int(bits->GetLength(), 3);
-    check_int(bits->Get(0), 1);
-    check_int(bits->Get(1), 0);
-    check_int(bits->Get(2), 1);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
     delete bits;
 }
 
@@ -395,42 +584,41 @@ void check_PrependImpl_BitSequence()
     bits->PrependImpl(1);
     
     check_int(bits->GetLength(), 3);
-    check_int(bits->Get(0), 1);
-    check_int(bits->Get(1), 0);
-    check_int(bits->Get(2), 1);
+    check_bool(bits->Get(0), 1);
+    check_bool(bits->Get(1), 0);
+    check_bool(bits->Get(2), 1);
     delete bits;
 }
 
 void check_Concat_BitSequence()
 {
-    int mas1[2] = {1, 0};
-    int mas2[2] = {1, 1};
+    bool mas1[2] = {1, 0};
+    bool mas2[2] = {1, 1};
     BitSequence* bits1 = new BitSequence(mas1, 2);
     BitSequence* bits2 = new BitSequence(mas2, 2);
-    BitSequence* result = bits1->Concat(bits2);
+    bits1 = bits1->Concat(bits2);
     
-    check_int(result->GetLength(), 4);
-    check_int(result->Get(0), 1);
-    check_int(result->Get(1), 0);
-    check_int(result->Get(2), 1);
-    check_int(result->Get(3), 1);
+    check_int(bits1->GetLength(), 4);
+    check_bool(bits1->Get(0), 1);
+    check_bool(bits1->Get(1), 0);
+    check_bool(bits1->Get(2), 1);
+    check_bool(bits1->Get(3), 1);
     delete bits1;
-    delete result;
     delete bits2;
 }
 
 void check_BitAnd()
 {
-    int mas1[3] = {1, 0, 1};
-    int mas2[3] = {1, 1, 0};
+    bool mas1[3] = {1, 0, 1};
+    bool mas2[3] = {1, 1, 0};
     BitSequence* bits1 = new BitSequence(mas1, 3);
     BitSequence* bits2 = new BitSequence(mas2, 3);
     BitSequence* result = bits1->BitAnd(bits2);
     
     check_int(result->GetLength(), 3);
-    check_int(result->Get(0), 1 & 1);  // 1
-    check_int(result->Get(1), 0 & 1);  // 0
-    check_int(result->Get(2), 1 & 0);  // 0
+    check_bool(result->Get(0), 1);
+    check_bool(result->Get(1), 0);
+    check_bool(result->Get(2), 0);
     delete bits1;
     delete bits2;
     delete result;
@@ -438,16 +626,16 @@ void check_BitAnd()
 
 void check_BitOr()
 {
-    int mas1[3] = {1, 0, 1};
-    int mas2[3] = {1, 1, 0};
+    bool mas1[3] = {1, 0, 1};
+    bool mas2[3] = {1, 1, 0};
     BitSequence* bits1 = new BitSequence(mas1, 3);
     BitSequence* bits2 = new BitSequence(mas2, 3);
     BitSequence* result = bits1->BitOr(bits2);
     
     check_int(result->GetLength(), 3);
-    check_int(result->Get(0), 1 | 1);  // 1
-    check_int(result->Get(1), 0 | 1);  // 1
-    check_int(result->Get(2), 1 | 0);  // 1
+    check_bool(result->Get(0), 1);
+    check_bool(result->Get(1), 1);
+    check_bool(result->Get(2), 1);
     delete bits1;
     delete bits2;
     delete result;
@@ -455,16 +643,16 @@ void check_BitOr()
 
 void check_BitXor()
 {
-    int mas1[3] = {1, 0, 1};
-    int mas2[3] = {1, 1, 0};
+    bool mas1[3] = {1, 0, 1};
+    bool mas2[3] = {1, 1, 0};
     BitSequence* bits1 = new BitSequence(mas1, 3);
     BitSequence* bits2 = new BitSequence(mas2, 3);
     BitSequence* result = bits1->BitXor(bits2);
     
     check_int(result->GetLength(), 3);
-    check_int(result->Get(0), 1 ^ 1);  // 0
-    check_int(result->Get(1), 0 ^ 1);  // 1
-    check_int(result->Get(2), 1 ^ 0);  // 1
+    check_bool(result->Get(0), 0);
+    check_bool(result->Get(1), 1);
+    check_bool(result->Get(2), 1);
     delete bits1;
     delete bits2;
     delete result;
@@ -472,14 +660,14 @@ void check_BitXor()
 
 void check_BitNot()
 {
-    int mas[3] = {1, 0, 1};
+    bool mas[3] = {1, 0, 1};
     BitSequence* bits = new BitSequence(mas, 3);
     BitSequence* result = bits->BitNot();
     
     check_int(result->GetLength(), 3);
-    check_int(result->Get(0), 0);
-    check_int(result->Get(1), 1);
-    check_int(result->Get(2), 0);
+    check_bool(result->Get(0), 0);
+    check_bool(result->Get(1), 1);
+    check_bool(result->Get(2), 0);
     delete bits;
     delete result;
 }

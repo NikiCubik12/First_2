@@ -1,22 +1,22 @@
-all: program.exe
+all: program tests
 
-program.exe: main.o
-	g++ -o program.exe main.o
+program: main.o
+	g++ -Wall -g -std=c++17 -o program main.o -lncursesw
 
-tests.exe: Run_Tests.o
-	g++ -o tests.exe Run_Tests.o
+tests: Run_Tests.o
+	g++ -Wall -g -std=c++17 -o tests Run_Tests.o
 
-main.o: main.cpp Sequence.hpp DynamicArray.hpp LinkedList.hpp
-	g++ -c main.cpp
+main.o: main.cpp DynamicArray.hpp LinkedList.hpp Sequence.hpp
+	g++ -Wall -g -std=c++17 -c main.cpp
 
-Run_Tests.o: Run_Tests.cpp Tests.hpp Sequence.hpp DynamicArray.hpp LinkedList.hpp
-	g++ -c Run_Tests.cpp
-
-run: program.exe
-	./program.exe
-
-test: tests.exe
-	./tests.exe
+Run_Tests.o: Run_Tests.cpp Tests.hpp DynamicArray.hpp LinkedList.hpp Sequence.hpp
+	g++ -Wall -g -std=c++17 -c Run_Tests.cpp
 
 clean:
-	rm -f *.o *.exe
+	rm -f main.o Run_Tests.o program tests
+
+run: program
+	./program
+
+test: tests
+	./tests
