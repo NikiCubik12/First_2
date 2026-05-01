@@ -66,7 +66,7 @@ template <class T> class ArraySequence : public Sequence<T>
 
     T GetFirst () 
     {
-        if (data->size == 0)
+        if (data->GetSize() == 0)
         {
             throw out_of_range("ArraySequence is empty - cannot get first element");
         }
@@ -79,20 +79,20 @@ template <class T> class ArraySequence : public Sequence<T>
 
     T GetLast () 
     {
-        if (data->size == 0)
+        if (data->GetSize() == 0)
         {
             throw out_of_range("ArraySequence is empty - cannot get last element");
         }
             
         else 
         {
-            return data->Get(data->size-1);
+            return data->Get(data->GetSize()-1);
         }
     };
 
     T Get (int index) 
     {
-        if ((index < 0) || (index > data->size-1))
+        if ((index < 0) || (index > data->GetSize()-1))
         {
             throw out_of_range("Index out of range in ArraySequence::Get");
         }
@@ -105,7 +105,7 @@ template <class T> class ArraySequence : public Sequence<T>
 
     ArraySequence <T>* GetSubsequence (int start, int end) 
     {
-        if ((start < 0) || (end > data->size-1) || (start > end))
+        if ((start < 0) || (end > data->GetSize()-1) || (start > end))
         {
             throw out_of_range("Invalid start or end indices in ArraySequence::GetSubsequence");
         }
@@ -123,18 +123,18 @@ template <class T> class ArraySequence : public Sequence<T>
 
     int GetLength()
     {
-        return data->size;
+        return data->GetSize();
     };
 
     ArraySequence <T>* AppendImpl (const T& item) 
     {
-        T* arr = new T[data->size + 1];
-        for (int i = 0; i < data->size; i++)
+        T* arr = new T[data->GetSize() + 1];
+        for (int i = 0; i < data->GetSize(); i++)
             arr[i] = data->Get(i);
-        arr[data->size] = item;
+        arr[data->GetSize()] = item;
 
         delete [] data->items;
-        data->size++;
+        data->Resize(data->GetSize() + 1);
 
         data->items = arr;
         return this;
@@ -142,20 +142,20 @@ template <class T> class ArraySequence : public Sequence<T>
 
     ArraySequence <T>* InsertAtImpl(const T& item, int index) 
     {
-        if ((index < 0) || (index > data->size-1))
+        if ((index < 0) || (index > data->GetSize()-1))
         {
             throw out_of_range("Index out of range in ArraySequence::InsertAtImpl");
         }
             
         else 
         {
-            T* arr = new T[data->size + 1];
+            T* arr = new T[data->GetSize() + 1];
             for (int i = 0; i < index; i++)
                 arr[i] = data->Get(i);
 
             arr[index] = item;
 
-            for (int i = index; i < data->size; i++)
+            for (int i = index; i < data->GetSize(); i++)
                 arr[i + 1] = data->Get(i);
 
             delete [] data->items;
@@ -166,15 +166,15 @@ template <class T> class ArraySequence : public Sequence<T>
 
     ArraySequence <T>* PrependImpl(const T& item) 
     {
-        T* arr = new T[data->size+1];
+        T* arr = new T[data->GetSize()+1];
 
         arr[0] = item;
         
-        for (int i = 0; i < data->size; i++)
+        for (int i = 0; i < data->GetSize(); i++)
             arr[i] = data->Get(i);
         
         delete [] data->items;
-        data->size++;
+        data->Resize(data->GetSize() + 1);
         data->items = arr;
         return this;
     };
@@ -187,11 +187,11 @@ template <class T> class ArraySequence : public Sequence<T>
         }    
         else 
         {
-            int old_size = data->size;
-            int new_size = data->size + list->GetLength();
+            int old_size = data->GetSize();
+            int new_size = data->GetSize() + list->GetLength();
             T* arr = new T[new_size];
 
-            for (int i = 0; i < data->size; i++)
+            for (int i = 0; i < data->GetSize(); i++)
                 arr[i] = data->Get(i);
 
             for (int i = 0; i < list->GetLength(); i++)
@@ -199,7 +199,7 @@ template <class T> class ArraySequence : public Sequence<T>
             
             delete [] data->items;
             data->items = arr;
-            data->size = new_size;
+            data->GetSize() = new_size;
             return this;
         }
     };
