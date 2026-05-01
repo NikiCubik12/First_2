@@ -59,6 +59,11 @@ template <class T> class ArraySequence : public Sequence<T>
         data = new DynamicArray<T> (items, count);
     }
 
+    ArraySequence (const DynamicArray<T>& array)
+    {
+        data = new DynamicArray<T> (array);
+    }
+
     ArraySequence (const LinkedList <T>& list)
     {
         data = new DynamicArray<T> (list);
@@ -128,54 +133,27 @@ template <class T> class ArraySequence : public Sequence<T>
 
     ArraySequence <T>* AppendImpl (const T& item) 
     {
-        T* arr = new T[data->GetSize() + 1];
-        for (int i = 0; i < data->GetSize(); i++)
-            arr[i] = data->Get(i);
-        arr[data->GetSize()] = item;
-
-        delete [] data->items;
-        data->Resize(data->GetSize() + 1);
-
-        data->items = arr;
+        data->Append(item);
         return this;
     };
 
     ArraySequence <T>* InsertAtImpl(const T& item, int index) 
     {
-        if ((index < 0) || (index > data->GetSize()-1))
+        if ((index < 0) || (index > data->GetSize()))
         {
             throw out_of_range("Index out of range in ArraySequence::InsertAtImpl");
         }
             
         else 
         {
-            T* arr = new T[data->GetSize() + 1];
-            for (int i = 0; i < index; i++)
-                arr[i] = data->Get(i);
-
-            arr[index] = item;
-
-            for (int i = index; i < data->GetSize(); i++)
-                arr[i + 1] = data->Get(i);
-
-            delete [] data->items;
-            data->items = arr;
+            data->InsertAt(item, index);
             return this;
         }
     };
 
     ArraySequence <T>* PrependImpl(const T& item) 
     {
-        T* arr = new T[data->GetSize()+1];
-
-        arr[0] = item;
-        
-        for (int i = 0; i < data->GetSize(); i++)
-            arr[i] = data->Get(i);
-        
-        delete [] data->items;
-        data->Resize(data->GetSize() + 1);
-        data->items = arr;
+        data->Prepend(item);
         return this;
     };
 
