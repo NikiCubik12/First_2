@@ -69,7 +69,7 @@ template <class T> class ArraySequence : public Sequence<T>
         data = new DynamicArray<T> (list);
     }
 
-    T GetFirst () 
+    T GetFirst () override
     {
         if (data->GetSize() == 0)
         {
@@ -82,7 +82,7 @@ template <class T> class ArraySequence : public Sequence<T>
         }
     };
 
-    T GetLast () 
+    T GetLast () override
     {
         if (data->GetSize() == 0)
         {
@@ -95,7 +95,7 @@ template <class T> class ArraySequence : public Sequence<T>
         }
     };
 
-    T Get (int index) 
+    T Get (int index) override
     {
         if ((index < 0) || (index > data->GetSize()-1))
         {
@@ -108,7 +108,7 @@ template <class T> class ArraySequence : public Sequence<T>
         }
     };
 
-    ArraySequence <T>* GetSubsequence (int start, int end) 
+    ArraySequence <T>* GetSubsequence (int start, int end) override
     {
         if ((start < 0) || (end > data->GetSize()-1) || (start > end))
         {
@@ -126,18 +126,18 @@ template <class T> class ArraySequence : public Sequence<T>
         }
     };
 
-    int GetLength()
+    int GetLength() override
     {
         return data->GetSize();
     };
 
-    ArraySequence <T>* AppendImpl (const T& item) 
+    ArraySequence <T>* AppendImpl (const T& item) override
     {
         data->Append(item);
         return this;
     };
 
-    ArraySequence <T>* InsertAtImpl(const T& item, int index) 
+    ArraySequence <T>* InsertAtImpl(const T& item, int index) override
     {
         if ((index < 0) || (index > data->GetSize()))
         {
@@ -151,7 +151,7 @@ template <class T> class ArraySequence : public Sequence<T>
         }
     };
 
-    ArraySequence <T>* PrependImpl(const T& item) 
+    ArraySequence <T>* PrependImpl(const T& item) override
     {
         data->Prepend(item);
         return this;
@@ -172,7 +172,7 @@ template <class T> class ArraySequence : public Sequence<T>
         }
     };
 
-    Sequence<T>* instance()
+    Sequence<T>* instance() override
     {
         return new ArraySequence<T>(*this);
     }
@@ -198,7 +198,7 @@ template <class T> class ListSequence : public Sequence <T>
         items = new LinkedList<T> (list);
     }
 
-    T GetFirst()
+    T GetFirst() override
     {
         if (items->GetLength() == 0)
             throw out_of_range("ListSequence is empty - cannot get first element");
@@ -206,21 +206,21 @@ template <class T> class ListSequence : public Sequence <T>
     }
 
     
-    T GetLast()
+    T GetLast() override
     {
         if (items->GetLength() == 0)
             throw out_of_range("ListSequence is empty - cannot get last element");
         return items->Get(items->GetLength() - 1);
     }
 
-    T Get(int index)
+    T Get(int index) override
     {
         if (index < 0 || index >= items->GetLength())
             throw out_of_range("Выход за границы диапазона в ListSequence::Get");
         return items->Get(index);
     }
 
-    ListSequence<T>* GetSubsequence(int start, int end)
+    ListSequence<T>* GetSubsequence(int start, int end) override
     {
         if (start < 0 || end >= items->GetLength() || start > end)
             throw out_of_range("Неправильные индексы для начала и конца в ListSequence::GetSubsequence");
@@ -234,18 +234,18 @@ template <class T> class ListSequence : public Sequence <T>
         return result;
     }
 
-    int GetLength()
+    int GetLength() 
     {
         return items->GetLength();
     }
 
-    ListSequence<T>* AppendImpl(const T& item)
+    ListSequence<T>* AppendImpl(const T& item) override
     {
         items->Append(item);
         return this;
     }
 
-    ListSequence<T>* InsertAtImpl(const T& item, int index)
+    ListSequence<T>* InsertAtImpl(const T& item, int index) override
     {
         if (index < 0 || index > items->GetLength())
             throw out_of_range("Выход за границы диапазона в ListSequence::InsertAtImpl");
@@ -254,7 +254,7 @@ template <class T> class ListSequence : public Sequence <T>
         return this;
     }
 
-    ListSequence<T>* PrependImpl(const T& item)
+    ListSequence<T>* PrependImpl(const T& item) override
     {
         items->Prepend(item);
         return this;
@@ -271,7 +271,7 @@ template <class T> class ListSequence : public Sequence <T>
         return this;
     }
 
-    Sequence<T>* instance()
+    Sequence<T>* instance() override
     {
         return new ListSequence<T>(*this);
     }
