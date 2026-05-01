@@ -187,19 +187,9 @@ template <class T> class ArraySequence : public Sequence<T>
         }    
         else 
         {
-            int old_size = data->GetSize();
-            int new_size = data->GetSize() + list->GetLength();
-            T* arr = new T[new_size];
-
-            for (int i = 0; i < data->GetSize(); i++)
-                arr[i] = data->Get(i);
-
             for (int i = 0; i < list->GetLength(); i++)
-                arr[old_size + i] = list->Get(i);
-            
-            delete [] data->items;
-            data->items = arr;
-            data->GetSize() = new_size;
+                data->Append(list->Get(i));
+
             return this;
         }
     };
