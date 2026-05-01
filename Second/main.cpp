@@ -54,7 +54,7 @@ struct Button {
 SequenceType currentSeqType = SequenceType::ArraySequence;
 SequenceImplType currentSeqImpl = SequenceImplType::None;
 Sequence<int>* intSequence = nullptr;
-Sequence<bool>* bitSequence = nullptr;
+Sequence<int>* bitSequence = nullptr;
 bool sequenceCreated = false;
 std::string sequenceMessage = "Create sequence first.";
 
@@ -399,7 +399,7 @@ void createSequence()
     if (bitSequence) delete bitSequence;
     
     if (currentSeqType == SequenceType::BitSequence) {
-        bitSequence = new BitSequence();
+        Sequence<int>* bitSequence = nullptr;
         sequenceCreated = true;
     } else {
         if (currentSeqImpl == SequenceImplType::Mutable) {

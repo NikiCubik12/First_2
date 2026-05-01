@@ -13,13 +13,14 @@ template <class T> class LinkedList;
 template <class T> class Sequence
 {
     public:
+    virtual ~Sequence() = default;
     virtual T GetFirst() = 0;
     virtual T GetLast() = 0;
     virtual T Get(int index) = 0;
 
     virtual Sequence <T>* GetSubsequence (int start, int end) = 0;
     virtual int GetLength() = 0;
-    
+
     Sequence <T>* Append (T item)
     {
         return instance()->AppendImpl(item);
@@ -178,8 +179,7 @@ template <class T> class ArraySequence : public Sequence<T>
         return this;
     };
 
-
-    ArraySequence <T>* Concat (ArraySequence <T>* list)
+    Sequence<T>* Concat (Sequence<T>* list) override
     {
         if (list == nullptr)
         {
@@ -187,13 +187,15 @@ template <class T> class ArraySequence : public Sequence<T>
         }    
         else 
         {
-            int new_size = data->size + list->data->size;
+            int old_size = data->size;
+            int new_size = data->size + list->GetLength();
             T* arr = new T[new_size];
+
             for (int i = 0; i < data->size; i++)
                 arr[i] = data->Get(i);
-            
-            for (int i = 0; i < list->data->size; i++)
-                arr[data-> size + i] = list->data->Get(i);
+
+            for (int i = 0; i < list->GetLength(); i++)
+                arr[old_size + i] = list->Get(i);
             
             delete [] data->items;
             data->items = arr;
@@ -290,7 +292,7 @@ template <class T> class ListSequence : public Sequence <T>
         return this;
     }
 
-    ListSequence<T>* Concat(ListSequence<T>* list)
+    Sequence<T>* Concat(Sequence<T>* list) override
     {
         if (list == nullptr)
             throw invalid_argument("Не может объединиться с пустым указателем в ListSequence::Concat");
