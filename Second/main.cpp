@@ -233,7 +233,7 @@ void drawLinkedListScreen(const Button buttons[LINKED_LIST_BUTTON_COUNT], int se
         drawButton(buttons[i], i == selected);
     }
     
-    int statusY = 6 + LINKED_LIST_BUTTON_COUNT;
+    int statusY = 30;
     mvhline(statusY, 2, ACS_HLINE, COLS - 4);
     mvprintw(statusY + 1, 2, "Status: %s", message.c_str());
     mvprintw(statusY + 2, 2, "Created: %s | Size: %d", created ? "yes" : "no", created ? list.GetLength() : 0);
@@ -244,7 +244,7 @@ void drawLinkedListScreen(const Button buttons[LINKED_LIST_BUTTON_COUNT], int se
 
 void drawLinkedListValues(LinkedList<int>& list, bool created)
 {
-    int startY = 18;
+    int startY = 33;
     int startX = 4;
     
     // Очищаем несколько строк
@@ -345,15 +345,17 @@ void handleLinkedListAction(int selected, Screen& screen, LinkedList<int>& list,
         case 7: {  // Get SubList
             if (!created) { message = "Create list first."; break; }
             int start, end;
-            mvprintw(22, 2, "Enter start index: ");
+            mvprintw(35, 2, "Enter start index: ");
+            clrtoeol();
             echo();
             curs_set(1);
             char input[32];
-            move(22, 20);
+            move(35, 20);
             getnstr(input, 31);
             start = atoi(input);
-            mvprintw(23, 2, "Enter end index: ");
-            move(23, 18);
+            mvprintw(36, 2, "Enter end index: ");
+            clrtoeol();
+            move(36, 18);
             getnstr(input, 31);
             end = atoi(input);
             noecho();
@@ -367,7 +369,7 @@ void handleLinkedListAction(int selected, Screen& screen, LinkedList<int>& list,
                 out += std::to_string(sublist->Get(i));
             }
             out += "]";
-            mvprintw(24, 2, "%s", out.c_str());
+            mvprintw(37, 2, "%s", out.c_str());
             delete sublist;
             break;
         }
@@ -375,19 +377,21 @@ void handleLinkedListAction(int selected, Screen& screen, LinkedList<int>& list,
         case 8: {  // Concat
             if (!created) { message = "Create list first."; break; }
             // Создаём второй список
-            LinkedList<int>* list2 = new LinkedList<int>();
-            mvprintw(22, 2, "Create second list for concatenation:");
+            LinkedList<int>* list2 = new LinkedList<int>();            
+            mvprintw(35, 2, "Create second list for concatenation:");
+            clrtoeol();
             refresh();
             
             // Добавляем элементы во второй список
             int value;
             int count = 0;
             while (true) {
-                mvprintw(23, 2, "Enter value (or non-integer to stop): ");
+                mvprintw(36, 2, "Enter value (or non-integer to stop): ");
+                clrtoeol();
                 echo();
                 curs_set(1);
                 char input[32];
-                move(23, 40);
+                move(36, 40);
                 getnstr(input, 31);
                 noecho();
                 curs_set(0);
@@ -401,7 +405,7 @@ void handleLinkedListAction(int selected, Screen& screen, LinkedList<int>& list,
                 list2->Append(value);
                 count++;
                 
-                mvprintw(24, 2, "Added: %d, Total: %d", value, count);
+                mvprintw(37, 2, "Added: %d, Total: %d", value, count);
                 refresh();
             }
             
@@ -413,7 +417,7 @@ void handleLinkedListAction(int selected, Screen& screen, LinkedList<int>& list,
                 out += std::to_string(result->Get(i));
             }
             out += "]";
-            mvprintw(25, 2, "%s", out.c_str());
+            mvprintw(38, 2, "%s", out.c_str());
             delete list2;
             delete result;
             break;
@@ -777,11 +781,11 @@ void handleSequenceAction(int selected, Screen& screen, std::string& message)
 bool readIntFromUser(int& value)
 {
     char input[32];
-    mvprintw(22, 2, "Enter integer value: ");
+    mvprintw(30, 2, "Enter integer value: ");
     clrtoeol();
     echo();
     curs_set(1);
-    move(22, 23);
+    move(30, 23);
     getnstr(input, sizeof(input) - 1);
     noecho();
     curs_set(0);
@@ -797,11 +801,11 @@ bool readIntFromUser(int& value)
 bool readBoolFromUser(bool& value)
 {
     char input[5];
-    mvprintw(22, 2, "Enter value (0 or 1): ");
+    mvprintw(30, 2, "Enter value (0 or 1): ");
     clrtoeol();
     echo();
     curs_set(1);
-    move(22, 25);
+    move(30, 25);
     getnstr(input, sizeof(input) - 1);
     noecho();
     curs_set(0);
@@ -814,11 +818,11 @@ bool readBoolFromUser(bool& value)
 bool readIndexFromUser(int& index)
 {
     char input[32];
-    mvprintw(22, 2, "Enter index: ");
+    mvprintw(30, 2, "Enter index: ");
     clrtoeol();
     echo();
     curs_set(1);
-    move(22, 14);
+    move(30, 14);
     getnstr(input, sizeof(input) - 1);
     noecho();
     curs_set(0);
