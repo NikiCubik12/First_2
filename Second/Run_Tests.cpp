@@ -88,11 +88,11 @@ int main()
     {
         run_all_tests();
     } 
-    catch (invalid_argument except)
+    catch (const invalid_argument& except)
     {
         cout << except.what() << endl;
     }
-    catch (out_of_range except)
+    catch (const out_of_range& except)
     {
         cout << except.what() << endl;
     }
