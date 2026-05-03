@@ -234,7 +234,7 @@ template <class T> class ListSequence : public Sequence <T>
         return result;
     }
 
-    int GetLength() 
+    int GetLength() override
     {
         return items->GetLength();
     }
@@ -415,10 +415,10 @@ class BitSequence: public Sequence <int>  // Вместо Sequence<bool>
         return bits->GetSize();
     }
 
-    BitSequence* AppendImpl (const int& item)  // Вместо const bool&
+    BitSequence* AppendImpl (const int& item)  
     {
-        // Проверка, что item это 0 или 1
-        if (item != 0 && item != 1) {
+        if (item != 0 && item != 1) 
+        {
             throw invalid_argument("Бит может быть только 0 или 1");
         }
         bits->Append(item);

@@ -15,7 +15,7 @@
 
 // Константы для кнопок
 constexpr int MAIN_BUTTON_COUNT = 3;
-constexpr int DYNAMIC_ARRAY_BUTTON_COUNT = 9;
+constexpr int DYNAMIC_ARRAY_BUTTON_COUNT = 8;
 constexpr int LINKED_LIST_BUTTON_COUNT = 13;
 constexpr int SEQUENCE_TYPE_BUTTON_COUNT = 3;
 constexpr int ARRAY_SEQUENCE_IMPL_BUTTON_COUNT = 3;  // Mutable, Immutable, Back
@@ -106,7 +106,7 @@ void drawDynamicArrayScreen(const Button buttons[DYNAMIC_ARRAY_BUTTON_COUNT], in
         drawButton(buttons[i], i == selected);
     }
     
-    int statusY = 5 + DYNAMIC_ARRAY_BUTTON_COUNT;
+    int statusY = 20;
     mvhline(statusY, 2, ACS_HLINE, COLS - 4);
     mvprintw(statusY + 1, 2, "Status: %s", message.c_str());
     mvprintw(statusY + 2, 2, "Created: %s | Size: %d", created ? "yes" : "no", created ? array.GetSize() : 0);
@@ -117,7 +117,7 @@ void drawDynamicArrayScreen(const Button buttons[DYNAMIC_ARRAY_BUTTON_COUNT], in
 
 void drawDynamicArrayValues(DynamicArray<int>& array, bool created)
 {
-    int startY = 14;  // Фиксированная позиция
+    int startY = 23;  // Фиксированная позиция
     int startX = 4;
     
     // Очищаем несколько строк, чтобы убрать артефакты
@@ -904,9 +904,9 @@ int main()
         {"Insert At", 10, 2, 16},
         {"Set", 12, 2, 16},
         {"Get", 14, 2, 16},
-        {"Resize", 16, 2, 16},  
-        {"Print", 18, 2, 16},
-        {"Back", 20, 2, 16},
+        // {"Resize", 16, 2, 16},  
+        {"Print", 16, 2, 16},
+        {"Back", 18, 2, 16},
     };
 
     // Linked List кнопки (вертикальные)
