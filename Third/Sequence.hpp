@@ -13,6 +13,7 @@ template <class T> class LinkedList;
 template <class T> class Sequence
 {
     public:
+    virtual ~Sequence() = default;
     virtual T GetFirst() = 0;
     virtual T GetLast() = 0;
     virtual T Get(int index) = 0;
@@ -48,7 +49,7 @@ template <class T> class ArraySequence : public Sequence<T>
     DynamicArray <T>* data;
 
     public:
-    ArraySequence () 
+    ArraySequence ()
     {
         data = new DynamicArray<T> ();
     }
@@ -58,7 +59,12 @@ template <class T> class ArraySequence : public Sequence<T>
         data = new DynamicArray<T> (items, count);
     }
 
-    ArraySequence (LinkedList <T>& list)
+    ArraySequence (const DynamicArray<T>& array)
+    {
+        data = new DynamicArray<T> (array);
+    }
+
+    ArraySequence (const LinkedList <T>& list)
     {
         data = new DynamicArray<T> (list);
     }
@@ -102,7 +108,7 @@ template <class T> class ArraySequence : public Sequence<T>
         }
     };
 
-    Sequence <T>* GetSubsequence (int start, int end) override
+    ArraySequence <T>* GetSubsequence (int start, int end) override
     {
         if ((start < 0) || (end > data->GetSize()-1) || (start > end))
         {
@@ -125,61 +131,33 @@ template <class T> class ArraySequence : public Sequence<T>
         return data->GetSize();
     };
 
-    Sequence <T>* AppendImpl (const T& item) override
+    ArraySequence <T>* AppendImpl (const T& item) override
     {
-        T* arr = new T[data->GetSize() + 1];
-        for (int i = 0; i < data->GetSize(); i++)
-            arr[i] = data->Get(i);
-        arr[data->GetSize()] = item;
-
-        delete [] data->items;
-        data->size++;
-
-        data->items = arr;
+        data->Append(item);
         return this;
     };
 
-    Sequence <T>* InsertAtImpl(const T& item, int index) override
+    ArraySequence <T>* InsertAtImpl(const T& item, int index) override
     {
-        if ((index < 0) || (index > data->GetSize()-1))
+        if ((index < 0) || (index > data->GetSize()))
         {
             throw out_of_range("Index out of range in ArraySequence::InsertAtImpl");
         }
             
         else 
         {
-            T* arr = new T[data->GetSize() + 1];
-            for (int i = 0; i < index; i++)
-                arr[i] = data->Get(i);
-
-            arr[index] = item;
-
-            for (int i = index; i < data->GetSize(); i++)
-                arr[i + 1] = data->Get(i);
-
-            delete [] data->items;
-            data->items = arr;
+            data->InsertAt(item, index);
             return this;
         }
     };
 
-    Sequence <T>* PrependImpl(const T& item) override
+    ArraySequence <T>* PrependImpl(const T& item) override
     {
-        T* arr = new T[data->GetSize()+1];
-
-        arr[0] = item;
-        
-        for (int i = 0; i < data->GetSize(); i++)
-            arr[i] = data->Get(i);
-        
-        delete [] data->items;
-        data->size++;
-        data->items = arr;
+        data->Prepend(item);
         return this;
     };
 
-
-    Sequence <T>* Concat (Sequence <T>* list) override
+    Sequence<T>* Concat (Sequence<T>* list) override
     {
         if (list == nullptr)
         {
@@ -187,17 +165,9 @@ template <class T> class ArraySequence : public Sequence<T>
         }    
         else 
         {
-            int new_size = data->GetSize() + list->GetLength();
-            T* arr = new T[new_size];
-            for (int i = 0; i < data->GetSize(); i++)
-                arr[i] = data->Get(i);
-            
             for (int i = 0; i < list->GetLength(); i++)
-                arr[data-> size + i] = list->Get(i);
-            
-            delete [] data->items;
-            data->items = arr;
-            data->size = new_size;
+                data->Append(list->Get(i));
+
             return this;
         }
     };
@@ -213,7 +183,6 @@ template <class T> class ListSequence : public Sequence <T>
     protected:
     LinkedList <T>* items;
     public:
-
     ListSequence ()
     {
         items = new LinkedList<T> ();
@@ -229,7 +198,7 @@ template <class T> class ListSequence : public Sequence <T>
         items = new LinkedList<T> (list);
     }
 
-    T GetFirst()
+    T GetFirst() override
     {
         if (items->GetLength() == 0)
             throw out_of_range("ListSequence is empty - cannot get first element");
@@ -237,21 +206,21 @@ template <class T> class ListSequence : public Sequence <T>
     }
 
     
-    T GetLast()
+    T GetLast() override
     {
         if (items->GetLength() == 0)
             throw out_of_range("ListSequence is empty - cannot get last element");
         return items->Get(items->GetLength() - 1);
     }
 
-    T Get(int index)
+    T Get(int index) override
     {
         if (index < 0 || index >= items->GetLength())
             throw out_of_range("Выход за границы диапазона в ListSequence::Get");
         return items->Get(index);
     }
 
-    ListSequence<T>* GetSubsequence(int start, int end)
+    ListSequence<T>* GetSubsequence(int start, int end) override
     {
         if (start < 0 || end >= items->GetLength() || start > end)
             throw out_of_range("Неправильные индексы для начала и конца в ListSequence::GetSubsequence");
@@ -265,18 +234,18 @@ template <class T> class ListSequence : public Sequence <T>
         return result;
     }
 
-    int GetLength()
+    int GetLength() 
     {
         return items->GetLength();
     }
 
-    ListSequence<T>* AppendImpl(const T& item)
+    ListSequence<T>* AppendImpl(const T& item) override
     {
         items->Append(item);
         return this;
     }
 
-    ListSequence<T>* InsertAtImpl(const T& item, int index)
+    ListSequence<T>* InsertAtImpl(const T& item, int index) override
     {
         if (index < 0 || index > items->GetLength())
             throw out_of_range("Выход за границы диапазона в ListSequence::InsertAtImpl");
@@ -285,13 +254,13 @@ template <class T> class ListSequence : public Sequence <T>
         return this;
     }
 
-    ListSequence<T>* PrependImpl(const T& item)
+    ListSequence<T>* PrependImpl(const T& item) override
     {
         items->Prepend(item);
         return this;
     }
 
-    ListSequence<T>* Concat(ListSequence<T>* list)
+    Sequence<T>* Concat(Sequence<T>* list) override
     {
         if (list == nullptr)
             throw invalid_argument("Не может объединиться с пустым указателем в ListSequence::Concat");
@@ -302,7 +271,7 @@ template <class T> class ListSequence : public Sequence <T>
         return this;
     }
 
-    Sequence<T>* instance()
+    Sequence<T>* instance() override
     {
         return new ListSequence<T>(*this);
     }
@@ -337,20 +306,20 @@ template <class T> class ImmutableArraySequence : public ArraySequence<T>
 };
 
 
-class BitSequence: public Sequence <bool>
+class BitSequence: public Sequence <int>  // Вместо Sequence<bool>
 {
     private:
-    DynamicArray <bool>* bits;
+    DynamicArray <int>* bits;  // Вместо DynamicArray<bool>
 
     public:
-    Sequence<bool>* instance()
+    Sequence<int>* instance()  // Вместо Sequence<bool>
     {
         return new BitSequence(*this);
     }
 
     BitSequence ()
     {
-        bits = new DynamicArray<bool> ();
+        bits = new DynamicArray<int> ();
     }
 
     BitSequence (unsigned a)
@@ -364,27 +333,30 @@ class BitSequence: public Sequence <bool>
             t = t / 2;
         }
 
-        bool* b = new bool[size];
+        if (size == 0) size = 1;  // Для случая a = 0
+
+        int* b = new int[size];  // Вместо bool*
         for (int i = size-1; i >= 0; i--)
         {
             b[i] = a % 2;
             a /= 2;
         }
 
-        bits = new DynamicArray<bool> (b, size);
+        bits = new DynamicArray<int> (b, size);
+        delete[] b;  // Не забываем удалять!
     }
 
-    BitSequence (bool* items, int size)
+    BitSequence (int* items, int size)  // Вместо bool*
     {
-        bits = new DynamicArray<bool> (items, size);
+        bits = new DynamicArray<int> (items, size);
     }
 
     BitSequence (const BitSequence & rhs)
     {
-        bits = new DynamicArray<bool> (*rhs.bits);
+        bits = new DynamicArray<int> (*rhs.bits);
     }
 
-    bool GetFirst () 
+    int GetFirst ()  // Вместо bool
     {
         if (bits->GetSize() == 0)
         {      
@@ -396,7 +368,7 @@ class BitSequence: public Sequence <bool>
         }
     }
 
-    bool GetLast () 
+    int GetLast ()  // Вместо bool
     {
         if (bits->GetSize() == 0)
         {      
@@ -408,7 +380,7 @@ class BitSequence: public Sequence <bool>
         }
     }
 
-    bool Get (int index) 
+    int Get (int index)  // Вместо bool
     {
         if (index >= 0 && index < bits->GetSize())
         {
@@ -428,7 +400,7 @@ class BitSequence: public Sequence <bool>
         }
         else 
         {
-            bool* subseq = new bool[end - start + 1];
+            int* subseq = new int[end - start + 1];  // Вместо bool*
             for (int i = 0; i < (end - start + 1); i++)
                 subseq[i] = bits->Get(start + i);
 
@@ -443,25 +415,35 @@ class BitSequence: public Sequence <bool>
         return bits->GetSize();
     }
 
-    BitSequence* AppendImpl (const bool& item) 
+    BitSequence* AppendImpl (const int& item)  // Вместо const bool&
     {
+        // Проверка, что item это 0 или 1
+        if (item != 0 && item != 1) {
+            throw invalid_argument("Бит может быть только 0 или 1");
+        }
         bits->Append(item);
         return this;
     }
 
-    BitSequence* InsertAtImpl(const bool& item, int index) 
+    BitSequence* InsertAtImpl(const int& item, int index)  // Вместо const bool&
     {
+        if (item != 0 && item != 1) {
+            throw invalid_argument("Бит может быть только 0 или 1");
+        }
         bits->InsertAt(item, index);
         return this;
     }
 
-    BitSequence* PrependImpl(const bool& item) 
+    BitSequence* PrependImpl(const int& item)  // Вместо const bool&
     {
+        if (item != 0 && item != 1) {
+            throw invalid_argument("Бит может быть только 0 или 1");
+        }
         bits->Prepend(item);
         return this;
     }
 
-    BitSequence* Concat (Sequence <bool>* rhs)
+    BitSequence* Concat (Sequence <int>* rhs)  // Вместо Sequence<bool>
     {
         if (rhs == nullptr)
         {      
@@ -481,46 +463,40 @@ class BitSequence: public Sequence <bool>
     {
         if (bits->GetSize() != rhs->bits->GetSize()) 
             throw invalid_argument("Размеры последовательностей не совпадают");
-        else
-        {
-            BitSequence* result = new BitSequence();
-            for (int i = 0; i < bits->GetSize(); i++)
-                result = result->AppendImpl(bits->Get(i) & rhs->bits->Get(i));
-            return result;
-        }
+        
+        BitSequence* result = new BitSequence();
+        for (int i = 0; i < bits->GetSize(); i++)
+            result->AppendImpl(bits->Get(i) & rhs->bits->Get(i));
+        return result;
     }
 
     BitSequence* BitOr (const BitSequence* rhs)
     {
         if (bits->GetSize() != rhs->bits->GetSize()) 
             throw invalid_argument("Размеры последовательностей не совпадают");
-        else
-        {
-            BitSequence* result = new BitSequence();
-            for (int i = 0; i < bits->GetSize(); i++)
-                result->AppendImpl(bits->Get(i) || rhs->bits->Get(i));
-            return result;
-        }
+        
+        BitSequence* result = new BitSequence();
+        for (int i = 0; i < bits->GetSize(); i++)
+            result->AppendImpl(bits->Get(i) | rhs->bits->Get(i));  // | вместо ||
+        return result;
     }
 
     BitSequence* BitXor (const BitSequence* rhs)
     {
         if (bits->GetSize() != rhs->bits->GetSize()) 
             throw invalid_argument("Размеры последовательностей не совпадают");
-        else
-        {
-            BitSequence* result = new BitSequence();
-            for (int i = 0; i < bits->GetSize(); i++)
-                result->AppendImpl(bits->Get(i) ^ rhs->bits->Get(i));
-            return result;
-        }
+        
+        BitSequence* result = new BitSequence();
+        for (int i = 0; i < bits->GetSize(); i++)
+            result->AppendImpl(bits->Get(i) ^ rhs->bits->Get(i));
+        return result;
     }
 
     BitSequence* BitNot ()
     {
         BitSequence* result = new BitSequence();
         for (int i = 0; i < bits->GetSize(); i++)
-            result->AppendImpl(bits->Get(i) ^ 1);
+            result->AppendImpl(bits->Get(i) ^ 1);  // Инверсия
         return result;
     }
 
@@ -528,8 +504,8 @@ class BitSequence: public Sequence <bool>
     {
         if (bits->GetSize() > 0)
         {
-            for (int i=0; i<bits->GetSize(); i++)
-                cout << (int) bits->Get(i);
+            for (int i = 0; i < bits->GetSize(); i++)
+                cout << bits->Get(i);  // Убрал (int), т.к. теперь и так int
             cout << endl; 
         }
         else

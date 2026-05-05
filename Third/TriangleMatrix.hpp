@@ -16,7 +16,7 @@ class TriMatrix
 {
     private:
     int RowsColomns;
-    ArraySequence<T*>* elems; // массив, элементами которого являются массивы (два указателя)
+    ArraySequence<T*>* elems;
     
     public:
     TriMatrix ()
@@ -28,11 +28,8 @@ class TriMatrix
     TriMatrix (T** item, int RowsColomns)
     {
         this->RowsColomns = RowsColomns;
-
-        // Создаем пустой ArraySequence
         elems = new ArraySequence<T*>();
 
-        // Заполняем его строками с глубоким копированием
         for (int i = 0; i < RowsColomns; i++)
         {
             T* row = new T[RowsColomns];
@@ -44,7 +41,6 @@ class TriMatrix
         }
     }
 
-    // Конструктор копирования
     TriMatrix (const TriMatrix& mtrx)
     {
         RowsColomns = mtrx.RowsColomns;
@@ -56,22 +52,6 @@ class TriMatrix
             for (int j = 0; j < RowsColomns; j++)
             {
                 row[j] = mtrx.elems->Get(i)[j];
-            }
-            elems->Append(row);
-        }
-    }
-
-    TriMatrix (ArraySequence<T*>* items)
-    {
-        RowsColomns = items->GetLength();
-        elems = new ArraySequence<T*> (items, RowsColomns);
-
-        for (int i = 0; i < RowsColomns; i++)
-        {
-            T* row = new T[RowsColomns]; 
-            for (int j = 0; j < RowsColomns; j++)
-            {
-                row[j] = items->Get(i)[j];
             }
             elems->Append(row);
         }
@@ -97,7 +77,7 @@ class TriMatrix
         
         T mx = 0;
         for (int i = 0; i < RowsColomns; i++)
-            mx += elems->Get(i)[0]; // прошлись по 1-му столбцу
+            mx += elems->Get(i)[0];
 
         for (int i = 1; i < RowsColomns; i++)
         {
@@ -114,34 +94,48 @@ class TriMatrix
         return mx;
     }
     
-    int GetRowsColomns ()
+    int GetRowsColomns () const
     {
         return RowsColomns;
     }
 
-    friend TriMatrix operator* (TriMatrix& mtrx, double lambda); // справа умножаем на скаляр
-    friend TriMatrix operator* (double lambda, TriMatrix& mtrx); // слева умножаем на скаляр
-    friend TriMatrix operator+ (TriMatrix& mtrx1, TriMatrix& mtrx2); // сложение матриц
-    friend ostream& operator<< (ostream& out, const TriMatrix& mtrx); // вывод матрицы
-    TriMatrix& operator= (const TriMatrix& mtrx) // перегрузка оператора присваивания
+    T GetElement(int i, int j) const
     {
-        if (&mtrx != this) // защита от самоприсваивания, типа: a = a
+        if (i < 0 || i >= RowsColomns || j < 0 || j >= RowsColomns)
+            throw out_of_range("Index out of range");
+        return elems->Get(i)[j];
+    }
+
+    void SetElement(int i, int j, T value)
+    {
+        if (i < 0 || i >= RowsColomns || j < 0 || j >= RowsColomns)
+            throw out_of_range("Index out of range");
+        elems->Get(i)[j] = value;
+    }
+
+    TriMatrix& operator= (const TriMatrix& mtrx)
+    {
+        if (&mtrx != this)
         {
-            for (int i = 0; i < RowsColomns; i++)
+            if (elems != nullptr)
             {
-                delete elems->Get(i);
+                for (int i = 0; i < RowsColomns; i++)
+                {
+                    if (elems->Get(i) != nullptr)
+                        delete [] elems->Get(i);
+                }
+                delete elems;
             }
-            delete elems;
         
             RowsColomns = mtrx.RowsColomns;
-            elems = new ArraySequence<T*> ();
+            elems = new ArraySequence<T*>();
 
             for (int i = 0; i < RowsColomns; i++)
             {
                 T* row = new T[RowsColomns];
                 for (int j = 0; j < RowsColomns; j++)
                 {
-                    row[j] = mtrx.elems->Get(i)[j];
+                    row[j] = mtrx.GetElement(i, j);
                 }
                 elems->Append(row);
             } 
@@ -149,8 +143,7 @@ class TriMatrix
         return *this;  
     }
     
-
-    int CorrectMatrix ()
+    int CorrectMatrix () const
     {
         int flag = 1;
         for (int i = 0; i < RowsColomns; i++)
@@ -186,65 +179,82 @@ class TriMatrix
         }
         return 0;
     }
+
+    void Print() const
+    {
+        for (int i = 0; i < RowsColomns; i++)
+        {
+            for (int j = 0; j < RowsColomns; j++)
+            {
+                cout << GetElement(i, j) << " ";
+            }
+            cout << endl;
+        }
+    }
 }; 
 
+// Оператор умножения (справа)
 template <typename T>
 TriMatrix<T> operator* (TriMatrix<T>& mtrx, double lambda)
 {
     TriMatrix<T> result;
-    result.RowsColomns = mtrx.RowsColomns;
-    result.elems = new ArraySequence<T*>();
-
+    int size = mtrx.GetRowsColomns();
     
-    for (int i = 0; i < result.RowsColomns; i++)
+    // Создаем временную матрицу
+    T** temp = new T*[size];
+    for (int i = 0; i < size; i++)
     {
-        T* row = new T[result.RowsColomns];
-        for (int j = 0; j < result.RowsColomns; j++)
+        temp[i] = new T[size];
+        for (int j = 0; j < size; j++)
         {
-            row[j] = mtrx.elems->Get(i)[j] * lambda;
+            temp[i][j] = mtrx.GetElement(i, j) * lambda;
         }
-        result.elems->Append(row);
     }
+    
+    result = TriMatrix<T>(temp, size);
+    
+    // Очищаем временную матрицу
+    for (int i = 0; i < size; i++)
+        delete[] temp[i];
+    delete[] temp;
+    
     return result;
 }
 
+// Оператор умножения (слева)
 template <typename T>
 TriMatrix<T> operator* (double lambda, TriMatrix<T>& mtrx)
 {
-    TriMatrix<T> result;
-    result.RowsColomns = mtrx.RowsColomns;
-    result.elems = new ArraySequence<T*>();
-
-    
-    for (int i = 0; i < result.RowsColomns; i++)
-    {
-        T* row = new T[result.RowsColomns];
-        for (int j = 0; j < result.RowsColomns; j++)
-        {
-            row[j] = lambda * mtrx.elems->Get(i)[j];
-        }
-        result.elems->Append(row);
-       
-    } 
-    return result;
+    return mtrx * lambda;
 }
 
+// Оператор сложения
 template <typename T>
 TriMatrix<T> operator+ (TriMatrix<T>& mtrx1, TriMatrix<T>& mtrx2)
 {
     if ((mtrx1.CorrectMatrix() == mtrx2.CorrectMatrix()) && (mtrx1.CorrectMatrix() != 0) 
         && (mtrx1.GetRowsColomns() == mtrx2.GetRowsColomns()) && (mtrx1.GetRowsColomns() != 0))
     {
-        TriMatrix<T> result;
-        for (int i = 0; i < result.RowsColomns; i++)
+        int size = mtrx1.GetRowsColomns();
+        
+        // Создаем временную матрицу
+        T** temp = new T*[size];
+        for (int i = 0; i < size; i++)
         {
-            T* row = new T[result.RowsColomns];
-            for (int j = 0; j < result.RowsColomns; j++)
+            temp[i] = new T[size];
+            for (int j = 0; j < size; j++)
             {
-                row[j] = mtrx1->Get(i)[j] + mtrx2->Get(i)[j];
+                temp[i][j] = mtrx1.GetElement(i, j) + mtrx2.GetElement(i, j);
             }
-            result.elems->Append(row);
         }
+        
+        TriMatrix<T> result(temp, size);
+        
+        // Очищаем временную матрицу
+        for (int i = 0; i < size; i++)
+            delete[] temp[i];
+        delete[] temp;
+        
         return result;
     }
     else 
@@ -253,21 +263,19 @@ TriMatrix<T> operator+ (TriMatrix<T>& mtrx1, TriMatrix<T>& mtrx2)
     }
 }
 
+// Оператор вывода
 template <typename T>
 ostream& operator<< (ostream& out, const TriMatrix<T>& mtrx)
 {
-    for (int i = 0; i < mtrx.RowsColomns; i++)
+    for (int i = 0; i < mtrx.GetRowsColomns(); i++)
     {
-        for (int j = 0; j < mtrx.RowsColomns; j++)
+        for (int j = 0; j < mtrx.GetRowsColomns(); j++)
         {
-            out << mtrx.Get(i)[j] << " ";
+            out << mtrx.GetElement(i, j) << " ";
         }
         out << endl;
     }
     return out;
-} 
-
-
-
+}
 
 #endif

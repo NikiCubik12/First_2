@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа: Структуры данных</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1> Лабораторная работа</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="dynamic">📦 Динамический массив</button>
+            <button class="tab-btn" data-tab="linked">🔗 Связный список</button>
+            <button class="tab-btn" data-tab="sequence">📜 Последовательности</button>
+        </div>
+        
+        <!-- Dynamic Array -->
+        <div id="dynamic-tab" class="tab-content active">
+            <div class="section-header">
+                <h2>Динамический массив</h2>
+                <button class="create-btn" onclick="daCreate()">➕ Создать массив</button>
+            </div>
+            <div class="values-display">
+                <span class="label">Значения:</span>
+                <span class="values" id="da-values">[пусто]</span>
+            </div>
+            <div class="info-row">
+                <span>📏 Размер: <span id="da-size">0</span></span>
+                <span>📌 Статус: <span id="da-status">Не создан</span></span>
+            </div>
+            <div class="input-group">
+                <h3>Операции</h3>
+                <div class="operation">
+                    <button onclick="daAppend()">➕ Добавить в конец</button>
+                    <input type="number" id="da-append-val" placeholder="Число">
+                </div>
+                <div class="operation">
+                    <button onclick="daPrepend()">➕ Добавить в начало</button>
+                    <input type="number" id="da-prepend-val" placeholder="Число">
+                </div>
+                <div class="operation">
+                    <button onclick="daInsert()">📌 Вставить по индексу</button>
+                    <input type="number" id="da-insert-index" placeholder="Индекс">
+                    <input type="number" id="da-insert-val" placeholder="Число">
+                </div>
+                <div class="operation">
+                    <button onclick="daSet()">✏️ Изменить по индексу</button>
+                    <input type="number" id="da-set-index" placeholder="Индекс">
+                    <input type="number" id="da-set-val" placeholder="Число">
+                </div>
+                <div class="operation">
+                    <button onclick="daGet()">🔍 Получить по индексу</button>
+                    <input type="number" id="da-get-index" placeholder="Индекс">
+                </div>
+                <div class="operation">
+                    <button onclick="daClear()">🗑️ Очистить массив</button>
+                </div>
+            </div>
+            <div class="info-note">
+                💡 <strong>Подсказка:</strong> Динамический массив автоматически расширяется при добавлении элементов.
+            </div>
+        </div>
+        
+        <!-- Linked List -->
+        <div id="linked-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Связный список</h2>
+                <button class="create-btn" onclick="llCreate()">➕ Создать список</button>
+            </div>
+            <div class="values-display">
+                <span class="label">Значения:</span>
+                <span class="values" id="ll-values">[пусто]</span>
+            </div>
+            <div class="info-row">
+                <span>📏 Размер: <span id="ll-size">0</span></span>
+                <span>📌 Статус: <span id="ll-status">Не создан</span></span>
+            </div>
+            <div class="input-group">
+                <h3>Операции</h3>
+                <div class="operation">
+                    <button onclick="llAppend()">➕ Добавить в конец</button>
+                    <input type="number" id="ll-append-val" placeholder="Число">
+                </div>
+                <div class="operation">
+                    <button onclick="llPrepend()">➕ Добавить в начало</button>
+                    <input type="number" id="ll-prepend-val" placeholder="Число">
+                </div>
+                <div class="operation">
+                    <button onclick="llInsert()">📌 Вставить по индексу</button>
+                    <input type="number" id="ll-insert-index" placeholder="Индекс">
+                    <input type="number" id="ll-insert-val" placeholder="Число">
+                </div>
+                <div class="operation">
+                    <button onclick="llGet()">🔍 Получить по индексу</button>
+                    <input type="number" id="ll-get-index" placeholder="Индекс">
+                </div>
+                <div class="operation">
+                    <button onclick="llGetFirst()">🔍 Получить первый элемент</button>
+                </div>
+                <div class="operation">
+                    <button onclick="llGetLast()">🔍 Получить последний элемент</button>
+                </div>
+                <div class="operation">
+                    <button onclick="llClear()">🗑️ Очистить список</button>
+                </div>
+            </div>
+            <div class="info-note">
+                💡 <strong>Подсказка:</strong> Связный список хранит элементы в узлах, каждый узел указывает на следующий.
+            </div>
+        </div>
+        
+        <!-- Sequence -->
+        <div id="sequence-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Последовательности</h2>
+                <div class="sequence-select">
+                    <label>Тип:</label>
+                    <select id="seq-type">
+                        <option value="ArraySequence">ArraySequence (на основе массива)</option>
+                        <option value="ListSequence">ListSequence (на основе списка)</option>
+                        <option value="BitSequence">BitSequence (битовая)</option>
+                    </select>
+                    
+                    <label id="seq-impl-label" style="display:none;">Реализация:</label>
+                    <select id="seq-impl" style="display:none;">
+                        <option value="Mutable">Mutable (изменяемая)</option>
+                        <option value="Immutable">Immutable (неизменяемая)</option>
+                    </select>
+                    
+                    <button class="create-btn" onclick="seqCreate()">✨ Создать последовательность</button>
+                </div>
+            </div>
+            <div class="values-display">
+                <span class="label">Значения:</span>
+                <span class="values" id="seq-values">[пусто]</span>
+            </div>
+            <div class="info-row">
+                <span>📏 Размер: <span id="seq-size">0</span></span>
+                <span>📌 Тип: <span id="seq-type-display">-</span></span>
+            </div>
+            <div class="input-group">
+                <h3>Операции</h3>
+                <div class="operation">
+                    <button onclick="seqAppend()">➕ Добавить в конец</button>
+                    <input type="text" id="seq-append-val" placeholder="Значение (0 или 1 для BitSeq)">
+                </div>
+                <div class="operation">
+                    <button onclick="seqPrepend()">➕ Добавить в начало</button>
+                    <input type="text" id="seq-prepend-val" placeholder="Значение">
+                </div>
+                <div class="operation">
+                    <button onclick="seqInsert()">📌 Вставить по индексу</button>
+                    <input type="number" id="seq-insert-index" placeholder="Индекс">
+                    <input type="text" id="seq-insert-val" placeholder="Значение">
+                </div>
+                <div class="operation">
+                    <button onclick="seqGet()">🔍 Получить по индексу</button>
+                    <input type="number" id="seq-get-index" placeholder="Индекс">
+                </div>
+                <div class="operation">
+                    <button onclick="seqGetFirst()">🔍 Получить первый элемент</button>
+                </div>
+                <div class="operation">
+                    <button onclick="seqGetLast()">🔍 Получить последний элемент</button>
+                </div>
+            </div>
+            <div class="info-note">
+                💡 <strong>Подсказка:</strong> ArraySequence может быть изменяемым (Mutable) или неизменяемым (Immutable). 
+                Mutable изменяет исходную последовательность, Immutable возвращает новую.
+            </div>
+        </div>
+        
+        <div id="message-area">
+            <span id="message-text">✅ Готов к работе</span>
+            <button onclick="document.getElementById('message-text').innerHTML='✅ Готов к работе';">✖</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

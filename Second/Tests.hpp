@@ -11,6 +11,7 @@ using runtime_error = std::runtime_error;
 #include "Sequence.hpp"
 #include "DynamicArray.hpp"
 #include "LinkedList.hpp"
+#include "BitSequence.hpp"
 
 int totalTests = 0;
 int passedTests = 0;
