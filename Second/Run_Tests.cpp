@@ -1,6 +1,5 @@
 #include <iostream>
 #include <clocale>
-using namespace std;
 using std::cin;
 using std::cout;
 using out_of_range = std::out_of_range;
@@ -20,11 +19,12 @@ bool run_test(void (*test_function)())
     int new_passed = passedTests - old_passed;
     int new_total = totalTests - old_total;
     
-    if (new_total > 0 && new_passed == new_total) {
-        return true;  // Все проверки успешны
+    if (new_total > 0 && new_passed == new_total) 
+    {
+        return true;  
     }
     
-    return false;  // Есть проваленные проверки
+    return false;  
 }
 
 void run_all_tests()
@@ -73,6 +73,13 @@ void run_all_tests()
     cout << "  check_BitOr: " << (run_test(check_BitOr) ? "PASSED" : "FAILED") << endl;
     cout << "  check_BitXor: " << (run_test(check_BitXor) ? "PASSED" : "FAILED") << endl;
     cout << "  check_BitNot: " << (run_test(check_BitNot) ? "PASSED" : "FAILED") << endl;
+
+    cout << "\nInitializer List Tests:" << endl;
+    cout << "  check_initializer_list_dynamic_array: " << (run_test(check_initializer_list_dynamic_array) ? "PASSED" : "FAILED") << endl;
+    cout << "  check_initializer_list_array_sequence: " << (run_test(check_initializer_list_array_sequence) ? "PASSED" : "FAILED") << endl;
+    cout << "  check_initializer_list_list_sequence: " << (run_test(check_initializer_list_list_sequence) ? "PASSED" : "FAILED") << endl;
+    cout << "  check_initializer_list_bit_sequence: " << (run_test(check_initializer_list_bit_sequence) ? "PASSED" : "FAILED") << endl;
+    cout << "  check_initializer_list_bit_sequence_invalid: " << (run_test(check_initializer_list_bit_sequence_invalid) ? "PASSED" : "FAILED") << endl;
     
     cout << "\n========== TEST RESULTS ==========" << endl;
     cout << "Total tests: " << totalTests << endl;
