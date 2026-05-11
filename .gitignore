@@ -1,0 +1,21 @@
+*.exe
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+
+# C/C++ build outputs
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.dSYM/
+
+# Project binaries produced by Makefiles
+program
+tests
