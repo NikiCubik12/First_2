@@ -7,8 +7,6 @@ template <class T> class ImmutableArraySequence : public ArraySequence<T>
 {
     protected:
     Sequence<T>* instance() override;
-    
-    // Переопределяем методы с правильным поведением для Immutable
     Sequence<T>* AppendImpl(const T& item) override;
     Sequence<T>* InsertAtImpl(const T& item, size_t index) override;
     Sequence<T>* PrependImpl(const T& item) override;

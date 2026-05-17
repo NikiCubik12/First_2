@@ -11,7 +11,12 @@ template <class T>
 size_t LinkedList<T>::calculateLength() const
 {
     size_t len = 0;
-    for (Node<T>* current = head; current != nullptr; current = current->next, ++len)
+    Node<T>* current = head;
+    while (current != nullptr)
+    {
+        len++;
+        current = current->next;
+    }
     return len;
 }
 

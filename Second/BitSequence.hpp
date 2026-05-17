@@ -39,6 +39,4 @@ class BitSequence : public Sequence<int>
     void Print();
 };
 
-#include "BitSequence.tpp"
-
 #endif

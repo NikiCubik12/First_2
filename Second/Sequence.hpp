@@ -5,45 +5,46 @@
 #include <string>
 #include <stdexcept>
 #include <cstddef>
+using std::string;
 
 class SequenceException : public std::exception
 {
     protected:
-    std::string message;
+    string message;
     
     public:
-    explicit SequenceException(const std::string& msg);
+    explicit SequenceException(const string& msg);
     const char* what() const noexcept override;
 };
 
 class IndexOutOfRangeException : public SequenceException
 {
     public:
-    explicit IndexOutOfRangeException(const std::string& msg);
+    explicit IndexOutOfRangeException(const string& msg);
 };
 
 class SequenceEmptyException : public SequenceException
 {
     public:
-    explicit SequenceEmptyException(const std::string& msg);
+    explicit SequenceEmptyException(const string& msg);
 };
 
 class NullPointerException : public SequenceException
 {
     public:
-    explicit NullPointerException(const std::string& msg);
+    explicit NullPointerException(const string& msg);
 };
 
 class InvalidBitException : public SequenceException
 {
     public:
-    explicit InvalidBitException(const std::string& msg);
+    explicit InvalidBitException(const string& msg);
 };
 
 class DifferentSizeException : public SequenceException
 {
     public:
-    explicit DifferentSizeException(const std::string& msg);
+    explicit DifferentSizeException(const string& msg);
 };
 
 template <class T> class Sequence

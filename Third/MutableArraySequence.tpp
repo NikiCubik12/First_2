@@ -19,4 +19,24 @@ MutableArraySequence<T>::MutableArraySequence(std::initializer_list<T> list) : A
     }
 }
 
+template <class T>
+void MutableArraySequence<T>::Set(size_t index, const T& value)
+{
+    if (index >= this->data->GetSize())
+    {
+        throw IndexOutOfRangeException("Индекс выходит за границы в MutableArraySequence::Set");
+    }
+    this->data->Set(index, value);
+}
+
+template <class T>
+void MutableArraySequence<T>::Set(size_t index, MutableArraySequence<T>* value)
+{
+    if (index >= this->data->GetSize())
+    {
+        throw IndexOutOfRangeException("Индекс выходит за границы в MutableArraySequence::Set");
+    }
+    this->data->Set(index, value);
+}
+
 #endif

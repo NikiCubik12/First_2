@@ -107,11 +107,21 @@ void DynamicArray<T>::Prepend(const T& item)
 }
 
 template <class T>
+void DynamicArray<T>::Set(size_t index, T value)
+{
+    if (index >= size)
+    {
+        throw IndexOutOfRangeException("Ошибка: индекс выходит за границы");
+    }
+    items[index] = value;
+}
+
+template <class T>
 T DynamicArray<T>::Get(size_t index) const
 {
     if (index >= size)
     {
-        throw IndexOutOfRangeException("Индекс выходит за границы в DynamicArray::Get");
+        throw IndexOutOfRangeException("Ошибка: индекс выходит за границы");
     }
     return items[index];
 }
@@ -120,16 +130,6 @@ template <class T>
 size_t DynamicArray<T>::GetSize() const
 {
     return size;
-}
-
-template <class T>
-void DynamicArray<T>::Set(size_t index, T value)
-{
-    if (index >= size)
-    {
-        throw IndexOutOfRangeException("Индекс выходит за границы в DynamicArray::Set");
-    }
-    items[index] = value;
 }
 
 template <class T>

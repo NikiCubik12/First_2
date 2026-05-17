@@ -26,6 +26,7 @@ template <class T> class DynamicArray
     void Append(const T& item);
     void InsertAt(const T& item, size_t index);
     void Prepend(const T& item);
+    void RemoveAt(size_t index);
     T Get(size_t index) const;
     size_t GetSize() const;
     void Set(size_t index, T value);
