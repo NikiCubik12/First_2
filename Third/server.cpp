@@ -1231,10 +1231,61 @@ void handleRequest(const string& request, string& responseStr)
             }
             return result;
         };
+
+        auto isDouble = [](const string& s) -> bool {
+            if (s.empty()) return false;
+            char* end = nullptr;
+            strtod(s.c_str(), &end);
+            return end != s.c_str() && *end == '\0';
+        };
+
+        auto parseDoubleMatrix = [&](const string& dataStr, int rows, int cols, const string& name, string& error) -> vector<vector<double>> {
+           vector<vector<double>> result(rows, vector<double>(cols, 0.0));
+           vector<double> numbers;
+           string num;
+
+
+           for (char c : dataStr) {
+               if (c == '-' || c == '.' || (c >= '0' && c <= '9')) {
+                   num += c;
+               } else if (!num.empty()) {
+                   if (!isDouble(num)) {
+                       error = "❌ Ошибка: в матрице " + name + " некорректное число '" + num + "'";
+                       return {};
+                   }
+                   numbers.push_back(strtod(num.c_str(), nullptr));
+                   num.clear();
+               }
+           }
+           if (!num.empty()) {
+               if (!isDouble(num)) {
+                   error = "❌ Ошибка: в матрице " + name + " некорректное число '" + num + "'";
+                   return {};
+               }
+               numbers.push_back(strtod(num.c_str(), nullptr));
+           }
+
+
+           if ((int)numbers.size() < rows * cols) {
+               error = "❌ Ошибка: в матрице " + name + " недостаточно данных (" + to_string(numbers.size()) + " чисел, ожидается " + to_string(rows * cols) + ")";
+               return {};
+           }
+
+
+           int idx = 0;
+           for (int i = 0; i < rows && idx < (int)numbers.size(); i++) {
+               for (int j = 0; j < cols && idx < (int)numbers.size(); j++) {
+                   result[i][j] = numbers[idx++];
+               }
+           }
+           return result;
+        };
         
+
+
         string result;
         string errorMsg;
-        
+
         try 
         {
             int rows1 = atoi(params["rows1"].c_str());
@@ -1247,6 +1298,63 @@ void handleRequest(const string& request, string& responseStr)
                 responseStr = responseHtml(200, result);
                 return;
             }
+
+            if (operation == "add")
+           {
+               int rows2 = atoi(params["rows2"].c_str());
+               int cols2 = atoi(params["cols2"].c_str());
+               string data2Str = params["data2"];
+
+
+               if (rows2 <= 0 || rows2 > 10 || cols2 <= 0 || cols2 > 10) {
+                   result = "❌ Ошибка: размеры матрицы №2 должны быть от 1 до 10";
+                   responseStr = responseHtml(200, result);
+                   return;
+               }
+
+
+               auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+               if (!errorMsg.empty()) {
+                   responseStr = responseHtml(200, errorMsg);
+                   return;
+               }
+
+
+               auto m2Double = parseDoubleMatrix(data2Str, rows2, cols2, "№2", errorMsg);
+               if (!errorMsg.empty()) {
+                   responseStr = responseHtml(200, errorMsg);
+                   return;
+               }
+
+
+               if (rows1 != rows2 || cols1 != cols2) {
+                   result = "❌ Ошибка: Размеры матриц не совпадают! (" + to_string(rows1) + "x" + to_string(cols1) + " vs " + to_string(rows2) + "x" + to_string(cols2) + ")";
+               } else {
+                   double** arr1 = new double*[rows1];
+                   double** arr2 = new double*[rows2];
+                   for (int i = 0; i < rows1; i++) {
+                       arr1[i] = new double[cols1];
+                       arr2[i] = new double[cols2];
+                       for (int j = 0; j < cols1; j++) {
+                           arr1[i][j] = m1Double[i][j];
+                           arr2[i][j] = m2Double[i][j];
+                       }
+                   }
+                   RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                   RectangularMatrix<double> mat2(arr2, rows2, cols2);
+                   auto res = mat1 + mat2;
+                   result = "Результат сложения:\n" + res.ToString();
+                   for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                   for (int i = 0; i < rows2; i++) delete[] arr2[i];
+                   delete[] arr1;
+                   delete[] arr2;
+               }
+
+
+               responseStr = responseHtml(200, result);
+               return;
+           }
+
             
             // Парсим первую матрицу
             auto m1 = parseMatrix(data1Str, rows1, cols1, "№1", errorMsg);
