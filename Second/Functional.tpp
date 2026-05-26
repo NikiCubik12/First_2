@@ -238,8 +238,10 @@ MutableArraySequence<MutableArraySequence<T>*>* GetAllPostfixes(Sequence<T>* seq
 template <class T, class R>
 R ReduceWithIndex(Sequence<T>* seq, R initialValue, R (*func)(R, T, size_t))
 {
-    if (!seq) throw std::invalid_argument("Ошибка: ReduceWithIndex - последовательность не может быть пустой");
-    if (!func) throw std::invalid_argument("Ошибка: ReduceWithIndex - функция не может быть пустой");
+    if (!seq) 
+        throw std::invalid_argument("Ошибка: ReduceWithIndex - последовательность не может быть пустой");
+    if (!func) 
+        throw std::invalid_argument("Ошибка: ReduceWithIndex - функция не может быть пустой");
     
     R result = initialValue;
     for (size_t i = 0; i < seq->GetLength(); i++) {

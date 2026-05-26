@@ -10,11 +10,9 @@ Sequence<T>* ImmutableArraySequence<T>::instance()
 template <class T>
 Sequence<T>* ImmutableArraySequence<T>::AppendImpl(const T& item)
 {
-    // Создаём НОВЫЙ массив на основе текущего
     DynamicArray<T>* newData = new DynamicArray<T>(*this->data);
     newData->Append(item);
     
-    // Создаём НОВУЮ последовательность
     ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(*newData);
     delete newData;
     

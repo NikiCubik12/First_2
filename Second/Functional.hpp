@@ -8,7 +8,8 @@
 #include "MutableArraySequence.hpp"
 
 template <class T>
-class ICollection {
+class ICollection 
+{
     public:
     virtual ~ICollection() = default;
     virtual T Get(size_t index) const = 0;
