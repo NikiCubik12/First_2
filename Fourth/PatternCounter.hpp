@@ -3,13 +3,28 @@
 
 #include <cstddef>
 #include <string>
-#include <unordered_map>
-#include <vector>
 #include <utility>
 #include "Sequence.hpp"
 #include "MutableArraySequence.hpp"
 #include "ReadOnlyStream.hpp"
 #include "LazySequence.hpp"
+
+struct CharNode
+{
+    int  next[256];
+    int  fail;
+    int  outputLink;
+    int  patternEnd;
+    
+    CharNode()
+    {
+        for (int i = 0; i < 256; ++i)
+            next[i] = -1;
+        fail = 0;
+        outputLink = -1;
+        patternEnd = -1;
+    }
+};
 
 class PatternCounter
 {
@@ -26,20 +41,10 @@ public:
     Sequence<std::pair<std::string, std::size_t>>* GetCounts() const;
 
 private:
-    struct Node
-    {
-        std::unordered_map<char, int> children;
-        int                            fail;
-        int                            outputLink;
-        int                            patternEnd;
-
-        Node() : children(), fail(0), outputLink(-1), patternEnd(-1) {}
-    };
-
-    std::vector<std::string> patterns_;
-    std::vector<Node>        nodes_;
-    std::vector<std::size_t> counts_;
-    std::vector<long long>   lastMatchEnd_;
+    MutableArraySequence<std::string> patterns_;
+    MutableArraySequence<CharNode>    nodes_;
+    MutableArraySequence<std::size_t> counts_;
+    MutableArraySequence<long long>   lastMatchEnd_;
     bool                     allowOverlapping_;
     int                      state_;
     long long                position_;

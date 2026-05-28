@@ -29,6 +29,9 @@ template <class T> class ArraySequence : public Sequence<T>
     Sequence<T>* GetSubsequence(size_t start, size_t end) override;
     size_t GetLength() override;
     Sequence<T>* Concat(Sequence<T>* list) override;
+
+    T& GetRef(size_t index);
+    const T& GetRef(size_t index) const;
 };
 
 #include "ArraySequence.tpp"

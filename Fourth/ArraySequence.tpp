@@ -135,4 +135,16 @@ Sequence<T>* ArraySequence<T>::Concat(Sequence<T>* list)
     return result;
 }
 
+template <class T>
+T& ArraySequence<T>::GetRef(size_t index)
+{
+    return data->GetRef(index);
+}
+
+template <class T>
+const T& ArraySequence<T>::GetRef(size_t index) const
+{
+    return data->GetRef(index);
+}
+
 #endif

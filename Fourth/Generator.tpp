@@ -4,16 +4,6 @@
 #include "Generator.hpp"
 
 template <typename T>
-std::vector<T> Generator<T>::FromSequence(Sequence<T>& seq)
-{
-    std::vector<T> v;
-    v.reserve(seq.GetLength());
-    for (size_t i = 0; i < seq.GetLength(); ++i)
-        v.push_back(seq.Get(i));
-    return v;
-}
-
-template <typename T>
 void Generator<T>::AllocateHistory()
 {
     delete history_;
@@ -27,7 +17,21 @@ void Generator<T>::ResetState()
     AllocateHistory();
     emitted_     = 0;
     baseEmitted_ = 0;
-    modIdx_      = 0;
+    ClearMods();
+}
+
+template <typename T>
+void Generator<T>::ClearMods()
+{
+    Modification* curr = mods_;
+    while (curr)
+    {
+        Modification* next = curr->next;
+        delete curr;
+        curr = next;
+    }
+    mods_ = nullptr;
+    modCount_ = 0;
 }
 
 template <typename T>
@@ -36,15 +40,19 @@ Generator<T>::Generator(const Rule& rule,
                         size_t window)
     : rule_(rule),
       window_(window),
-      initials_(FromSequence(initials)),
+      initials_(),
       history_(nullptr),
       emitted_(0),
       baseEmitted_(0),
       hasBound_(false),
       maxCount_(0),
-      modIdx_(0)
+      mods_(nullptr),
+      modCount_(0)
 {
-    if (initials_.size() > window)
+    for (size_t i = 0; i < initials.GetLength(); ++i)
+        initials_.Append(initials.Get(i));
+    
+    if (initials_.GetLength() > window)
         throw std::invalid_argument("Generator: initials.size() > window");
     AllocateHistory();
 }
@@ -56,15 +64,19 @@ Generator<T>::Generator(const Rule& rule,
                         size_t maxCount)
     : rule_(rule),
       window_(window),
-      initials_(FromSequence(initials)),
+      initials_(),
       history_(nullptr),
       emitted_(0),
       baseEmitted_(0),
       hasBound_(true),
       maxCount_(maxCount),
-      modIdx_(0)
+      mods_(nullptr),
+      modCount_(0)
 {
-    if (initials_.size() > window)
+    for (size_t i = 0; i < initials.GetLength(); ++i)
+        initials_.Append(initials.Get(i));
+    
+    if (initials_.GetLength() > window)
         throw std::invalid_argument("Generator: initials.size() > window");
     AllocateHistory();
 }
@@ -79,19 +91,25 @@ Generator<T>::Generator(const Generator<T>& other)
       baseEmitted_(other.baseEmitted_),
       hasBound_(other.hasBound_),
       maxCount_(other.maxCount_),
-      mods_(other.mods_),
-      modIdx_(other.modIdx_)
+      mods_(nullptr),
+      modCount_(0)
 {
-    if (other.history_)
-        history_ = new BoundedQueue<T>(*other.history_);
-    else
-        AllocateHistory();
+    AllocateHistory();
+    
+    // Копируем модификации
+    Modification* curr = other.mods_;
+    while (curr)
+    {
+        InsertMod({curr->pos, curr->isInsert, curr->value, nullptr});
+        curr = curr->next;
+    }
 }
 
 template <typename T>
 Generator<T>& Generator<T>::operator=(const Generator<T>& other)
 {
     if (this == &other) return *this;
+    
     rule_        = other.rule_;
     window_      = other.window_;
     initials_    = other.initials_;
@@ -99,11 +117,18 @@ Generator<T>& Generator<T>::operator=(const Generator<T>& other)
     baseEmitted_ = other.baseEmitted_;
     hasBound_    = other.hasBound_;
     maxCount_    = other.maxCount_;
-    mods_        = other.mods_;
-    modIdx_      = other.modIdx_;
+    
     delete history_;
-    history_ = other.history_ ? new BoundedQueue<T>(*other.history_) : nullptr;
-    if (!history_) AllocateHistory();
+    AllocateHistory();
+    ClearMods();
+    
+    Modification* curr = other.mods_;
+    while (curr)
+    {
+        InsertMod({curr->pos, curr->isInsert, curr->value, nullptr});
+        curr = curr->next;
+    }
+    
     return *this;
 }
 
@@ -111,14 +136,15 @@ template <typename T>
 Generator<T>::~Generator()
 {
     delete history_;
+    ClearMods();
 }
 
 template <typename T>
 T Generator<T>::ProduceBase()
 {
     T value;
-    if (baseEmitted_ < initials_.size())
-        value = initials_[baseEmitted_];
+    if (baseEmitted_ < initials_.GetLength())
+        value = initials_.Get(baseEmitted_);
     else
         value = rule_(*history_);
     history_->Push(value);
@@ -134,26 +160,31 @@ T Generator<T>::GetNext()
 
     while (true)
     {
-        if (modIdx_ < mods_.size())
+        Modification* curr = mods_;
+        size_t idx = 0;
+        
+        while (curr && idx < emitted_)
         {
-            const Modification& m = mods_[modIdx_];
-            if (m.pos == emitted_)
+            curr = curr->next;
+            ++idx;
+        }
+        
+        if (curr && curr->pos == emitted_)
+        {
+            if (curr->isInsert)
             {
-                if (m.isInsert)
-                {
-                    T v = m.value;
-                    ++modIdx_;
-                    ++emitted_;
-                    return v;
-                }
-                else
-                {
-                    ++modIdx_;
-                    (void)ProduceBase();
-                    continue;
-                }
+                T v = curr->value;
+                ++emitted_;
+                return v;
+            }
+            else
+            {
+                (void)ProduceBase();
+                ++emitted_;
+                continue;
             }
         }
+        
         T v = ProduceBase();
         ++emitted_;
         return v;
@@ -183,9 +214,22 @@ void Generator<T>::Reset()
 template <typename T>
 void Generator<T>::InsertMod(const Modification& m)
 {
-    size_t idx = 0;
-    while (idx < mods_.size() && mods_[idx].pos <= m.pos) ++idx;
-    mods_.insert(mods_.begin() + idx, m);
+    Modification* newMod = new Modification{m.pos, m.isInsert, m.value, nullptr};
+    
+    if (!mods_ || mods_->pos > m.pos)
+    {
+        newMod->next = mods_;
+        mods_ = newMod;
+    }
+    else
+    {
+        Modification* curr = mods_;
+        while (curr->next && curr->next->pos <= m.pos)
+            curr = curr->next;
+        newMod->next = curr->next;
+        curr->next = newMod;
+    }
+    ++modCount_;
 }
 
 template <typename T>
@@ -193,8 +237,7 @@ void Generator<T>::InsertAt(size_t pos, const T& value)
 {
     if (pos < emitted_)
         throw std::invalid_argument("Generator::InsertAt: позиция уже пройдена");
-    Modification m{pos, true, value};
-    InsertMod(m);
+    InsertMod({pos, true, value, nullptr});
     if (hasBound_) ++maxCount_;
 }
 
@@ -203,8 +246,7 @@ void Generator<T>::RemoveAt(size_t pos)
 {
     if (pos < emitted_)
         throw std::invalid_argument("Generator::RemoveAt: позиция уже пройдена");
-    Modification m{pos, false, T()};
-    InsertMod(m);
+    InsertMod({pos, false, T(), nullptr});
     if (hasBound_ && maxCount_ > 0) --maxCount_;
 }
 

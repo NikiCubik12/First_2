@@ -1,29 +1,23 @@
-CXX      := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -g
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -g
+LDFLAGS = -lws2_32
 
-PROGRAM_SRCS := main.cpp
-TESTS_SRCS   := Run_Tests.cpp
+SRCS = main.cpp
+OBJS = $(SRCS:.cpp=.o)
+TARGET = program
 
-PROGRAM := program
-TESTS   := tests.exe
+all: $(TARGET)
 
-HEADERS := $(wildcard *.hpp *.tpp)
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-.PHONY: all tests run clean
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-all: $(PROGRAM) $(TESTS)
-
-$(PROGRAM): $(PROGRAM_SRCS) $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(PROGRAM_SRCS) -o $(PROGRAM)
-
-$(TESTS): $(TESTS_SRCS) $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(TESTS_SRCS) -o $(TESTS)
-
-tests: $(TESTS)
-	./$(TESTS)
-
-run: $(PROGRAM)
-	./$(PROGRAM)
+run: $(TARGET)
+	./$(TARGET).exe
 
 clean:
-	rm -f $(PROGRAM) $(TESTS)
+	del /f $(OBJS) $(TARGET).exe 2>nul || rm -f $(OBJS) $(TARGET)
+
+.PHONY: all clean run

@@ -4,10 +4,10 @@
 #include <cstddef>
 #include <functional>
 #include <stdexcept>
-#include <vector>
 #include "BoundedQueue.hpp"
 #include "Sequence.hpp"
 #include "Option.hpp"
+#include "MutableArraySequence.hpp"
 
 template <typename T>
 class Generator
@@ -21,11 +21,12 @@ private:
         size_t pos;
         bool   isInsert;
         T      value;
+        Modification* next;
     };
 
     Rule                       rule_;
     size_t                     window_;
-    std::vector<T>             initials_;
+    MutableArraySequence<T>    initials_;
 
     BoundedQueue<T>*           history_;
     size_t                     emitted_;
@@ -34,15 +35,14 @@ private:
     bool                       hasBound_;
     size_t                     maxCount_;
 
-    std::vector<Modification>  mods_;
-    size_t                     modIdx_;
+    Modification*              mods_;
+    size_t                     modCount_;
 
     void AllocateHistory();
     void ResetState();
     T    ProduceBase();
     void InsertMod(const Modification& m);
-
-    static std::vector<T> FromSequence(Sequence<T>& seq);
+    void ClearMods();
 
 public:
     Generator(const Rule& rule,

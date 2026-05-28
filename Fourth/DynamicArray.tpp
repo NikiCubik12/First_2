@@ -146,4 +146,24 @@ void DynamicArray<T>::Resize(size_t newSize)
     items = arr;
 }
 
+template <class T>
+T& DynamicArray<T>::GetRef(size_t index)
+{
+    if (index >= size)
+    {
+        throw IndexOutOfRangeException("Индекс выходит за границы в DynamicArray::GetRef");
+    }
+    return items[index];
+}
+
+template <class T>
+const T& DynamicArray<T>::GetRef(size_t index) const
+{
+    if (index >= size)
+    {
+        throw IndexOutOfRangeException("Индекс выходит за границы в DynamicArray::GetRef");
+    }
+    return items[index];
+}
+
 #endif

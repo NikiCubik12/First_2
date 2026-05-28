@@ -12,9 +12,8 @@ ReadOnlyStream<T>::ReadOnlyStream(Sequence<T>* src)
       open_(true)
 {
     if (!src) throw NullPointerException("ReadOnlyStream(Sequence*): nullptr");
-    buffer_.reserve(src->GetLength());
     for (size_t i = 0; i < src->GetLength(); ++i)
-        buffer_.push_back(src->Get(i));
+        buffer_.Append(src->Get(i));
 }
 
 template <typename T>
@@ -48,11 +47,8 @@ ReadOnlyStream<T>::ReadOnlyStream(const std::string& s)
       pos_(0),
       open_(true)
 {
-    static_assert(std::is_convertible<char, T>::value,
-                  "ReadOnlyStream(string): T должен быть совместим с char");
-    buffer_.reserve(s.size());
     for (char c : s)
-        buffer_.push_back(static_cast<T>(c));
+        buffer_.Append(static_cast<T>(c));
 }
 
 template <typename T>
@@ -86,11 +82,11 @@ ReadOnlyStream<T>::ReadOnlyStream(ReadOnlyStream<T>& other)
 template <typename T>
 void ReadOnlyStream<T>::EnsureBuffered(size_t n)
 {
-    while (!exhausted_ && producer_ && buffer_.size() < n)
+    while (!exhausted_ && producer_ && buffer_.GetLength() < n)
     {
         Optional<T> nxt = producer_();
         if (!nxt.HasValue()) { exhausted_ = true; break; }
-        buffer_.push_back(nxt.GetValue());
+        buffer_.Append(nxt.GetValue());
     }
 }
 
@@ -98,7 +94,7 @@ template <typename T>
 bool ReadOnlyStream<T>::IsEndOfStream()
 {
     EnsureBuffered(pos_ + 1);
-    return pos_ >= buffer_.size();
+    return pos_ >= buffer_.GetLength();
 }
 
 template <typename T>
@@ -107,9 +103,9 @@ T ReadOnlyStream<T>::Read()
     if (!open_)
         throw std::runtime_error("ReadOnlyStream::Read: поток закрыт");
     EnsureBuffered(pos_ + 1);
-    if (pos_ >= buffer_.size())
+    if (pos_ >= buffer_.GetLength())
         throw EndOfStreamException("ReadOnlyStream::Read: конец потока");
-    T v = buffer_[pos_];
+    T v = buffer_.Get(pos_);
     ++pos_;
     return v;
 }
@@ -118,7 +114,7 @@ template <typename T>
 void ReadOnlyStream<T>::Seek(size_t newPos)
 {
     EnsureBuffered(newPos);
-    if (newPos > buffer_.size())
+    if (newPos > buffer_.GetLength())
         throw std::out_of_range("ReadOnlyStream::Seek: позиция вне диапазона");
     pos_ = newPos;
 }
