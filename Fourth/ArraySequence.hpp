@@ -20,6 +20,7 @@ template <class T> class ArraySequence : public Sequence<T>
     ArraySequence(const DynamicArray<T>& array);
     ArraySequence(const LinkedList<T>& list);
     ArraySequence(const ArraySequence<T>& other);
+    ArraySequence<T>& operator=(const ArraySequence<T>& other);
     ArraySequence(std::initializer_list<T> list);
     ~ArraySequence();
 

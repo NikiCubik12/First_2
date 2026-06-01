@@ -40,18 +40,16 @@ inline void PatternCounter::BuildTrie()
         {
             unsigned char c = static_cast<unsigned char>(pattern[j]);
             
-            CharNode& curNode = nodes_.GetRef(cur);
-            
-            if (curNode.next[c] == -1)
+            if (nodes_.GetRef(cur).next[c] == -1)
             {
                 nodes_.Append(CharNode());
                 int idx = static_cast<int>(nodes_.GetLength()) - 1;
-                curNode.next[c] = idx;
+                nodes_.GetRef(cur).next[c] = idx;
                 cur = idx;
             }
             else
             {
-                cur = curNode.next[c];
+                cur = nodes_.GetRef(cur).next[c];
             }
         }
         

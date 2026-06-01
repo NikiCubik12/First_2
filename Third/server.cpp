@@ -1300,160 +1300,369 @@ void handleRequest(const string& request, string& responseStr)
             }
 
             if (operation == "add")
-           {
-               int rows2 = atoi(params["rows2"].c_str());
-               int cols2 = atoi(params["cols2"].c_str());
-               string data2Str = params["data2"];
+            {
+                int rows2 = atoi(params["rows2"].c_str());
+                int cols2 = atoi(params["cols2"].c_str());
+                string data2Str = params["data2"];
 
 
-               if (rows2 <= 0 || rows2 > 10 || cols2 <= 0 || cols2 > 10) {
-                   result = "❌ Ошибка: размеры матрицы №2 должны быть от 1 до 10";
-                   responseStr = responseHtml(200, result);
-                   return;
-               }
+                if (rows2 <= 0 || rows2 > 10 || cols2 <= 0 || cols2 > 10) {
+                    result = "❌ Ошибка: размеры матрицы №2 должны быть от 1 до 10";
+                    responseStr = responseHtml(200, result);
+                    return;
+                }
 
 
-               auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
-               if (!errorMsg.empty()) {
-                   responseStr = responseHtml(200, errorMsg);
-                   return;
-               }
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
 
 
-               auto m2Double = parseDoubleMatrix(data2Str, rows2, cols2, "№2", errorMsg);
-               if (!errorMsg.empty()) {
-                   responseStr = responseHtml(200, errorMsg);
-                   return;
-               }
+                auto m2Double = parseDoubleMatrix(data2Str, rows2, cols2, "№2", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
 
 
-               if (rows1 != rows2 || cols1 != cols2) {
-                   result = "❌ Ошибка: Размеры матриц не совпадают! (" + to_string(rows1) + "x" + to_string(cols1) + " vs " + to_string(rows2) + "x" + to_string(cols2) + ")";
-               } else {
-                   double** arr1 = new double*[rows1];
-                   double** arr2 = new double*[rows2];
-                   for (int i = 0; i < rows1; i++) {
-                       arr1[i] = new double[cols1];
-                       arr2[i] = new double[cols2];
-                       for (int j = 0; j < cols1; j++) {
-                           arr1[i][j] = m1Double[i][j];
-                           arr2[i][j] = m2Double[i][j];
-                       }
-                   }
-                   RectangularMatrix<double> mat1(arr1, rows1, cols1);
-                   RectangularMatrix<double> mat2(arr2, rows2, cols2);
-                   auto res = mat1 + mat2;
-                   result = "Результат сложения:\n" + res.ToString();
-                   for (int i = 0; i < rows1; i++) delete[] arr1[i];
-                   for (int i = 0; i < rows2; i++) delete[] arr2[i];
-                   delete[] arr1;
-                   delete[] arr2;
-               }
-               
+                if (rows1 != rows2 || cols1 != cols2) {
+                    result = "❌ Ошибка: Размеры матриц не совпадают! (" + to_string(rows1) + "x" + to_string(cols1) + " vs " + to_string(rows2) + "x" + to_string(cols2) + ")";
+                } else {
+                    double** arr1 = new double*[rows1];
+                    double** arr2 = new double*[rows2];
+                    for (int i = 0; i < rows1; i++) {
+                        arr1[i] = new double[cols1];
+                        arr2[i] = new double[cols2];
+                        for (int j = 0; j < cols1; j++) {
+                            arr1[i][j] = m1Double[i][j];
+                            arr2[i][j] = m2Double[i][j];
+                        }
+                    }
+                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    RectangularMatrix<double> mat2(arr2, rows2, cols2);
+                    auto res = mat1 + mat2;
+                    result = "Результат сложения:\n" + res.ToString();
+                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                    for (int i = 0; i < rows2; i++) delete[] arr2[i];
+                    delete[] arr1;
+                    delete[] arr2;
+                }
+                
 
-               responseStr = responseHtml(200, result);
-               return;
-           }
-
-
-           if (operation == "multiply_scalar")
-           {
-               string scalarStr = params["param1"];
-               if (!isDouble(scalarStr)) {
-                   result = "❌ Ошибка: скаляр содержит некорректные символы";
-                   responseStr = responseHtml(200, result);
-                   return;
-               }
-               double scalar = strtod(scalarStr.c_str(), nullptr);
+                responseStr = responseHtml(200, result);
+                return;
+            }
 
 
-               auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
-               if (!errorMsg.empty()) {
-                   responseStr = responseHtml(200, errorMsg);
-                   return;
-               }
+            if (operation == "multiply_scalar")
+            {
+                string scalarStr = params["param1"];
+                if (!isDouble(scalarStr)) {
+                    result = "❌ Ошибка: скаляр содержит некорректные символы";
+                    responseStr = responseHtml(200, result);
+                    return;
+                }
+                double scalar = strtod(scalarStr.c_str(), nullptr);
 
 
-               double** arr1 = new double*[rows1];
-               for (int i = 0; i < rows1; i++) {
-                   arr1[i] = new double[cols1];
-                   for (int j = 0; j < cols1; j++) {
-                       arr1[i][j] = m1Double[i][j];
-                   }
-               }
-               RectangularMatrix<double> mat1(arr1, rows1, cols1);
-               auto res = mat1 * scalar;
-               result = "Умножение на " + scalarStr + ":\n" + res.ToString();
-               for (int i = 0; i < rows1; i++) delete[] arr1[i];
-               delete[] arr1;
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
 
 
-               responseStr = responseHtml(200, result);
-               return;
-           }
-
-           if (operation == "norm")
-           {
-               auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
-               if (!errorMsg.empty()) {
-                   responseStr = responseHtml(200, errorMsg);
-                   return;
-               }
-
-
-               double** arr1 = new double*[rows1];
-               for (int i = 0; i < rows1; i++) {
-                   arr1[i] = new double[cols1];
-                   for (int j = 0; j < cols1; j++) {
-                       arr1[i][j] = m1Double[i][j];
-                   }
-               }
-               RectangularMatrix<double> mat1(arr1, rows1, cols1);
-               double norm = mat1.Norm();
-               result = "Норма матрицы: " + to_string(norm) + "\n\n";
-               result += mat1.ToString();
-               for (int i = 0; i < rows1; i++) delete[] arr1[i];
-               delete[] arr1;
+                double** arr1 = new double*[rows1];
+                for (int i = 0; i < rows1; i++) {
+                    arr1[i] = new double[cols1];
+                    for (int j = 0; j < cols1; j++) {
+                        arr1[i][j] = m1Double[i][j];
+                    }
+                }
+                RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                auto res = mat1 * scalar;
+                result = "Умножение на " + scalarStr + ":\n" + res.ToString();
+                for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                delete[] arr1;
 
 
-               responseStr = responseHtml(200, result);
-               return;
-           }
+                responseStr = responseHtml(200, result);
+                return;
+            }
 
-           if (operation == "swap_rows")
-           {
-               int row1 = atoi(params["param1"].c_str());
-               int row2 = atoi(params["param2"].c_str());
-
-
-               auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
-               if (!errorMsg.empty()) {
-                   responseStr = responseHtml(200, errorMsg);
-                   return;
-               }
+            if (operation == "norm")
+            {
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
 
 
-               if (row1 < 0 || row1 >= rows1 || row2 < 0 || row2 >= rows1) {
-                   result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
-               } else {
-                   double** arr1 = new double*[rows1];
-                   for (int i = 0; i < rows1; i++) {
-                       arr1[i] = new double[cols1];
-                       for (int j = 0; j < cols1; j++) {
-                           arr1[i][j] = m1Double[i][j];
-                       }
-                   }
-                   RectangularMatrix<double> mat1(arr1, rows1, cols1);
-                   mat1.SwapRows(row1, row2);
-                   result = mat1.ToString();
-                   for (int i = 0; i < rows1; i++) delete[] arr1[i];
-                   delete[] arr1;
-               }
+                double** arr1 = new double*[rows1];
+                for (int i = 0; i < rows1; i++) {
+                    arr1[i] = new double[cols1];
+                    for (int j = 0; j < cols1; j++) {
+                        arr1[i][j] = m1Double[i][j];
+                    }
+                }
+                RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                double norm = mat1.Norm();
+                result = "Норма матрицы: " + to_string(norm) + "\n\n";
+                result += mat1.ToString();
+                for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                delete[] arr1;
 
 
-               responseStr = responseHtml(200, result);
-               return;
-           }
+                responseStr = responseHtml(200, result);
+                return;
+            }
+
+            if (operation == "swap_rows")
+            {
+                int row1 = atoi(params["param1"].c_str());
+                int row2 = atoi(params["param2"].c_str());
+
+
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
+
+
+                if (row1 < 0 || row1 >= rows1 || row2 < 0 || row2 >= rows1) {
+                    result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
+                } else {
+                    double** arr1 = new double*[rows1];
+                    for (int i = 0; i < rows1; i++) {
+                        arr1[i] = new double[cols1];
+                        for (int j = 0; j < cols1; j++) {
+                            arr1[i][j] = m1Double[i][j];
+                        }
+                    }
+                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    mat1.SwapRows(row1, row2);
+                    result = mat1.ToString();
+                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                    delete[] arr1;
+                }
+
+
+                responseStr = responseHtml(200, result);
+                return;
+            }
+            if (operation == "multiply_row")
+            {
+                int row = atoi(params["param1"].c_str());
+                string scalarStr = params["param2"];
+
+
+                if (!isDouble(scalarStr)) {
+                    result = "❌ Ошибка: скаляр содержит некорректные символы";
+                    responseStr = responseHtml(200, result);
+                    return;
+                }
+                double scalar = strtod(scalarStr.c_str(), nullptr);
+
+
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
+
+
+                if (row < 0 || row >= rows1) {
+                    result = "❌ Ошибка: номер строки должен быть от 0 до " + to_string(rows1 - 1);
+                } else {
+                    double** arr1 = new double*[rows1];
+                    for (int i = 0; i < rows1; i++) {
+                        arr1[i] = new double[cols1];
+                        for (int j = 0; j < cols1; j++) {
+                            arr1[i][j] = m1Double[i][j];
+                        }
+                    }
+                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    mat1.MultiplyRow(row, scalar);
+                    result = mat1.ToString();
+                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                    delete[] arr1;
+                }
+
+
+                responseStr = responseHtml(200, result);
+                return;
+            }
+            if (operation == "add_row")
+            {
+                int from = atoi(params["param1"].c_str());
+                int to = atoi(params["param2"].c_str());
+                string lambdaStr = params.find("param3") != params.end() ? params["param3"] : "1";
+
+
+                if (!isDouble(lambdaStr)) {
+                    result = "❌ Ошибка: коэффициент содержит некорректные символы";
+                    responseStr = responseHtml(200, result);
+                    return;
+                }
+                double lambda = strtod(lambdaStr.c_str(), nullptr);
+
+
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
+
+
+                if (from < 0 || from >= rows1 || to < 0 || to >= rows1) {
+                    result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
+                } else {
+                    double** arr1 = new double*[rows1];
+                    for (int i = 0; i < rows1; i++) {
+                        arr1[i] = new double[cols1];
+                        for (int j = 0; j < cols1; j++) {
+                            arr1[i][j] = m1Double[i][j];
+                        }
+                    }
+                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    mat1.AddRowToRow(from, to, lambda);
+                    result = mat1.ToString();
+                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                    delete[] arr1;
+                }
+
+
+                responseStr = responseHtml(200, result);
+                return;
+            }
+            if (operation == "swap_cols")
+            {
+                int col1 = atoi(params["param1"].c_str());
+                int col2 = atoi(params["param2"].c_str());
+
+
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
+
+
+                if (col1 < 0 || col1 >= cols1 || col2 < 0 || col2 >= cols1) {
+                    result = "❌ Ошибка: номера столбцов должны быть от 0 до " + to_string(cols1 - 1);
+                } else {
+                    double** arr1 = new double*[rows1];
+                    for (int i = 0; i < rows1; i++) {
+                        arr1[i] = new double[cols1];
+                        for (int j = 0; j < cols1; j++) {
+                            arr1[i][j] = m1Double[i][j];
+                        }
+                    }
+                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    mat1.SwapCols(col1, col2);
+                    result = mat1.ToString();
+                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                    delete[] arr1;
+                }
+
+
+                responseStr = responseHtml(200, result);
+                return;
+            }
+            if (operation == "multiply_col")
+            {
+                int col = atoi(params["param1"].c_str());
+                string scalarStr = params["param2"];
+
+
+                if (!isDouble(scalarStr)) {
+                    result = "❌ Ошибка: скаляр содержит некорректные символы";
+                    responseStr = responseHtml(200, result);
+                    return;
+                }
+                double scalar = strtod(scalarStr.c_str(), nullptr);
+
+
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
+
+
+                if (col < 0 || col >= cols1) {
+                    result = "❌ Ошибка: номер столбца должен быть от 0 до " + to_string(cols1 - 1);
+                } else {
+                    double** arr1 = new double*[rows1];
+                    for (int i = 0; i < rows1; i++) {
+                        arr1[i] = new double[cols1];
+                        for (int j = 0; j < cols1; j++) {
+                            arr1[i][j] = m1Double[i][j];
+                        }
+                    }
+                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    mat1.MultiplyCol(col, scalar);
+                    result = mat1.ToString();
+                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                    delete[] arr1;
+                }
+
+
+                responseStr = responseHtml(200, result);
+                return;
+            }
+            if (operation == "add_col")
+            {
+                int from = atoi(params["param1"].c_str());
+                int to = atoi(params["param2"].c_str());
+                string lambdaStr = params.find("param3") != params.end() ? params["param3"] : "1";
+
+
+                if (!isDouble(lambdaStr)) {
+                    result = "❌ Ошибка: коэффициент содержит некорректные символы";
+                    responseStr = responseHtml(200, result);
+                    return;
+                }
+                double lambda = strtod(lambdaStr.c_str(), nullptr);
+
+
+                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                if (!errorMsg.empty()) {
+                    responseStr = responseHtml(200, errorMsg);
+                    return;
+                }
+
+
+                if (from < 0 || from >= cols1 || to < 0 || to >= cols1) {
+                    result = "❌ Ошибка: номера столбцов должны быть от 0 до " + to_string(cols1 - 1);
+                } else {
+                    double** arr1 = new double*[rows1];
+                    for (int i = 0; i < rows1; i++) {
+                        arr1[i] = new double[cols1];
+                        for (int j = 0; j < cols1; j++) {
+                            arr1[i][j] = m1Double[i][j];
+                        }
+                    }
+                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    mat1.AddColToCol(from, to, lambda);
+                    result = mat1.ToString();
+                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
+                    delete[] arr1;
+                }
+
+
+                responseStr = responseHtml(200, result);
+                return;
+            }
+
+
+
+
+
 
 
             
@@ -2295,11 +2504,11 @@ int main()
     struct sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(8080);
+    serverAddr.sin_port = htons(8082);
     
     if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) 
     {
-        cerr << "Failed to bind to port 8080" << endl;
+        cerr << "Failed to bind to port 8082" << endl;
         closesocket(serverSocket);
         WSACleanup();
         return 1;
@@ -2315,8 +2524,8 @@ int main()
     
     cout << "========================================" << endl;
     cout << "  Server started!" << endl;
-    cout << "  Open browser at: http://localhost:8080" << endl;
-    cout << "  Matrix page: http://localhost:8080/matrix" << endl;
+    cout << "  Open browser at: http://localhost:8082" << endl;
+    cout << "  Matrix page: http://localhost:8082/matrix" << endl;
     cout << "========================================" << endl;
     
     while (true) 

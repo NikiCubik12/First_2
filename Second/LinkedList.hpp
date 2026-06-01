@@ -14,7 +14,7 @@ template <class T> class Node
     Node* next{nullptr};
 
     Node();
-    explicit Node(const T& key);
+    Node(const T& key);
 };
 
 template <class T> class LinkedList

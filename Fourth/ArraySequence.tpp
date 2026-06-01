@@ -42,6 +42,18 @@ template <class T>
 ArraySequence<T>::ArraySequence(const DynamicArray<T>& array) : data(new DynamicArray<T>(array)) {}
 
 template <class T>
+ArraySequence<T>& ArraySequence<T>::operator=(const ArraySequence<T>& other)
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    *data = *other.data;
+    return *this;
+}
+
+template <class T>
 ArraySequence<T>::ArraySequence(const LinkedList<T>& list) : data(new DynamicArray<T>(list)) {}
 
 template <class T>

@@ -23,6 +23,26 @@ DynamicArray<T>::DynamicArray(const DynamicArray<T>& rhs) : items(new T[rhs.size
 }
 
 template <class T>
+DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& rhs)
+{
+    if (this == &rhs)
+    {
+        return *this;
+    }
+
+    T* newItems = rhs.size > 0 ? new T[rhs.size] : nullptr;
+    for (size_t i = 0; i < rhs.size; i++)
+    {
+        newItems[i] = rhs.items[i];
+    }
+
+    delete[] items;
+    items = newItems;
+    size = rhs.size;
+    return *this;
+}
+
+template <class T>
 DynamicArray<T>::DynamicArray(LinkedList<T>& list) : items(nullptr), size(0)
 {
     if (list.GetLength() > 0)

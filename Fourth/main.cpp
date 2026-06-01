@@ -16,6 +16,7 @@
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <unistd.h>
 #define SOCKET int
 #define INVALID_SOCKET -1
@@ -29,7 +30,7 @@
 #include "LazySequence.hpp"
 #include "Generator.hpp"
 
-// ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+// ==================== Р’РЎРџРћРњРћР“РђРўР•Р›Р¬РќР«Р• Р¤РЈРќРљР¦РР ====================
 
 std::string trim(const std::string& str)
 {
@@ -53,7 +54,7 @@ std::string escapeHtml(const std::string& s)
     return result;
 }
 
-// ==================== ГЛОБАЛЬНОЕ СОСТОЯНИЕ ====================
+// ==================== Р“Р›РћР‘РђР›Р¬РќРћР• РЎРћРЎРўРћРЇРќРР• ====================
 
 struct AppState
 {
@@ -64,7 +65,7 @@ struct AppState
     size_t lazyLength;
     std::string lazyAlphabet;
     size_t processedCount;
-    MutableArraySequence<std::pair<std::string, size_t> > lastResults;
+    MutableArraySequence<std::pair<std::string, size_t>> lastResults;
     std::string lastErrorMessage;
     
     AppState() : allowOverlap(true), lazyLength(1000000), lazyAlphabet("ab"), processedCount(0) {}
@@ -72,7 +73,35 @@ struct AppState
 
 static AppState g_state;
 
-// ==================== ГЕНЕРАЦИЯ HTML ====================
+#ifdef _WIN32
+static CRITICAL_SECTION g_stateMutex;
+#else
+static pthread_mutex_t g_stateMutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
+class StateLock
+{
+public:
+    StateLock()
+    {
+#ifdef _WIN32
+        EnterCriticalSection(&g_stateMutex);
+#else
+        pthread_mutex_lock(&g_stateMutex);
+#endif
+    }
+
+    ~StateLock()
+    {
+#ifdef _WIN32
+        LeaveCriticalSection(&g_stateMutex);
+#else
+        pthread_mutex_unlock(&g_stateMutex);
+#endif
+    }
+};
+
+// ==================== Р“Р•РќР•Р РђР¦РРЇ HTML ====================
 
 std::string renderMainPage()
 {
@@ -82,7 +111,7 @@ std::string renderMainPage()
     ss << "<head>\n";
     ss << "<meta charset=\"UTF-8\">\n";
     ss << "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
-    ss << "<title>Лабораторная работа №4 - Поиск подстрок</title>\n";
+    ss << "<title>Р›Р°Р±РѕСЂР°С‚РѕСЂРЅР°СЏ СЂР°Р±РѕС‚Р° в„–4 - РџРѕРёСЃРє РїРѕРґСЃС‚СЂРѕРє</title>\n";
     ss << "<style>\n";
     ss << "* { margin: 0; padding: 0; box-sizing: border-box; }\n";
     ss << "body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }\n";
@@ -129,13 +158,13 @@ std::string renderMainPage()
     ss << "  const input = document.getElementById('new-pattern');\n";
     ss << "  const pattern = input.value.trim();\n";
     ss << "  if (pattern) apiCall('/api/add-pattern', { pattern: pattern });\n";
-    ss << "  else alert('Введите подстроку');\n";
+    ss << "  else alert('Р’РІРµРґРёС‚Рµ РїРѕРґСЃС‚СЂРѕРєСѓ');\n";
     ss << "}\n";
     ss << "function removePattern(index) {\n";
     ss << "  apiCall('/api/remove-pattern', { index: index });\n";
     ss << "}\n";
     ss << "function clearPatterns() {\n";
-    ss << "  if (confirm('Удалить все подстроки?')) apiCall('/api/clear-patterns', {});\n";
+    ss << "  if (confirm('РЈРґР°Р»РёС‚СЊ РІСЃРµ РїРѕРґСЃС‚СЂРѕРєРё?')) apiCall('/api/clear-patterns', {});\n";
     ss << "}\n";
     ss << "function runSearch(source) {\n";
     ss << "  let data = { source: source };\n";
@@ -149,91 +178,87 @@ std::string renderMainPage()
     ss << "  apiCall('/api/search', data);\n";
     ss << "}\n";
     ss << "function setExample() {\n";
-    ss << "  document.getElementById('keyboard-text').value = 'ushers';\n";
-    ss << "  apiCall('/api/add-pattern', { pattern: 'he' });\n";
-    ss << "  setTimeout(() => apiCall('/api/add-pattern', { pattern: 'she' }), 100);\n";
-    ss << "  setTimeout(() => apiCall('/api/add-pattern', { pattern: 'his' }), 200);\n";
-    ss << "  setTimeout(() => apiCall('/api/add-pattern', { pattern: 'hers' }), 300);\n";
+    ss << "  apiCall('/api/example', {});\n";
     ss << "}\n";
     ss << "</script>\n";
     ss << "</head>\n";
     ss << "<body>\n";
     ss << "<div class=\"container\">\n";
-    ss << "<h1>?? Поиск подстрок в потоке данных</h1>\n";
+    ss << "<h1>РџРѕРёСЃРє РїРѕРґСЃС‚СЂРѕРє РІ РїРѕС‚РѕРєРµ РґР°РЅРЅС‹С…</h1>\n";
     ss << "<div class=\"content\">\n";
     
-    // Сообщения
+    // РЎРѕРѕР±С‰РµРЅРёСЏ
     if (!g_state.lastErrorMessage.empty())
-        ss << "<div class=\"error\">? " << escapeHtml(g_state.lastErrorMessage) << "</div>\n";
+        ss << "<div class=\"error\">" << escapeHtml(g_state.lastErrorMessage) << "</div>\n";
     
-    // Подстроки
+    // РџРѕРґСЃС‚СЂРѕРєРё
     ss << "<div class=\"section\">\n";
-    ss << "<h2>?? Подстроки для поиска</h2>\n";
+    ss << "<h2>РџРѕРґСЃС‚СЂРѕРєРё РґР»СЏ РїРѕРёСЃРєР°</h2>\n";
     ss << "<div class=\"pattern-list\">\n";
     for (size_t i = 0; i < g_state.patterns.GetLength(); ++i)
     {
         ss << "<div class=\"pattern-item\">\n";
         ss << "<span>\"" << escapeHtml(g_state.patterns.Get(i)) << "\"</span>\n";
-        ss << "<button onclick=\"removePattern(" << i << ")\">? Удалить</button>\n";
+        ss << "<button onclick=\"removePattern(" << i << ")\">РЈРґР°Р»РёС‚СЊ</button>\n";
         ss << "</div>\n";
     }
     ss << "<div class=\"add-pattern\">\n";
-    ss << "<input type=\"text\" id=\"new-pattern\" placeholder=\"Новая подстрока\">\n";
-    ss << "<button onclick=\"addPattern()\">? Добавить</button>\n";
-    ss << "<button onclick=\"clearPatterns()\" style=\"background:#6c757d\">?? Очистить все</button>\n";
-    ss << "<button onclick=\"setExample()\" style=\"background:#28a745\">?? Пример (ushers)</button>\n";
+    ss << "<input type=\"text\" id=\"new-pattern\" placeholder=\"РќРѕРІР°СЏ РїРѕРґСЃС‚СЂРѕРєР°\">\n";
+    ss << "<button onclick=\"addPattern()\">Р”РѕР±Р°РІРёС‚СЊ</button>\n";
+    ss << "<button onclick=\"clearPatterns()\" style=\"background:#6c757d\">РћС‡РёСЃС‚РёС‚СЊ РІСЃРµ</button>\n";
+    ss << "<button onclick=\"setExample()\" style=\"background:#28a745\">РџСЂРёРјРµСЂ (ushers)</button>\n";
     ss << "</div>\n";
     ss << "</div>\n";
     ss << "</div>\n";
     
-    // Источник данных
+    // РСЃС‚РѕС‡РЅРёРє РґР°РЅРЅС‹С…
     ss << "<div class=\"section\">\n";
-    ss << "<h2>?? Источник данных</h2>\n";
+    ss << "<h2>РСЃС‚РѕС‡РЅРёРє РґР°РЅРЅС‹С…</h2>\n";
     ss << "<div class=\"row\">\n";
     
-    // Клавиатура
+    // РљР»Р°РІРёР°С‚СѓСЂР°
     ss << "<div class=\"col\">\n";
-    ss << "<h3>?? Ручной ввод</h3>\n";
-    ss << "<textarea id=\"keyboard-text\" rows=\"4\" placeholder=\"Введите текст для поиска...\">" << escapeHtml(g_state.sourceText) << "</textarea>\n";
-    ss << "<button onclick=\"runSearch('keyboard')\">?? Поискать</button>\n";
+    ss << "<h3>Р СѓС‡РЅРѕР№ РІРІРѕРґ</h3>\n";
+    ss << "<textarea id=\"keyboard-text\" rows=\"4\" placeholder=\"Р’РІРµРґРёС‚Рµ С‚РµРєСЃС‚ РґР»СЏ РїРѕРёСЃРєР°...\">" << escapeHtml(g_state.sourceText) << "</textarea>\n";
+    ss << "<button onclick=\"runSearch('keyboard')\">РџРѕРёСЃРєР°С‚СЊ</button>\n";
     ss << "</div>\n";
     
-    // Файл
+    // Р¤Р°Р№Р»
     ss << "<div class=\"col\">\n";
-    ss << "<h3>?? Файл</h3>\n";
-    ss << "<input type=\"text\" id=\"file-path\" placeholder=\"Путь к файлу\" value=\"" << escapeHtml(g_state.filePath) << "\">\n";
-    ss << "<button onclick=\"runSearch('file')\">?? Открыть и поискать</button>\n";
+    ss << "<h3>Р¤Р°Р№Р»</h3>\n";
+    ss << "<input type=\"text\" id=\"file-path\" placeholder=\"РџСѓС‚СЊ Рє С„Р°Р№Р»Сѓ\" value=\"" << escapeHtml(g_state.filePath) << "\">\n";
+    ss << "<button onclick=\"runSearch('file')\">РћС‚РєСЂС‹С‚СЊ Рё РїРѕРёСЃРєР°С‚СЊ</button>\n";
     ss << "</div>\n";
     
-    // Генерация
+    // Р“РµРЅРµСЂР°С†РёСЏ
     ss << "<div class=\"col\">\n";
-    ss << "<h3>?? Генерация (ленивая последовательность)</h3>\n";
-    ss << "<label>Длина:</label>\n";
+    ss << "<h3>Р“РµРЅРµСЂР°С†РёСЏ (Р»РµРЅРёРІР°СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ)</h3>\n";
+    ss << "<label>Р”Р»РёРЅР°:</label>\n";
     ss << "<input type=\"number\" id=\"lazy-length\" value=\"" << g_state.lazyLength << "\" min=\"1\" max=\"10000000\">\n";
-    ss << "<label>Алфавит:</label>\n";
+    ss << "<label>РђР»С„Р°РІРёС‚:</label>\n";
     ss << "<input type=\"text\" id=\"lazy-alphabet\" value=\"" << escapeHtml(g_state.lazyAlphabet) << "\" maxlength=\"26\">\n";
-    ss << "<button onclick=\"runSearch('lazy')\">?? Сгенерировать и поискать</button>\n";
+    ss << "<button onclick=\"runSearch('lazy')\">РЎРіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ Рё РїРѕРёСЃРєР°С‚СЊ</button>\n";
     ss << "</div>\n";
     
     ss << "</div>\n";
     
-    // Настройки
+    // РќР°СЃС‚СЂРѕР№РєРё
     ss << "<div style=\"margin-top: 16px;\">\n";
     ss << "<label style=\"display: inline-block; margin-right: 20px;\">\n";
     ss << "<input type=\"checkbox\" id=\"allow-overlap\"" << (g_state.allowOverlap ? " checked" : "") << ">\n";
-    ss << " Разрешить перекрывающиеся вхождения\n";
+    ss << " Р Р°Р·СЂРµС€РёС‚СЊ РїРµСЂРµРєСЂС‹РІР°СЋС‰РёРµСЃСЏ РІС…РѕР¶РґРµРЅРёСЏ\n";
     ss << "</label>\n";
     ss << "</div>\n";
     ss << "</div>\n";
     
-    // Результаты
-    if (g_state.lastResults.GetLength() > 0)
+    // Р РµР·СѓР»СЊС‚Р°С‚С‹
+    if (g_state.lastResults.GetLength()> 0)
     {
         ss << "<div class=\"section\">\n";
-        ss << "<h2>?? Результаты поиска</h2>\n";
-        ss << "<div class=\"info\">?? Обработано символов: " << g_state.processedCount << "</div>\n";
+        ss << "<h2>Р РµР·СѓР»СЊС‚Р°С‚С‹ РїРѕРёСЃРєР°</h2>\n";
+        ss << "<div class=\"info\">РћР±СЂР°Р±РѕС‚Р°РЅРѕ СЃРёРјРІРѕР»РѕРІ: " << g_state.processedCount << "</div>\n";
         ss << "<table class=\"results-table\">\n";
-        ss << "<thead>\n<tr><th>Подстрока</th><th>Количество вхождений</th></tr>\n</thead>\n";
+        ss << "<thead>\n<tr><th>РџРѕРґСЃС‚СЂРѕРєР°</th><th>РљРѕР»РёС‡РµСЃС‚РІРѕ РІС…РѕР¶РґРµРЅРёР№</th></tr>\n</thead>\n";
         ss << "<tbody>\n";
         for (size_t i = 0; i < g_state.lastResults.GetLength(); ++i)
         {
@@ -253,7 +278,7 @@ std::string renderMainPage()
     return ss.str();
 }
 
-// ==================== HTTP ОТВЕТЫ ====================
+// ==================== HTTP РћРўР’Р•РўР« ====================
 
 std::string httpResponse(int code, const std::string& contentType, const std::string& body)
 {
@@ -276,15 +301,17 @@ std::string htmlResponse(int code, const std::string& html)
     return httpResponse(code, "text/html; charset=utf-8", html);
 }
 
-// ==================== ОБРАБОТКА ЗАПРОСОВ ====================
+// ==================== РћР‘Р РђР‘РћРўРљРђ Р—РђРџР РћРЎРћР’ ====================
 
 void handleRequest(const std::string& request, std::string& response)
 {
+    StateLock lock;
+
     std::stringstream ss(request);
     std::string method, path, version;
-    ss >> method >> path >> version;
+    ss>> method>> path>> version;
     
-    // GET запросы
+    // GET Р·Р°РїСЂРѕСЃС‹
     if (method == "GET" && (path == "/" || path == "/index.html"))
     {
         response = htmlResponse(200, renderMainPage());
@@ -297,7 +324,7 @@ void handleRequest(const std::string& request, std::string& response)
         return;
     }
     
-    // POST запросы
+    // POST Р·Р°РїСЂРѕСЃС‹
     if (method == "POST")
     {
         size_t bodyPos = request.find("\r\n\r\n");
@@ -343,7 +370,7 @@ void handleRequest(const std::string& request, std::string& response)
             if (it != params.end())
             {
                 int idx = std::stoi(it->second);
-                if (idx >= 0 && static_cast<size_t>(idx) < g_state.patterns.GetLength())
+                if (idx>= 0 && static_cast<size_t>(idx) < g_state.patterns.GetLength())
                 {
                     MutableArraySequence<std::string> newPatterns;
                     for (size_t i = 0; i < g_state.patterns.GetLength(); ++i)
@@ -357,6 +384,18 @@ void handleRequest(const std::string& request, std::string& response)
         else if (path == "/api/clear-patterns")
         {
             g_state.patterns = MutableArraySequence<std::string>();
+            g_state.lastResults = MutableArraySequence<std::pair<std::string, size_t>>();
+            g_state.lastErrorMessage.clear();
+        }
+        else if (path == "/api/example")
+        {
+            g_state.patterns = MutableArraySequence<std::string>();
+            g_state.patterns.Append("he");
+            g_state.patterns.Append("she");
+            g_state.patterns.Append("his");
+            g_state.patterns.Append("hers");
+            g_state.sourceText = "ushers";
+            g_state.lastResults = MutableArraySequence<std::pair<std::string, size_t>>();
             g_state.lastErrorMessage.clear();
         }
         else if (path == "/api/search")
@@ -367,7 +406,7 @@ void handleRequest(const std::string& request, std::string& response)
             
             if (g_state.patterns.GetLength() == 0)
             {
-                g_state.lastErrorMessage = "Добавьте хотя бы одну подстроку для поиска";
+                g_state.lastErrorMessage = "Р”РѕР±Р°РІСЊС‚Рµ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ РїРѕРґСЃС‚СЂРѕРєСѓ РґР»СЏ РїРѕРёСЃРєР°";
                 response = htmlResponse(200, renderMainPage());
                 return;
             }
@@ -393,7 +432,7 @@ void handleRequest(const std::string& request, std::string& response)
                     std::ifstream file(pathStr.c_str(), std::ios::binary);
                     if (!file.is_open())
                     {
-                        g_state.lastErrorMessage = "Не удалось открыть файл: " + pathStr;
+                        g_state.lastErrorMessage = "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»: " + pathStr;
                         response = htmlResponse(200, renderMainPage());
                         return;
                     }
@@ -412,7 +451,7 @@ void handleRequest(const std::string& request, std::string& response)
                     g_state.lazyLength = length;
                     g_state.lazyAlphabet = alphabet;
                     
-                    // Простой генератор без захвата алфавита по ссылке
+                    // РџСЂРѕСЃС‚РѕР№ РіРµРЅРµСЂР°С‚РѕСЂ Р±РµР· Р·Р°С…РІР°С‚Р° Р°Р»С„Р°РІРёС‚Р° РїРѕ СЃСЃС‹Р»РєРµ
                     std::string alphabetCopy = alphabet;
                     auto rule = [alphabetCopy](const BoundedQueue<char>&) -> char {
                         static std::mt19937 rng(42);
@@ -429,10 +468,10 @@ void handleRequest(const std::string& request, std::string& response)
                     g_state.processedCount = length;
                 }
                 
-                Sequence<std::pair<std::string, size_t> >* results = pc.GetCounts();
+                Sequence<std::pair<std::string, size_t>>* results = pc.GetCounts();
                 
-                // Копируем результаты вручную
-                g_state.lastResults = MutableArraySequence<std::pair<std::string, size_t> >();
+                // РљРѕРїРёСЂСѓРµРј СЂРµР·СѓР»СЊС‚Р°С‚С‹ РІСЂСѓС‡РЅСѓСЋ
+                g_state.lastResults = MutableArraySequence<std::pair<std::string, size_t>>();
                 for (size_t i = 0; i < results->GetLength(); ++i)
                     g_state.lastResults.Append(results->Get(i));
                 
@@ -452,7 +491,7 @@ void handleRequest(const std::string& request, std::string& response)
     response = httpResponse(404, "text/html", "<h1>404 Not Found</h1>");
 }
 
-// ==================== СЕРВЕР ====================
+// ==================== РЎР•Р Р’Р•Р  ====================
 
 #ifdef _WIN32
 DWORD WINAPI clientHandler(LPVOID arg)
@@ -466,7 +505,7 @@ void* clientHandler(void* arg)
     char buffer[65536];
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     
-    if (bytesRead > 0)
+    if (bytesRead> 0)
     {
         buffer[bytesRead] = '\0';
         std::string request(buffer);
@@ -493,6 +532,8 @@ int main()
     setlocale(LC_ALL, "Russian");
     
 #ifdef _WIN32
+    InitializeCriticalSection(&g_stateMutex);
+
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
     {
@@ -521,11 +562,11 @@ int main()
     struct sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(8080);
+    serverAddr.sin_port = htons(8081);
     
     if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
     {
-        std::cerr << "Failed to bind to port 8080" << std::endl;
+        std::cerr << "Failed to bind to port 8081" << std::endl;
         closesocket(serverSocket);
 #ifdef _WIN32
         WSACleanup();
@@ -544,14 +585,18 @@ int main()
     }
     
     std::cout << "========================================" << std::endl;
-    std::cout << "  Сервер запущен!" << std::endl;
-    std::cout << "  Откройте браузер: http://localhost:8080" << std::endl;
+    std::cout << "  РЎРµСЂРІРµСЂ Р·Р°РїСѓС‰РµРЅ!" << std::endl;
+    std::cout << "  РћС‚РєСЂРѕР№С‚Рµ Р±СЂР°СѓР·РµСЂ: http://localhost:8081" << std::endl;
     std::cout << "========================================" << std::endl;
     
     while (true)
     {
         struct sockaddr_in clientAddr;
+#ifdef _WIN32
         int clientLen = sizeof(clientAddr);
+#else
+        socklen_t clientLen = sizeof(clientAddr);
+#endif
         SOCKET* clientSocket = new SOCKET;
         *clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientLen);
         

@@ -20,6 +20,7 @@ template <class T> class DynamicArray
     DynamicArray(T* items, size_t size);
     DynamicArray(const DynamicArray<T>& rhs);
     DynamicArray(LinkedList<T>& list);
+    DynamicArray<T>& operator=(const DynamicArray<T>& rhs);
     DynamicArray(std::initializer_list<T> list);
     ~DynamicArray();
 
