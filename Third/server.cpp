@@ -1588,15 +1588,15 @@ void handleRequest(const string& request, string& responseStr)
                 string scalarStr = params["param2"];
 
 
-                if (!isDouble(scalarStr)) {
-                    result = "❌ Ошибка: скаляр содержит некорректные символы";
+                Complex scalar;
+                if (!parseComplexNumber(scalarStr, scalar)) {
+                    result = "❌ Ошибка: скаляр содержит некорректное комплексное число";
                     responseStr = responseHtml(200, result);
                     return;
                 }
-                double scalar = strtod(scalarStr.c_str(), nullptr);
 
 
-                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                auto m1Complex = parseComplexMatrix(data1Str, rows1, cols1, "№1", errorMsg);
                 if (!errorMsg.empty()) {
                     responseStr = responseHtml(200, errorMsg);
                     return;
@@ -1606,14 +1606,14 @@ void handleRequest(const string& request, string& responseStr)
                 if (row < 0 || row >= rows1) {
                     result = "❌ Ошибка: номер строки должен быть от 0 до " + to_string(rows1 - 1);
                 } else {
-                    double** arr1 = new double*[rows1];
+                    Complex** arr1 = new Complex*[rows1];
                     for (int i = 0; i < rows1; i++) {
-                        arr1[i] = new double[cols1];
+                        arr1[i] = new Complex[cols1];
                         for (int j = 0; j < cols1; j++) {
-                            arr1[i][j] = m1Double[i][j];
+                            arr1[i][j] = m1Complex[i][j];
                         }
                     }
-                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    RectangularMatrix<Complex> mat1(arr1, rows1, cols1);
                     mat1.MultiplyRow(row, scalar);
                     result = mat1.ToString();
                     for (int i = 0; i < rows1; i++) delete[] arr1[i];
@@ -1631,15 +1631,15 @@ void handleRequest(const string& request, string& responseStr)
                 string lambdaStr = params.find("param3") != params.end() ? params["param3"] : "1";
 
 
-                if (!isDouble(lambdaStr)) {
-                    result = "❌ Ошибка: коэффициент содержит некорректные символы";
+                Complex lambda;
+                if (!parseComplexNumber(lambdaStr, lambda)) {
+                    result = "❌ Ошибка: коэффициент содержит некорректное комплексное число";
                     responseStr = responseHtml(200, result);
                     return;
                 }
-                double lambda = strtod(lambdaStr.c_str(), nullptr);
 
 
-                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+                auto m1Complex = parseComplexMatrix(data1Str, rows1, cols1, "№1", errorMsg);
                 if (!errorMsg.empty()) {
                     responseStr = responseHtml(200, errorMsg);
                     return;
@@ -1649,14 +1649,14 @@ void handleRequest(const string& request, string& responseStr)
                 if (from < 0 || from >= rows1 || to < 0 || to >= rows1) {
                     result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
                 } else {
-                    double** arr1 = new double*[rows1];
+                    Complex** arr1 = new Complex*[rows1];
                     for (int i = 0; i < rows1; i++) {
-                        arr1[i] = new double[cols1];
+                        arr1[i] = new Complex[cols1];
                         for (int j = 0; j < cols1; j++) {
-                            arr1[i][j] = m1Double[i][j];
+                            arr1[i][j] = m1Complex[i][j];
                         }
                     }
-                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    RectangularMatrix<Complex> mat1(arr1, rows1, cols1);
                     mat1.AddRowToRow(from, to, lambda);
                     result = mat1.ToString();
                     for (int i = 0; i < rows1; i++) delete[] arr1[i];
@@ -1667,6 +1667,7 @@ void handleRequest(const string& request, string& responseStr)
                 responseStr = responseHtml(200, result);
                 return;
             }
+
             if (operation == "swap_cols")
             {
                 int col1 = atoi(params["param1"].c_str());
@@ -1891,85 +1892,6 @@ void handleRequest(const string& request, string& responseStr)
                     for (int i = 0; i < rows2; i++) delete[] arr2[i];
                     delete[] arr1;
                     delete[] arr2;
-                }
-            }
-            else if (operation == "swap_rows") 
-            {
-                int row1 = atoi(params["param1"].c_str());
-                int row2 = atoi(params["param2"].c_str());
-                
-                if (row1 < 0 || row1 >= rows1 || row2 < 0 || row2 >= rows1) {
-                    result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
-                } else {
-                    int** arr1 = new int*[rows1];
-                    for (int i = 0; i < rows1; i++) {
-                        arr1[i] = new int[cols1];
-                        for (int j = 0; j < cols1; j++) {
-                            arr1[i][j] = m1[i][j];
-                        }
-                    }
-                    RectangularMatrix<int> mat1(arr1, rows1, cols1);
-                    mat1.SwapRows(row1, row2);
-                    result = mat1.ToString();
-                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
-                    delete[] arr1;
-                }
-            }
-            else if (operation == "multiply_row") 
-            {
-                int row = atoi(params["param1"].c_str());
-                string scalarStr = params["param2"];
-                
-                if (!isInt(scalarStr)) {
-                    result = "❌ Ошибка: скаляр содержит некорректные символы";
-                    responseStr = responseHtml(200, result);
-                    return;
-                }
-                if (isTooLarge(scalarStr)) {
-                    result = "❌ Ошибка: скаляр слишком большой";
-                    responseStr = responseHtml(200, result);
-                    return;
-                }
-                int scalar = atoi(scalarStr.c_str());
-                
-                if (row < 0 || row >= rows1) {
-                    result = "❌ Ошибка: номер строки должен быть от 0 до " + to_string(rows1 - 1);
-                } else {
-                    int** arr1 = new int*[rows1];
-                    for (int i = 0; i < rows1; i++) {
-                        arr1[i] = new int[cols1];
-                        for (int j = 0; j < cols1; j++) {
-                            arr1[i][j] = m1[i][j];
-                        }
-                    }
-                    RectangularMatrix<int> mat1(arr1, rows1, cols1);
-                    mat1.MultiplyRow(row, scalar);
-                    result = mat1.ToString();
-                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
-                    delete[] arr1;
-                }
-            }
-            else if (operation == "add_row") 
-            {
-                int from = atoi(params["param1"].c_str());
-                int to = atoi(params["param2"].c_str());
-                int lambda = params.find("param3") != params.end() ? atoi(params["param3"].c_str()) : 1;
-                
-                if (from < 0 || from >= rows1 || to < 0 || to >= rows1) {
-                    result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
-                } else {
-                    int** arr1 = new int*[rows1];
-                    for (int i = 0; i < rows1; i++) {
-                        arr1[i] = new int[cols1];
-                        for (int j = 0; j < cols1; j++) {
-                            arr1[i][j] = m1[i][j];
-                        }
-                    }
-                    RectangularMatrix<int> mat1(arr1, rows1, cols1);
-                    mat1.AddRowToRow(from, to, lambda);
-                    result = mat1.ToString();
-                    for (int i = 0; i < rows1; i++) delete[] arr1[i];
-                    delete[] arr1;
                 }
             }
             else if (operation == "swap_cols") 
