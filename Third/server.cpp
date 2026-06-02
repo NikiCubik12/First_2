@@ -27,6 +27,7 @@
 #include "BitSequence.hpp"
 #include "Functional.hpp"
 #include "RectangularMatrix.hpp"
+#include "Complex.hpp"
 
 using namespace std;
 
@@ -1280,6 +1281,126 @@ void handleRequest(const string& request, string& responseStr)
            }
            return result;
         };
+
+        auto parseComplexNumber = [&](const string& raw, Complex& value) -> bool {
+           string s = trim(raw);
+           if (s.empty()) return false;
+
+
+           if (s.back() != 'i') {
+               if (!isDouble(s)) return false;
+               value = Complex(strtod(s.c_str(), nullptr), 0.0);
+               return true;
+           }
+
+
+           string body = s.substr(0, s.length() - 1);
+           if (body.empty() || body == "+") {
+               value = Complex(0.0, 1.0);
+               return true;
+           }
+           if (body == "-") {
+               value = Complex(0.0, -1.0);
+               return true;
+           }
+
+
+           size_t signPos = string::npos;
+           for (size_t i = 1; i < body.length(); i++) {
+               if (body[i] == '+' || body[i] == '-') {
+                   signPos = i;
+               }
+           }
+
+
+           if (signPos == string::npos) {
+               if (!isDouble(body)) return false;
+               value = Complex(0.0, strtod(body.c_str(), nullptr));
+               return true;
+           }
+
+
+           string realPart = body.substr(0, signPos);
+           string imagPart = body.substr(signPos);
+           if (!isDouble(realPart)) return false;
+
+
+           double imag = 0.0;
+           if (imagPart == "+") {
+               imag = 1.0;
+           } else if (imagPart == "-") {
+               imag = -1.0;
+           } else {
+               if (!isDouble(imagPart)) return false;
+               imag = strtod(imagPart.c_str(), nullptr);
+           }
+
+
+           value = Complex(strtod(realPart.c_str(), nullptr), imag);
+           return true;
+       };
+
+
+        auto parseComplexMatrix = [&](const string& dataStr, int rows, int cols, const string& name, string& error) -> vector<vector<Complex>> {
+            vector<vector<Complex>> result(rows, vector<Complex>(cols));
+            vector<string> tokens;
+            string token;
+            bool inQuotes = false;
+            bool hasQuotes = false;
+
+
+            for (char c : dataStr) {
+                if (c == '"') {
+                    hasQuotes = true;
+                    if (inQuotes) {
+                        tokens.push_back(token);
+                        token.clear();
+                    }
+                    inQuotes = !inQuotes;
+                } else if (inQuotes) {
+                    token += c;
+                }
+            }
+
+
+            if (!hasQuotes) {
+                token.clear();
+                for (char c : dataStr) {
+                    if (c == '[' || c == ']' || c == ',' || isspace((unsigned char)c)) {
+                        if (!token.empty()) {
+                            tokens.push_back(token);
+                            token.clear();
+                        }
+                    } else {
+                        token += c;
+                    }
+                }
+                if (!token.empty()) tokens.push_back(token);
+            }
+
+
+           if ((int)tokens.size() < rows * cols) {
+               error = "❌ Ошибка: в матрице " + name + " недостаточно данных (" + to_string(tokens.size()) + " чисел, ожидается " + to_string(rows * cols) + ")";
+               return {};
+           }
+
+
+           int idx = 0;
+           for (int i = 0; i < rows && idx < (int)tokens.size(); i++) {
+               for (int j = 0; j < cols && idx < (int)tokens.size(); j++) {
+                   Complex parsed;
+                   if (!parseComplexNumber(tokens[idx], parsed)) {
+                       error = "❌ Ошибка: в матрице " + name + " некорректное комплексное число '" + tokens[idx] + "'";
+                       return {};
+                   }
+                   result[i][j] = parsed;
+                   idx++;
+               }
+           }
+
+
+           return result;
+       };
         
 
 
@@ -1426,24 +1547,28 @@ void handleRequest(const string& request, string& responseStr)
                 int row2 = atoi(params["param2"].c_str());
 
 
-                auto m1Double = parseDoubleMatrix(data1Str, rows1, cols1, "№1", errorMsg);
+
+
+                auto m1Complex = parseComplexMatrix(data1Str, rows1, cols1, "№1", errorMsg);
                 if (!errorMsg.empty()) {
                     responseStr = responseHtml(200, errorMsg);
                     return;
                 }
 
 
+
+
                 if (row1 < 0 || row1 >= rows1 || row2 < 0 || row2 >= rows1) {
                     result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
                 } else {
-                    double** arr1 = new double*[rows1];
+                    Complex** arr1 = new Complex*[rows1];
                     for (int i = 0; i < rows1; i++) {
-                        arr1[i] = new double[cols1];
+                        arr1[i] = new Complex[cols1];
                         for (int j = 0; j < cols1; j++) {
-                            arr1[i][j] = m1Double[i][j];
+                            arr1[i][j] = m1Complex[i][j];
                         }
                     }
-                    RectangularMatrix<double> mat1(arr1, rows1, cols1);
+                    RectangularMatrix<Complex> mat1(arr1, rows1, cols1);
                     mat1.SwapRows(row1, row2);
                     result = mat1.ToString();
                     for (int i = 0; i < rows1; i++) delete[] arr1[i];
@@ -1451,9 +1576,12 @@ void handleRequest(const string& request, string& responseStr)
                 }
 
 
+
+
                 responseStr = responseHtml(200, result);
                 return;
             }
+
             if (operation == "multiply_row")
             {
                 int row = atoi(params["param1"].c_str());
