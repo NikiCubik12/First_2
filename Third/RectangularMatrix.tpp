@@ -1,8 +1,36 @@
 #ifndef RECTANGULAR_MATRIX_TPP
 #define RECTANGULAR_MATRIX_TPP
 
+#include <cmath>
 #include <sstream>
 #include <string>
+#include "Complex.hpp"
+
+
+namespace RectangularMatrixDetail
+{
+    template <class T>
+    double ValueNorm(const T& value)
+    {
+        return std::fabs(static_cast<double>(value));
+    }
+
+    inline double ValueNorm(const Complex& value)
+    {
+        return value.Norm();
+    }
+
+    template <class T>
+    T NormResult(double value, const T*)
+    {
+        return static_cast<T>(value);
+    }
+
+    inline Complex NormResult(double value, const Complex*)
+    {
+        return Complex(value, 0);
+    }
+}
 
 template <class T>
 RectangularMatrix<T>::RectangularMatrix() : rows(nullptr), rowsCount(0), colsCount(0) {}
@@ -148,20 +176,21 @@ RectangularMatrix<T> RectangularMatrix<T>::MultiplyScalar(T lambda) const
 template <class T>
 T RectangularMatrix<T>::Norm() const
 {
-    if (rowsCount == 0 || colsCount == 0) return 0;
+    if (rowsCount == 0 || colsCount == 0) return RectangularMatrixDetail::NormResult(0, static_cast<T*>(nullptr));
     
-    T maxNorm = 0;
+    double maxNorm = 0;
     for (size_t j = 0; j < colsCount; j++)
     {
-        T colSum = 0;
+        double colSum = 0;
         for (size_t i = 0; i < rowsCount; i++)
         {
-            colSum += Get(i, j);
+            colSum += RectangularMatrixDetail::ValueNorm(Get(i, j));
         }
         if (colSum > maxNorm) maxNorm = colSum;
     }
-    return maxNorm;
+    return RectangularMatrixDetail::NormResult(maxNorm, static_cast<T*>(nullptr));
 }
+
 
 template <class T>
 string RectangularMatrix<T>::ToString() const
