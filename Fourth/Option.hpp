@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-template <typename T>
+template <typename T> // нужен для более безопасного чтения данных
 class Optional
 {
 private:

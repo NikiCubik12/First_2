@@ -2,14 +2,15 @@
 #define LAZY_SEQUENCE_HPP
 
 #include <cstddef>
-#include <functional>
+// #include <functional>
 #include <memory>
 #include <vector>
-#include <utility>
+// #include <utility>
 #include "Sequence.hpp"
 #include "Option.hpp"
 #include "Cardinal.hpp"
 #include "Generator.hpp"
+#include "DynamicArray.hpp"
 
 template <typename T>
 class LazySequence : public Sequence<T>

@@ -10,6 +10,8 @@
 #include <vector>
 #include <regex>
 #include <algorithm>
+#include <cmath>
+#include <cerrno>
 #include <utility>
 
 // Windows сокеты
@@ -1236,8 +1238,12 @@ void handleRequest(const string& request, string& responseStr)
         auto isDouble = [](const string& s) -> bool {
             if (s.empty()) return false;
             char* end = nullptr;
-            strtod(s.c_str(), &end);
-            return end != s.c_str() && *end == '\0';
+            errno = 0;
+            double value = strtod(s.c_str(), &end);
+            return end != s.c_str()
+                && *end == '\0'
+                && errno != ERANGE
+                && isfinite(value);
         };
 
         auto parseDoubleMatrix = [&](const string& dataStr, int rows, int cols, const string& name, string& error) -> vector<vector<double>> {

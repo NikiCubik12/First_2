@@ -36,7 +36,7 @@ DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& rhs)
         newItems[i] = rhs.items[i];
     }
 
-    delete[] items;
+    delete[] items; // [] -- освобождаем память из-под массива, просто delete -- освобождаем память из-под объекта
     items = newItems;
     size = rhs.size;
     return *this;
@@ -76,7 +76,7 @@ DynamicArray<T>::~DynamicArray()
 }
 
 template <class T>
-void DynamicArray<T>::Append(const T& item)
+void DynamicArray<T>::Append(const T& item) // ссылка здесь нужна для того, чтобы не передавать какой-то объект, а просто указать, где он находится, и уже с ним работать
 {
     T* arr = new T[size + 1];
     for (size_t i = 0; i < size; i++)

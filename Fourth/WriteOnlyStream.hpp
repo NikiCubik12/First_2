@@ -2,7 +2,7 @@
 #define WRITE_ONLY_STREAM_HPP
 
 #include <cstddef>
-#include <functional>
+// #include <functional>
 #include <memory>
 #include "IStream.hpp"
 #include "Sequence.hpp"

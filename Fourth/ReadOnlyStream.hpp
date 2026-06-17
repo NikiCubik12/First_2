@@ -2,9 +2,9 @@
 #define READ_ONLY_STREAM_HPP
 
 #include <cstddef>
-#include <functional>
+// #include <functional>
 #include <fstream>
-#include <memory>
+// #include <memory>
 #include <string>
 #include "IStream.hpp"
 #include "Sequence.hpp"

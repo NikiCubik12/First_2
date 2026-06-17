@@ -2,7 +2,7 @@
 #define GENERATOR_HPP
 
 #include <cstddef>
-#include <functional>
+// #include <functional>
 #include <stdexcept>
 #include "BoundedQueue.hpp"
 #include "Sequence.hpp"

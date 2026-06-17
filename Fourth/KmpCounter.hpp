@@ -13,7 +13,7 @@ public:
     KmpCounter(const std::string& pattern, bool allowOverlapping);
 
     void   ConsumeChar(char c);
-    void   ConsumeStream(ReadOnlyStream<char>& stream);
+    // void   ConsumeStream(ReadOnlyStream<char>& stream);
     void   ConsumeLazy(LazySequence<char>& lazy);
 
     void   Reset();

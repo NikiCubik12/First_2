@@ -150,11 +150,11 @@ inline void PatternCounter::ConsumeChar(char c)
     EmitMatches(state_);
 }
 
-inline void PatternCounter::ConsumeStream(ReadOnlyStream<char>& stream)
-{
-    while (!stream.IsEndOfStream())
-        ConsumeChar(stream.Read());
-}
+// inline void PatternCounter::ConsumeStream(ReadOnlyStream<char>& stream)
+// {
+//     while (!stream.IsEndOfStream())
+//         ConsumeChar(stream.Read());
+// }
 
 inline void PatternCounter::ConsumeLazy(LazySequence<char>& lazy)
 {

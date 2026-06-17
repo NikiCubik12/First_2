@@ -1,7 +1,7 @@
 #ifndef SERIALIZER_HPP
 #define SERIALIZER_HPP
 
-#include <functional>
+// #include <functional>
 #include <iostream>
 
 template <typename T>

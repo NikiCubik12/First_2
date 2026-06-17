@@ -45,11 +45,11 @@ inline void KmpCounter::ConsumeChar(char c)
     }
 }
 
-inline void KmpCounter::ConsumeStream(ReadOnlyStream<char>& stream)
-{
-    while (!stream.IsEndOfStream())
-        ConsumeChar(stream.Read());
-}
+// inline void KmpCounter::ConsumeStream(ReadOnlyStream<char>& stream)
+// {
+//     while (!stream.IsEndOfStream())
+//         ConsumeChar(stream.Read());
+// }
 
 inline void KmpCounter::ConsumeLazy(LazySequence<char>& lazy)
 {
