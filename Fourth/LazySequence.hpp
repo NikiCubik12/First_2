@@ -4,13 +4,14 @@
 #include <cstddef>
 // #include <functional>
 #include <memory>
-#include <vector>
+// #include <vector>
 // #include <utility>
 #include "Sequence.hpp"
 #include "Option.hpp"
 #include "Cardinal.hpp"
 #include "Generator.hpp"
-#include "DynamicArray.hpp"
+#include "SimpleVector.hpp"
+
 
 template <typename T>
 class LazySequence : public Sequence<T>
@@ -19,7 +20,7 @@ class LazySequence : public Sequence<T>
 
 private:
     std::function<Optional<T>()>  producer_;
-    std::vector<T>                cache_;
+    SimpleVector<T>                cache_;
     bool                          exhausted_;
     bool                          isInfinite_;
 

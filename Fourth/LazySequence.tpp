@@ -3,6 +3,7 @@
 
 #include "LazySequence.hpp"
 #include "MutableArraySequence.hpp"
+#include "SimpleVector.hpp"
 
 template <typename T>
 LazySequence<T>::LazySequence()
@@ -158,7 +159,7 @@ template <typename T>
 Sequence<T>* LazySequence<T>::PrependImpl(const T& item)
 {
     MaterializeAll();
-    cache_.insert(cache_.begin(), item);
+    cache_.prepend(item);
     return this;
 }
 
@@ -168,7 +169,7 @@ Sequence<T>* LazySequence<T>::InsertAtImpl(const T& item, size_t index)
     MaterializeAll();
     if (index > cache_.size())
         throw IndexOutOfRangeException("LazySequence::InsertAtImpl: индекс вне диапазона");
-    cache_.insert(cache_.begin() + index, item);
+    cache_.insert_at(item, index);
     return this;
 }
 
@@ -193,7 +194,7 @@ LazySequence<U>* LazySequence<T>::Map(std::function<U(T)> f)
     result->isInfinite_ = isInfinite_;
     result->exhausted_  = isInfinite_ ? false : false;
 
-    auto srcCache = std::make_shared<std::vector<T>>();
+    auto srcCache = std::make_shared<SimpleVector<T>>();
     *srcCache = cache_;
     auto srcProducer = producer_;
     auto srcExhausted = std::make_shared<bool>(exhausted_);
@@ -233,7 +234,7 @@ LazySequence<T>* LazySequence<T>::Where(std::function<bool(T)> pred)
     LazySequence<T>* result = new LazySequence<T>();
     result->isInfinite_ = isInfinite_;
 
-    auto srcCache = std::make_shared<std::vector<T>>();
+    auto srcCache = std::make_shared<SimpleVector<T>>();
     *srcCache = cache_;
     auto srcProducer = producer_;
     auto srcExhausted = std::make_shared<bool>(exhausted_);
@@ -276,8 +277,8 @@ LazySequence<std::pair<T, U>>* LazySequence<T>::Zip(LazySequence<U>& other)
     LazySequence<std::pair<T, U>>* result = new LazySequence<std::pair<T, U>>();
     result->isInfinite_ = isInfinite_ && other.IsInfinite();
 
-    auto aCache = std::make_shared<std::vector<T>>();   *aCache = cache_;
-    auto bCache = std::make_shared<std::vector<U>>();   *bCache = other.cache_;
+    auto aCache = std::make_shared<SimpleVector<T>>();   *aCache = cache_;
+    auto bCache = std::make_shared<SimpleVector<U>>();   *bCache = other.cache_;
     auto aProducer = producer_;
     auto bProducer = other.producer_;
     auto aExhausted = std::make_shared<bool>(exhausted_);
