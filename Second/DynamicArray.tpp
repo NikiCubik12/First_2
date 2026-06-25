@@ -1,6 +1,8 @@
 #ifndef DYNAMIC_ARRAY_TPP
 #define DYNAMIC_ARRAY_TPP
 
+using namespace std;
+
 template <class T>
 DynamicArray<T>::DynamicArray() : items(nullptr), size(0) {}
 
@@ -144,6 +146,18 @@ void DynamicArray<T>::Resize(size_t newSize)
     delete[] items;
     size = newSize;
     items = arr;
+}
+
+template <class T>
+T* DynamicArray<T>::GetData()
+{
+    return items;
+}
+
+template <class T>
+const T* DynamicArray<T> :: GetData() const
+{
+    return items;
 }
 
 #endif

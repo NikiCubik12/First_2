@@ -56,7 +56,7 @@ DynamicArray<T>::~DynamicArray()
 }
 
 template <class T>
-void DynamicArray<T>::Append(const T& item)
+void DynamicArray<T>::Append(T item)
 {
     T* arr = new T[size + 1];
     for (size_t i = 0; i < size; i++)
@@ -70,7 +70,7 @@ void DynamicArray<T>::Append(const T& item)
 }
 
 template <class T>
-void DynamicArray<T>::InsertAt(const T& item, size_t index)
+void DynamicArray<T>::InsertAt(T item, size_t index)
 {
     if (index > size)
     {
@@ -93,7 +93,7 @@ void DynamicArray<T>::InsertAt(const T& item, size_t index)
 }
 
 template <class T>
-void DynamicArray<T>::Prepend(const T& item)
+void DynamicArray<T>::Prepend(T item)
 {
     T* arr = new T[size + 1];
     arr[0] = item;

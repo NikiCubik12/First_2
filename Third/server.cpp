@@ -7,7 +7,6 @@
 #include <climits>
 #include <cctype>
 #include <memory>
-#include <vector>
 #include <regex>
 #include <algorithm>
 #include <cmath>
@@ -164,10 +163,10 @@ public:
     void create() { if (data) delete data; data = new DynamicArray<T>(); created = true; }
     void clear() { if (created && data) data->Resize(0); }
     bool isCreated() const { return created; }
-    void append(const T& value) { if (created && data) data->Append(value); }
-    void prepend(const T& value) { if (created && data) data->Prepend(value); }
-    void insertAt(const T& value, size_t index) { if (created && data) data->InsertAt(value, index); }
-    void set(size_t index, const T& value) { if (created && data) data->Set(index, value); }
+    void append(T value) { if (created && data) data->Append(value); }
+    void prepend(T value) { if (created && data) data->Prepend(value); }
+    void insertAt(T value, size_t index) { if (created && data) data->InsertAt(value, index); }
+    void set(size_t index, T value) { if (created && data) data->Set(index, value); }
     T get(size_t index) const { if (created && data) return data->Get(index); throw runtime_error("Not created"); }
     size_t getSize() const { return created && data ? data->GetSize() : 0; }
     string getValuesString() const {
@@ -196,9 +195,9 @@ public:
     void create() { if (data) delete data; data = new LinkedList<T>(); created = true; }
     void clear() { if (created && data) data->ClearList(); }
     bool isCreated() const { return created; }
-    void append(const T& value) { if (created && data) data->Append(value); }
-    void prepend(const T& value) { if (created && data) data->Prepend(value); }
-    void insertAt(const T& value, size_t index) { if (created && data) data->InsertAt(value, index); }
+    void append(T value) { if (created && data) data->Append(value); }
+    void prepend(T value) { if (created && data) data->Prepend(value); }
+    void insertAt(T value, size_t index) { if (created && data) data->InsertAt(value, index); }
     T get(size_t index) const { if (created && data) return data->Get(index); throw runtime_error("Not created"); }
     T getFirst() const { if (created && data) return data->GetFirst(); throw runtime_error("Not created"); }
     T getLast() const { if (created && data) return data->GetLast(); throw runtime_error("Not created"); }
@@ -217,7 +216,8 @@ public:
     }
 };
 
-// Класс для управления последовательностями
+// ==================== SequenceManager (БЕЗ vector - используем DynamicArray) ====================
+
 class SequenceManager 
 {
 private:
@@ -228,15 +228,50 @@ private:
         BitSequence* bitSeq;
         SeqType type;
         bool isBit;
-        vector<Sequence<int>*> tempIntSeqs;
-        vector<BitSequence*> tempBitSeqs;
+        
+        // ВМЕСТО vector ИСПОЛЬЗУЕМ DynamicArray
+        DynamicArray<Sequence<int>*> tempIntSeqs;
+        DynamicArray<BitSequence*> tempBitSeqs;
         
         SequenceData() : intSeq(nullptr), bitSeq(nullptr), type(ARRAY_MUTABLE), isBit(false) {}
-        ~SequenceData() { clear(); for (auto seq : tempIntSeqs) delete seq; for (auto seq : tempBitSeqs) delete seq; }
-        void clear() { if (intSeq) delete intSeq; if (bitSeq) delete bitSeq; intSeq = nullptr; bitSeq = nullptr; isBit = false; }
-        size_t getSize() const { if (isBit) return bitSeq ? bitSeq->GetLength() : 0; return intSeq ? intSeq->GetLength() : 0; }
+        
+        ~SequenceData() {
+            clear();
+            for (size_t i = 0; i < tempIntSeqs.GetSize(); i++) {
+                delete tempIntSeqs.Get(i);
+            }
+            for (size_t i = 0; i < tempBitSeqs.GetSize(); i++) {
+                delete tempBitSeqs.Get(i);
+            }
+        }
+        
+        void clear() {
+            if (intSeq) delete intSeq;
+            if (bitSeq) delete bitSeq;
+            intSeq = nullptr;
+            bitSeq = nullptr;
+            isBit = false;
+        }
+        
+        void clearTempSubsequences() {
+            for (size_t i = 0; i < tempIntSeqs.GetSize(); i++) {
+                delete tempIntSeqs.Get(i);
+            }
+            for (size_t i = 0; i < tempBitSeqs.GetSize(); i++) {
+                delete tempBitSeqs.Get(i);
+            }
+            tempIntSeqs.Resize(0);
+            tempBitSeqs.Resize(0);
+        }
+        
+        size_t getSize() const {
+            if (isBit) return bitSeq ? bitSeq->GetLength() : 0;
+            return intSeq ? intSeq->GetLength() : 0;
+        }
+        
         string getValuesString() const {
-            stringstream ss; ss << "[";
+            stringstream ss;
+            ss << "[";
             size_t size = getSize();
             for (size_t i = 0; i < size; i++) {
                 if (i > 0) ss << ", ";
@@ -246,6 +281,7 @@ private:
             ss << "]";
             return ss.str();
         }
+        
         string getTypeString() const {
             if (!intSeq && !bitSeq) return "Не создана";
             switch (type) {
@@ -256,42 +292,79 @@ private:
                 default: return "Unknown";
             }
         }
+        
         string append(int value) {
-            if (isBit) { if (value != 0 && value != 1) return "❌ Ошибка: для BitSequence допустимы только 0 или 1"; if (bitSeq) bitSeq->Append(value); }
-            else { if (intSeq) intSeq->Append(value); }
+            if (isBit) {
+                if (value != 0 && value != 1) return "❌ Ошибка: для BitSequence допустимы только 0 или 1";
+                if (bitSeq) bitSeq->Append(value);
+            } else {
+                if (intSeq) intSeq->Append(value);
+            }
             return "";
         }
+        
         string prepend(int value) {
-            if (isBit) { if (value != 0 && value != 1) return "❌ Ошибка: для BitSequence допустимы только 0 или 1"; if (bitSeq) bitSeq->Prepend(value); }
-            else { if (intSeq) intSeq->Prepend(value); }
+            if (isBit) {
+                if (value != 0 && value != 1) return "❌ Ошибка: для BitSequence допустимы только 0 или 1";
+                if (bitSeq) bitSeq->Prepend(value);
+            } else {
+                if (intSeq) intSeq->Prepend(value);
+            }
             return "";
         }
+        
         string insertAt(int value, size_t index) {
-            if (isBit) { if (value != 0 && value != 1) return "❌ Ошибка: для BitSequence допустимы только 0 или 1"; if (bitSeq) bitSeq->InsertAt(value, index); }
-            else { if (intSeq) intSeq->InsertAt(value, index); }
+            if (isBit) {
+                if (value != 0 && value != 1) return "❌ Ошибка: для BitSequence допустимы только 0 или 1";
+                if (bitSeq) bitSeq->InsertAt(value, index);
+            } else {
+                if (intSeq) intSeq->InsertAt(value, index);
+            }
             return "";
         }
-        int get(size_t index) const { if (isBit) return bitSeq ? bitSeq->Get(index) : 0; return intSeq ? intSeq->Get(index) : 0; }
-        int getFirst() const { if (isBit) return bitSeq ? bitSeq->GetFirst() : 0; return intSeq ? intSeq->GetFirst() : 0; }
-        int getLast() const { if (isBit) return bitSeq ? bitSeq->GetLast() : 0; return intSeq ? intSeq->GetLast() : 0; }
+        
+        int get(size_t index) const {
+            if (isBit) return bitSeq ? bitSeq->Get(index) : 0;
+            return intSeq ? intSeq->Get(index) : 0;
+        }
+        
+        int getFirst() const {
+            if (isBit) return bitSeq ? bitSeq->GetFirst() : 0;
+            return intSeq ? intSeq->GetFirst() : 0;
+        }
+        
+        int getLast() const {
+            if (isBit) return bitSeq ? bitSeq->GetLast() : 0;
+            return intSeq ? intSeq->GetLast() : 0;
+        }
+        
         string getSubsequence(size_t start, size_t end) {
             if (!intSeq && !bitSeq) return "❌ Ошибка: последовательность не создана";
             if (start > end) return "❌ Ошибка: начальный индекс не может быть больше конечного";
             if (end >= getSize()) return "❌ Ошибка: конечный индекс выходит за границы (максимум " + to_string(getSize() - 1) + ")";
-            stringstream ss; ss << "[";
+            
+            stringstream ss;
+            ss << "[";
+            
             if (isBit) {
                 BitSequence* sub = bitSeq->GetSubsequence(start, end);
-                tempBitSeqs.push_back(sub);
-                for (size_t i = 0; i < sub->GetLength(); i++) { if (i > 0) ss << ", "; ss << sub->Get(i); }
+                tempBitSeqs.Append(sub);
+                for (size_t i = 0; i < sub->GetLength(); i++) {
+                    if (i > 0) ss << ", ";
+                    ss << sub->Get(i);
+                }
             } else {
                 Sequence<int>* sub = intSeq->GetSubsequence(start, end);
-                tempIntSeqs.push_back(sub);
-                for (size_t i = 0; i < sub->GetLength(); i++) { if (i > 0) ss << ", "; ss << sub->Get(i); }
+                tempIntSeqs.Append(sub);
+                for (size_t i = 0; i < sub->GetLength(); i++) {
+                    if (i > 0) ss << ", ";
+                    ss << sub->Get(i);
+                }
             }
+            
             ss << "]";
             return ss.str();
         }
-        void clearTempSubsequences() { for (auto seq : tempIntSeqs) delete seq; for (auto seq : tempBitSeqs) delete seq; tempIntSeqs.clear(); tempBitSeqs.clear(); }
     };
     
     SequenceData seq1;
@@ -322,18 +395,66 @@ public:
         else if (type == "BitSequence") { target->bitSeq = new BitSequence(); target->type = BIT; target->isBit = true; }
     }
     
-    bool isCreated(int id) const { const SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->intSeq != nullptr || target->bitSeq != nullptr; }
-    string append(int id, int value) { SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->append(value); }
-    string prepend(int id, int value) { SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->prepend(value); }
-    string insertAt(int id, int value, size_t index) { SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->insertAt(value, index); }
-    int get(int id, size_t index) const { const SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->get(index); }
-    int getFirst(int id) const { const SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->getFirst(); }
-    int getLast(int id) const { const SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->getLast(); }
-    size_t getSize(int id) const { const SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->getSize(); }
-    string getValuesString(int id) const { const SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->getValuesString(); }
-    string getTypeString(int id) const { const SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->getTypeString(); }
-    string getSubsequence(int id, size_t start, size_t end) { SequenceData* target = (id == 1) ? &seq1 : &seq2; return target->getSubsequence(start, end); }
-    void clear(int id) { SequenceData* target = (id == 1) ? &seq1 : &seq2; target->clear(); target->clearTempSubsequences(); }
+    bool isCreated(int id) const { 
+        const SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->intSeq != nullptr || target->bitSeq != nullptr; 
+    }
+    
+    string append(int id, int value) { 
+        SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->append(value); 
+    }
+    
+    string prepend(int id, int value) { 
+        SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->prepend(value); 
+    }
+    
+    string insertAt(int id, int value, size_t index) { 
+        SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->insertAt(value, index); 
+    }
+    
+    int get(int id, size_t index) const { 
+        const SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->get(index); 
+    }
+    
+    int getFirst(int id) const { 
+        const SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->getFirst(); 
+    }
+    
+    int getLast(int id) const { 
+        const SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->getLast(); 
+    }
+    
+    size_t getSize(int id) const { 
+        const SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->getSize(); 
+    }
+    
+    string getValuesString(int id) const { 
+        const SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->getValuesString(); 
+    }
+    
+    string getTypeString(int id) const { 
+        const SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->getTypeString(); 
+    }
+    
+    string getSubsequence(int id, size_t start, size_t end) { 
+        SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        return target->getSubsequence(start, end); 
+    }
+    
+    void clear(int id) { 
+        SequenceData* target = (id == 1) ? &seq1 : &seq2; 
+        target->clear(); 
+        target->clearTempSubsequences(); 
+    }
     
     string concat() {
         if (!seq1.intSeq && !seq1.bitSeq) return "❌ Ошибка: Первая последовательность не создана";
@@ -385,7 +506,11 @@ public:
         return "✅ Результат объединения: " + concatResult.getValuesString();
     }
     
-    string getConcatResult() const { if (!concatResult.intSeq && !concatResult.bitSeq) return "Нет результата"; return concatResult.getValuesString(); }
+    string getConcatResult() const { 
+        if (!concatResult.intSeq && !concatResult.bitSeq) return "Нет результата"; 
+        return concatResult.getValuesString(); 
+    }
+    
     void clearConcatResult() { concatResult.clear(); }
 };
 
@@ -633,79 +758,6 @@ string renderMatrixPage()
     return ss.str();
 }
 
-string renderFunctionalTestPage()
-{
-    stringstream ss;
-    ss << "<!DOCTYPE html>";
-    ss << "<html lang=\"ru\">";
-    ss << "<head>";
-    ss << "<meta charset=\"UTF-8\">";
-    ss << "<title>Функциональные операции</title>";
-    ss << "<style>";
-    ss << "* { margin: 0; padding: 0; box-sizing: border-box; }";
-    ss << "body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }";
-    ss << ".container { max-width: 900px; margin: 0 auto; background: white; border-radius: 24px; padding: 32px; }";
-    ss << "h1 { color: #667eea; margin-bottom: 20px; }";
-    ss << ".input-group { margin-bottom: 20px; }";
-    ss << "label { display: block; font-weight: 600; margin-bottom: 5px; color: #555; }";
-    ss << "input[type=text] { width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px; }";
-    ss << "select { width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px; }";
-    ss << "button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 10px; }";
-    ss << ".result { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-top: 20px; font-family: monospace; }";
-    ss << ".back-link { display: inline-block; margin-top: 20px; color: #667eea; text-decoration: none; }";
-    ss << "</style>";
-    ss << "</head>";
-    ss << "<body>";
-    ss << "<div class=\"container\">";
-    ss << "<h1>Демострация функциональных операций</h1>";
-    ss << "<p>Map, Filter, Reduce над последовательностями</p>";
-    
-    ss << "<div class=\"input-group\">";
-    ss << "<label>Введите последовательность чисел (через запятую):</label>";
-    ss << "<input type=\"text\" id=\"inputSeq\" value=\"1,2,3,4,5,6,7,8,9,10\">";
-    ss << "</div>";
-    
-    ss << "<div class=\"input-group\">";
-    ss << "<label>Выберите операцию:</label>";
-    ss << "<select id=\"operation\">";
-    ss << "<option value=\"map_square\">Map: возвести в квадрат</option>";
-    ss << "<option value=\"map_double\">Map: умножить на 2</option>";
-    ss << "<option value=\"filter_even\">Filter: чётные числа</option>";
-    ss << "<option value=\"filter_positive\">Filter: положительные числа</option>";
-    ss << "<option value=\"reduce_sum\">Reduce: сумма</option>";
-    ss << "<option value=\"reduce_product\">Reduce: произведение</option>";
-    ss << "<option value=\"reduce_max\">Reduce: максимум</option>";
-    ss << "<option value=\"reduce_min\">Reduce: минимум</option>";
-    ss << "</select>";
-    ss << "</div>";
-    
-    ss << "<button onclick=\"execute()\">Выполнить</button>";
-    ss << "<div id=\"result\" class=\"result\">Результат появится здесь...</div>";
-    ss << "<a href=\"/\" class=\"back-link\">← Вернуться на главную</a>";
-    ss << "</div>";
-    
-    ss << "<script>";
-    ss << "async function execute() {";
-    ss << "  let input = document.getElementById('inputSeq').value;";
-    ss << "  let operation = document.getElementById('operation').value;";
-    ss << "  let formData = new URLSearchParams();";
-    ss << "  formData.append('input', input);";
-    ss << "  formData.append('operation', operation);";
-    ss << "  try {";
-    ss << "    let response = await fetch('/api/functional', { method: 'POST', body: formData });";
-    ss << "    let result = await response.text();";
-    ss << "    document.getElementById('result').innerHTML = '<strong>Результат:</strong><br>' + result;";
-    ss << "  } catch(e) {";
-    ss << "    document.getElementById('result').innerHTML = '<strong>Ошибка:</strong> ' + e.message;";
-    ss << "  }";
-    ss << "}";
-    ss << "</script>";
-    ss << "</body>";
-    ss << "</html>";
-    
-    return ss.str();
-}
-
 string renderFullPage() 
 {
     stringstream ss;
@@ -776,7 +828,6 @@ string renderFullPage()
 
     ss << "<div style=\"text-align:center; margin: 16px 0;\">";
     ss << "<button class=\"demo-btn\" onclick=\"window.open('/matrix', '_blank')\" style=\"background: linear-gradient(135deg, #28a745 0%, #20c997 100%);\">📊 Матричный калькулятор</button>";
-    ss << "<button class=\"demo-btn\" onclick=\"window.open('/functional-test', '_blank')\" style=\"background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);\">🧪 Дополнительный функционал</button>";
     ss << "</div>";
     
     ss << "<div class=\"tabs\">";
@@ -1117,19 +1168,13 @@ void handleRequest(const string& request, string& responseStr)
         return;
     }
     
-    if (method == "GET" && path == "/functional-test") 
-    {
-        responseStr = responseHtml(200, renderFunctionalTestPage());
-        return;
-    }
-    
     if (method == "GET" && path == "/state") 
     {
         responseStr = responseJson(200, getStateJson());
         return;
     }
     
-        // ==================== POST /api/matrix ====================
+    // ==================== POST /api/matrix ====================
     if (method == "POST" && path == "/api/matrix") 
     {
         size_t bodyPos = request.find("\r\n\r\n");
@@ -1160,7 +1205,6 @@ void handleRequest(const string& request, string& responseStr)
         
         string operation = params["operation"];
         
-        // Простая функция проверки, является ли строка целым числом
         auto isInt = [](const string& s) -> bool {
             if (s.empty()) return false;
             size_t start = 0;
@@ -1172,7 +1216,6 @@ void handleRequest(const string& request, string& responseStr)
             return true;
         };
         
-        // Проверка на слишком большое число
         auto isTooLarge = [](const string& s) -> bool {
             string temp = s;
             if (temp[0] == '-') temp = temp.substr(1);
@@ -1187,7 +1230,6 @@ void handleRequest(const string& request, string& responseStr)
             return false;
         };
         
-        // Парсинг матрицы с проверкой
         auto parseMatrix = [&](const string& dataStr, int rows, int cols, const string& name, string& error) -> vector<vector<int>> {
             vector<vector<int>> result(rows, vector<int>(cols, 0));
             vector<int> numbers;
@@ -1202,7 +1244,7 @@ void handleRequest(const string& request, string& responseStr)
                         return {};
                     }
                     if (isTooLarge(num)) {
-                        error = "❌ Ошибка: в матрице " + name + " число '" + num + "' слишком большое (допустимый диапазон: -2147483648...2147483647)";
+                        error = "❌ Ошибка: в матрице " + name + " число '" + num + "' слишком большое";
                         return {};
                     }
                     numbers.push_back(atoi(num.c_str()));
@@ -1246,106 +1288,56 @@ void handleRequest(const string& request, string& responseStr)
                 && isfinite(value);
         };
 
-        auto parseDoubleMatrix = [&](const string& dataStr, int rows, int cols, const string& name, string& error) -> vector<vector<double>> {
-           vector<vector<double>> result(rows, vector<double>(cols, 0.0));
-           vector<double> numbers;
-           string num;
-
-
-           for (char c : dataStr) {
-               if (c == '-' || c == '.' || (c >= '0' && c <= '9')) {
-                   num += c;
-               } else if (!num.empty()) {
-                   if (!isDouble(num)) {
-                       error = "❌ Ошибка: в матрице " + name + " некорректное число '" + num + "'";
-                       return {};
-                   }
-                   numbers.push_back(strtod(num.c_str(), nullptr));
-                   num.clear();
-               }
-           }
-           if (!num.empty()) {
-               if (!isDouble(num)) {
-                   error = "❌ Ошибка: в матрице " + name + " некорректное число '" + num + "'";
-                   return {};
-               }
-               numbers.push_back(strtod(num.c_str(), nullptr));
-           }
-
-
-           if ((int)numbers.size() < rows * cols) {
-               error = "❌ Ошибка: в матрице " + name + " недостаточно данных (" + to_string(numbers.size()) + " чисел, ожидается " + to_string(rows * cols) + ")";
-               return {};
-           }
-
-
-           int idx = 0;
-           for (int i = 0; i < rows && idx < (int)numbers.size(); i++) {
-               for (int j = 0; j < cols && idx < (int)numbers.size(); j++) {
-                   result[i][j] = numbers[idx++];
-               }
-           }
-           return result;
-        };
-
         auto parseComplexNumber = [&](const string& raw, Complex& value) -> bool {
-           string s = trim(raw);
-           if (s.empty()) return false;
+            string s = trim(raw);
+            if (s.empty()) return false;
 
+            if (s.back() != 'i') {
+                if (!isDouble(s)) return false;
+                value = Complex(strtod(s.c_str(), nullptr), 0.0);
+                return true;
+            }
 
-           if (s.back() != 'i') {
-               if (!isDouble(s)) return false;
-               value = Complex(strtod(s.c_str(), nullptr), 0.0);
-               return true;
-           }
+            string body = s.substr(0, s.length() - 1);
+            if (body.empty() || body == "+") {
+                value = Complex(0.0, 1.0);
+                return true;
+            }
+            if (body == "-") {
+                value = Complex(0.0, -1.0);
+                return true;
+            }
 
+            size_t signPos = string::npos;
+            for (size_t i = 1; i < body.length(); i++) {
+                if (body[i] == '+' || body[i] == '-') {
+                    signPos = i;
+                }
+            }
 
-           string body = s.substr(0, s.length() - 1);
-           if (body.empty() || body == "+") {
-               value = Complex(0.0, 1.0);
-               return true;
-           }
-           if (body == "-") {
-               value = Complex(0.0, -1.0);
-               return true;
-           }
+            if (signPos == string::npos) {
+                if (!isDouble(body)) return false;
+                value = Complex(0.0, strtod(body.c_str(), nullptr));
+                return true;
+            }
 
+            string realPart = body.substr(0, signPos);
+            string imagPart = body.substr(signPos);
+            if (!isDouble(realPart)) return false;
 
-           size_t signPos = string::npos;
-           for (size_t i = 1; i < body.length(); i++) {
-               if (body[i] == '+' || body[i] == '-') {
-                   signPos = i;
-               }
-           }
+            double imag = 0.0;
+            if (imagPart == "+") {
+                imag = 1.0;
+            } else if (imagPart == "-") {
+                imag = -1.0;
+            } else {
+                if (!isDouble(imagPart)) return false;
+                imag = strtod(imagPart.c_str(), nullptr);
+            }
 
-
-           if (signPos == string::npos) {
-               if (!isDouble(body)) return false;
-               value = Complex(0.0, strtod(body.c_str(), nullptr));
-               return true;
-           }
-
-
-           string realPart = body.substr(0, signPos);
-           string imagPart = body.substr(signPos);
-           if (!isDouble(realPart)) return false;
-
-
-           double imag = 0.0;
-           if (imagPart == "+") {
-               imag = 1.0;
-           } else if (imagPart == "-") {
-               imag = -1.0;
-           } else {
-               if (!isDouble(imagPart)) return false;
-               imag = strtod(imagPart.c_str(), nullptr);
-           }
-
-
-           value = Complex(strtod(realPart.c_str(), nullptr), imag);
-           return true;
-       };
-
+            value = Complex(strtod(realPart.c_str(), nullptr), imag);
+            return true;
+        };
 
         auto parseComplexMatrix = [&](const string& dataStr, int rows, int cols, const string& name, string& error) -> vector<vector<Complex>> {
             vector<vector<Complex>> result(rows, vector<Complex>(cols));
@@ -1353,7 +1345,6 @@ void handleRequest(const string& request, string& responseStr)
             string token;
             bool inQuotes = false;
             bool hasQuotes = false;
-
 
             for (char c : dataStr) {
                 if (c == '"') {
@@ -1367,7 +1358,6 @@ void handleRequest(const string& request, string& responseStr)
                     token += c;
                 }
             }
-
 
             if (!hasQuotes) {
                 token.clear();
@@ -1384,32 +1374,27 @@ void handleRequest(const string& request, string& responseStr)
                 if (!token.empty()) tokens.push_back(token);
             }
 
+            if ((int)tokens.size() < rows * cols) {
+                error = "❌ Ошибка: в матрице " + name + " недостаточно данных (" + to_string(tokens.size()) + " чисел, ожидается " + to_string(rows * cols) + ")";
+                return {};
+            }
 
-           if ((int)tokens.size() < rows * cols) {
-               error = "❌ Ошибка: в матрице " + name + " недостаточно данных (" + to_string(tokens.size()) + " чисел, ожидается " + to_string(rows * cols) + ")";
-               return {};
-           }
+            int idx = 0;
+            for (int i = 0; i < rows && idx < (int)tokens.size(); i++) {
+                for (int j = 0; j < cols && idx < (int)tokens.size(); j++) {
+                    Complex parsed;
+                    if (!parseComplexNumber(tokens[idx], parsed)) {
+                        error = "❌ Ошибка: в матрице " + name + " некорректное комплексное число '" + tokens[idx] + "'";
+                        return {};
+                    }
+                    result[i][j] = parsed;
+                    idx++;
+                }
+            }
 
-
-           int idx = 0;
-           for (int i = 0; i < rows && idx < (int)tokens.size(); i++) {
-               for (int j = 0; j < cols && idx < (int)tokens.size(); j++) {
-                   Complex parsed;
-                   if (!parseComplexNumber(tokens[idx], parsed)) {
-                       error = "❌ Ошибка: в матрице " + name + " некорректное комплексное число '" + tokens[idx] + "'";
-                       return {};
-                   }
-                   result[i][j] = parsed;
-                   idx++;
-               }
-           }
-
-
-           return result;
-       };
+            return result;
+        };
         
-
-
         string result;
         string errorMsg;
 
@@ -1419,7 +1404,6 @@ void handleRequest(const string& request, string& responseStr)
             int cols1 = atoi(params["cols1"].c_str());
             string data1Str = params["data1"];
             
-            // Проверка размеров
             if (rows1 <= 0 || rows1 > 10 || cols1 <= 0 || cols1 > 10) {
                 result = "❌ Ошибка: размеры матрицы должны быть от 1 до 10";
                 responseStr = responseHtml(200, result);
@@ -1472,14 +1456,10 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr1;
                     delete[] arr2;
                 }
-                
-
 
                 responseStr = responseHtml(200, result);
                 return;
             }
-
-
 
             if (operation == "multiply_scalar")
             {
@@ -1492,13 +1472,11 @@ void handleRequest(const string& request, string& responseStr)
                     return;
                 }
 
-
                 auto m1Complex = parseComplexMatrix(data1Str, rows1, cols1, "№1", errorMsg);
                 if (!errorMsg.empty()) {
                     responseStr = responseHtml(200, errorMsg);
                     return;
                 }
-
 
                 Complex** arr1 = new Complex*[rows1];
                 for (int i = 0; i < rows1; i++) {
@@ -1513,7 +1491,6 @@ void handleRequest(const string& request, string& responseStr)
                 for (int i = 0; i < rows1; i++) delete[] arr1[i];
                 delete[] arr1;
 
-
                 responseStr = responseHtml(200, result);
                 return;
             }
@@ -1525,9 +1502,6 @@ void handleRequest(const string& request, string& responseStr)
                     responseStr = responseHtml(200, errorMsg);
                     return;
                 }
-
-
-
 
                 Complex** arr1 = new Complex*[rows1];
                 for (int i = 0; i < rows1; i++) {
@@ -1543,30 +1517,20 @@ void handleRequest(const string& request, string& responseStr)
                 for (int i = 0; i < rows1; i++) delete[] arr1[i];
                 delete[] arr1;
 
-
-
-
                 responseStr = responseHtml(200, result);
                 return;
             }
-
 
             if (operation == "swap_rows")
             {
                 int row1 = atoi(params["param1"].c_str());
                 int row2 = atoi(params["param2"].c_str());
 
-
-
-
                 auto m1Complex = parseComplexMatrix(data1Str, rows1, cols1, "№1", errorMsg);
                 if (!errorMsg.empty()) {
                     responseStr = responseHtml(200, errorMsg);
                     return;
                 }
-
-
-
 
                 if (row1 < 0 || row1 >= rows1 || row2 < 0 || row2 >= rows1) {
                     result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
@@ -1585,9 +1549,6 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr1;
                 }
 
-
-
-
                 responseStr = responseHtml(200, result);
                 return;
             }
@@ -1597,7 +1558,6 @@ void handleRequest(const string& request, string& responseStr)
                 int row = atoi(params["param1"].c_str());
                 string scalarStr = params["param2"];
 
-
                 Complex scalar;
                 if (!parseComplexNumber(scalarStr, scalar)) {
                     result = "❌ Ошибка: скаляр содержит некорректное комплексное число";
@@ -1605,13 +1565,11 @@ void handleRequest(const string& request, string& responseStr)
                     return;
                 }
 
-
                 auto m1Complex = parseComplexMatrix(data1Str, rows1, cols1, "№1", errorMsg);
                 if (!errorMsg.empty()) {
                     responseStr = responseHtml(200, errorMsg);
                     return;
                 }
-
 
                 if (row < 0 || row >= rows1) {
                     result = "❌ Ошибка: номер строки должен быть от 0 до " + to_string(rows1 - 1);
@@ -1630,16 +1588,15 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr1;
                 }
 
-
                 responseStr = responseHtml(200, result);
                 return;
             }
+
             if (operation == "add_row")
             {
                 int from = atoi(params["param1"].c_str());
                 int to = atoi(params["param2"].c_str());
                 string lambdaStr = params.find("param3") != params.end() ? params["param3"] : "1";
-
 
                 Complex lambda;
                 if (!parseComplexNumber(lambdaStr, lambda)) {
@@ -1648,13 +1605,11 @@ void handleRequest(const string& request, string& responseStr)
                     return;
                 }
 
-
                 auto m1Complex = parseComplexMatrix(data1Str, rows1, cols1, "№1", errorMsg);
                 if (!errorMsg.empty()) {
                     responseStr = responseHtml(200, errorMsg);
                     return;
                 }
-
 
                 if (from < 0 || from >= rows1 || to < 0 || to >= rows1) {
                     result = "❌ Ошибка: номера строк должны быть от 0 до " + to_string(rows1 - 1);
@@ -1673,22 +1628,20 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr1;
                 }
 
-
                 responseStr = responseHtml(200, result);
                 return;
             }
+
             if (operation == "swap_cols")
             {
                 int col1 = atoi(params["param1"].c_str());
                 int col2 = atoi(params["param2"].c_str());
-
 
                 auto m1Complex = parseComplexMatrix(data1Str, rows1, cols1, "№1", errorMsg);
                 if (!errorMsg.empty()) {
                     responseStr = responseHtml(200, errorMsg);
                     return;
                 }
-
 
                 if (col1 < 0 || col1 >= cols1 || col2 < 0 || col2 >= cols1) {
                     result = "❌ Ошибка: номера столбцов должны быть от 0 до " + to_string(cols1 - 1);
@@ -1707,10 +1660,10 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr1;
                 }
 
-
                 responseStr = responseHtml(200, result);
                 return;
             }
+
             if (operation == "multiply_col")
             {
                 int col = atoi(params["param1"].c_str());
@@ -1730,7 +1683,6 @@ void handleRequest(const string& request, string& responseStr)
                     return;
                 }
 
-
                 if (col < 0 || col >= cols1) {
                     result = "❌ Ошибка: номер столбца должен быть от 0 до " + to_string(cols1 - 1);
                 } else {
@@ -1748,10 +1700,10 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr1;
                 }
 
-
                 responseStr = responseHtml(200, result);
                 return;
             }
+
             if (operation == "add_col")
             {
                 int from = atoi(params["param1"].c_str());
@@ -1771,7 +1723,6 @@ void handleRequest(const string& request, string& responseStr)
                     return;
                 }
 
-
                 if (from < 0 || from >= cols1 || to < 0 || to >= cols1) {
                     result = "❌ Ошибка: номера столбцов должны быть от 0 до " + to_string(cols1 - 1);
                 } else {
@@ -1789,20 +1740,18 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr1;
                 }
 
-
                 responseStr = responseHtml(200, result);
                 return;
             }
 
-            
-            // Парсим первую матрицу
+            // Парсим первую матрицу для int
             auto m1 = parseMatrix(data1Str, rows1, cols1, "№1", errorMsg);
             if (!errorMsg.empty()) {
                 responseStr = responseHtml(200, errorMsg);
                 return;
             }
             
-            if (operation == "norm") 
+            if (operation == "norm_int") 
             {
                 int** arr1 = new int*[rows1];
                 for (int i = 0; i < rows1; i++) {
@@ -1825,7 +1774,7 @@ void handleRequest(const string& request, string& responseStr)
                 for (int i = 0; i < rows1; i++) delete[] arr1[i];
                 delete[] arr1;
             }
-            else if (operation == "multiply_scalar") 
+            else if (operation == "multiply_scalar_int") 
             {
                 string scalarStr = params["param1"];
                 if (!isInt(scalarStr)) {
@@ -1853,7 +1802,7 @@ void handleRequest(const string& request, string& responseStr)
                 for (int i = 0; i < rows1; i++) delete[] arr1[i];
                 delete[] arr1;
             }
-            else if (operation == "add") 
+            else if (operation == "add_int") 
             {
                 int rows2 = atoi(params["rows2"].c_str());
                 int cols2 = atoi(params["cols2"].c_str());
@@ -1894,7 +1843,7 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr2;
                 }
             }
-            else if (operation == "multiply_col") 
+            else if (operation == "multiply_col_int") 
             {
                 int col = atoi(params["param1"].c_str());
                 string scalarStr = params["param2"];
@@ -1928,7 +1877,7 @@ void handleRequest(const string& request, string& responseStr)
                     delete[] arr1;
                 }
             }
-            else if (operation == "add_col") 
+            else if (operation == "add_col_int") 
             {
                 int from = atoi(params["param1"].c_str());
                 int to = atoi(params["param2"].c_str());

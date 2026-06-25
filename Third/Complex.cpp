@@ -2,7 +2,7 @@
 
 Complex::Complex() : Re(0.0), Im(0.0) {}
 
-Complex::Complex(int value) : Re((double)value), Im(0.0) {}
+Complex::Complex(int value) : Re((double)value), Im(0.0) {} 
 
 Complex::Complex(double Re, double Im) : Re(Re), Im(Im) {}
 

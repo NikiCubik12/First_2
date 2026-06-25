@@ -4,11 +4,13 @@
 #include <cstddef>
 #include <stdexcept>
 #include <string>
+#include <optional>
 #include "Sequence.hpp"
 #include "MutableArraySequence.hpp"
 
 template <class T>
-class ICollection {
+class ICollection 
+{
     public:
     virtual ~ICollection() = default;
     virtual T Get(size_t index) const = 0;
@@ -21,8 +23,8 @@ template <class T>
 class Option 
 {
     private:
-    T* _value;
-    bool _hasValue;
+    alignas(T) unsigned char value[sizeof(T)];
+    bool HasValue;
     
     public:
     Option();
@@ -41,16 +43,6 @@ class Option
     
     Option<T> Where(bool (*predicate)(T)) const;
     T OrElse(const T& defaultValue) const;
-};
-
-template <class T>
-class TryHelpers 
-{
-    public:
-    static Option<T> TryGet(Sequence<T>* seq, size_t index);
-    static Option<T> TryGetFirst(Sequence<T>* seq);
-    static Option<T> TryGetLast(Sequence<T>* seq);
-    static Option<T> TryFind(Sequence<T>* seq, bool (*predicate)(T));
 };
 
 template <class T, class R>

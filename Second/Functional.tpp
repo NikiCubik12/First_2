@@ -4,22 +4,22 @@
 #include "MutableArraySequence.hpp"
 
 template <class T>
-Option<T>::Option() : _value(nullptr), _hasValue(false) {}
+Option<T>::Option() : value(nullptr), HasValue(false) {}
 
 template <class T>
-Option<T>::Option(const T& value) : _value(new T(value)), _hasValue(true) {}
+Option<T>::Option(const T& value) : value(new T(value)), HasValue(true) {}
 
 template <class T>
-Option<T>::Option(const Option& other) : _value(nullptr), _hasValue(other._hasValue) 
+Option<T>::Option(const Option& other) : value(nullptr), HasValue(other.HasValue) 
 {
-    if (_hasValue) 
-        _value = new T(*other._value);
+    if (HasValue) 
+        value = new T(*other.value);
 }
 
 template <class T>
 Option<T>::~Option() 
 { 
-    delete _value; 
+    delete value; 
 }
 
 template <class T>
@@ -27,12 +27,12 @@ Option<T>& Option<T>::operator=(const Option& other)
 {
     if (this != &other) 
     {
-        delete _value;
-        _hasValue = other._hasValue;
-        if (_hasValue) 
-            _value = new T(*other._value);
+        delete value;
+        HasValue = other.HasValue;
+        if (HasValue) 
+            value = new T(*other.value);
         else 
-            _value = nullptr;
+            value = nullptr;
     }
     return *this;
 }
@@ -40,45 +40,46 @@ Option<T>& Option<T>::operator=(const Option& other)
 template <class T>
 bool Option<T>::IsSome() const 
 {
-    return _hasValue; 
+    return HasValue; 
 }
 
 template <class T>
 bool Option<T>::IsNone() const 
 { 
-    return !_hasValue; 
+    return !HasValue; 
 }
 
 template <class T>
 T Option<T>::GetValue() const 
 {
-    if (!_hasValue) 
+    if (!HasValue) 
         throw std::runtime_error("Ошибка: Option не содержит значения");
-    return *_value;
+    return *value;
 }
 
 template <class T>
 T Option<T>::GetValueOrDefault(const T& defaultValue) const 
 {
-    return _hasValue ? *_value : defaultValue;
+    return HasValue ? *value : defaultValue;
 }
 
 template <class T>
 template <class R>
-Option<R> Option<T>::Map(R (*func)(T)) const {
-    if (!_hasValue || !func) return Option<R>();
-    return Option<R>(func(*_value));
+Option<R> Option<T>::Map(R (*func)(T)) const 
+{
+    if (!HasValue || !func) return Option<R>();
+    return Option<R>(func(*value));
 }
 
 template <class T>
 Option<T> Option<T>::Where(bool (*predicate)(T)) const {
-    if (!_hasValue || !predicate) return Option<T>();
-    return predicate(*_value) ? *this : Option<T>();
+    if (!HasValue || !predicate) return Option<T>();
+    return predicate(*value) ? *this : Option<T>();
 }
 
 template <class T>
 T Option<T>::OrElse(const T& defaultValue) const {
-    return _hasValue ? *_value : defaultValue;
+    return HasValue ? *value : defaultValue;
 }
 
 
@@ -115,7 +116,8 @@ Option<T> TryHelpers<T>::TryGetLast(Sequence<T>* seq)
 template <class T>
 Option<T> TryHelpers<T>::TryFind(Sequence<T>* seq, bool (*predicate)(T)) 
 {
-    if (!seq || !predicate) return Option<T>();
+    if (!seq || !predicate)     
+        return Option<T>();
     for (size_t i = 0; i < seq->GetLength(); i++) 
     {
         T val = seq->Get(i);

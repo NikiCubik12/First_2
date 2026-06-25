@@ -13,38 +13,38 @@ class SequenceException : public std::exception
     string message;
     
     public:
-    explicit SequenceException(const string& msg);
+    SequenceException(const string& msg);
     const char* what() const noexcept override;
 };
 
 class IndexOutOfRangeException : public SequenceException
 {
     public:
-    explicit IndexOutOfRangeException(const string& msg);
+    IndexOutOfRangeException(const string& msg);
 };
 
 class SequenceEmptyException : public SequenceException
 {
     public:
-    explicit SequenceEmptyException(const string& msg);
+    SequenceEmptyException(const string& msg);
 };
 
 class NullPointerException : public SequenceException
 {
     public:
-    explicit NullPointerException(const string& msg);
+    NullPointerException(const string& msg);
 };
 
 class InvalidBitException : public SequenceException
 {
     public:
-    explicit InvalidBitException(const string& msg);
+    InvalidBitException(const string& msg);
 };
 
 class DifferentSizeException : public SequenceException
 {
     public:
-    explicit DifferentSizeException(const string& msg);
+    DifferentSizeException(const string& msg);
 };
 
 template <class T> class Sequence
@@ -64,9 +64,9 @@ template <class T> class Sequence
     virtual Sequence<T>* Concat(Sequence<T>* list) = 0;
     
     protected:
-    virtual Sequence<T>* AppendImpl(const T& item) = 0;
-    virtual Sequence<T>* InsertAtImpl(const T& item, size_t index) = 0;
-    virtual Sequence<T>* PrependImpl(const T& item) = 0;
+    virtual Sequence<T>* AppendImpl(T item) = 0;
+    virtual Sequence<T>* InsertAtImpl(T item, size_t index) = 0;
+    virtual Sequence<T>* PrependImpl(T item) = 0;
     virtual Sequence<T>* instance() = 0;
 };
 

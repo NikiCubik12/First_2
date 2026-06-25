@@ -8,14 +8,14 @@ Sequence<T>* ArraySequence<T>::instance()
 }
 
 template <class T>
-Sequence<T>* ArraySequence<T>::AppendImpl(const T& item)
+Sequence<T>* ArraySequence<T>::AppendImpl(T item)
 {
     data->Append(item);
     return this;
 }
 
 template <class T>
-Sequence<T>* ArraySequence<T>::InsertAtImpl(const T& item, size_t index)
+Sequence<T>* ArraySequence<T>::InsertAtImpl(T item, size_t index)
 {
     if (index > data->GetSize())
     {
@@ -26,7 +26,7 @@ Sequence<T>* ArraySequence<T>::InsertAtImpl(const T& item, size_t index)
 }
 
 template <class T>
-Sequence<T>* ArraySequence<T>::PrependImpl(const T& item)
+Sequence<T>* ArraySequence<T>::PrependImpl(T item)
 {
     data->Prepend(item);
     return this;

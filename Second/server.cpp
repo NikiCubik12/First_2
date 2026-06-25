@@ -7,7 +7,6 @@
 #include <climits>
 #include <cctype>
 #include <memory>
-#include <vector>
 #include <regex>
 #include <algorithm>
 
@@ -341,16 +340,22 @@ private:
         BitSequence* bitSeq;
         SeqType type;
         bool isBit;
-        
-        vector<Sequence<int>*> tempIntSeqs;
-        vector<BitSequence*> tempBitSeqs;
+
+        DynamicArray<Sequence<int>*> tempIntSeqs;
+        DynamicArray<BitSequence*> tempBitSeqs;
         
         SequenceData() : intSeq(nullptr), bitSeq(nullptr), type(ARRAY_MUTABLE), isBit(false) {}
         
         ~SequenceData() {
             clear();
-            for (auto seq : tempIntSeqs) delete seq;
-            for (auto seq : tempBitSeqs) delete seq;
+            for (size_t i = 0; i < tempIntSeqs.GetSize(); i++)
+            {
+                delete tempIntSeqs.Get(i);
+            }
+            for (size_t i = 0; i < tempBitSeqs.GetSize(); i++)
+            {
+                delete tempBitSeqs.Get(i);
+            }
         }
         
         void clear() {
@@ -445,14 +450,14 @@ private:
             
             if (isBit) {
                 BitSequence* sub = bitSeq->GetSubsequence(start, end);
-                tempBitSeqs.push_back(sub);
+                tempBitSeqs.Append(sub);
                 for (size_t i = 0; i < sub->GetLength(); i++) {
                     if (i > 0) ss << ", ";
                     ss << sub->Get(i);
                 }
             } else {
                 Sequence<int>* sub = intSeq->GetSubsequence(start, end);
-                tempIntSeqs.push_back(sub);
+                tempIntSeqs.Append(sub);
                 for (size_t i = 0; i < sub->GetLength(); i++) {
                     if (i > 0) ss << ", ";
                     ss << sub->Get(i);
@@ -463,11 +468,18 @@ private:
             return ss.str();
         }
         
-        void clearTempSubsequences() {
-            for (auto seq : tempIntSeqs) delete seq;
-            for (auto seq : tempBitSeqs) delete seq;
-            tempIntSeqs.clear();
-            tempBitSeqs.clear();
+        void clearTempSubsequences()
+        {
+            for (size_t i = 0; i < tempIntSeqs.GetSize(); i++)
+            {
+                delete tempIntSeqs.Get(i);
+            }
+            for (size_t i = 0; i < tempBitSeqs.GetSize(); i++)
+            {
+                delete tempBitSeqs.Get(i);
+            }
+            tempIntSeqs.Resize(0);
+            tempBitSeqs.Resize(0);
         }
     };
     
@@ -1364,7 +1376,7 @@ void handleRequest(const string& request, string& responseStr)
         }
         
         // Парсим числа
-        vector<int> numbers;
+        DynamicArray<int> numbers;
         stringstream ssInput(inputStr);
         string num;
         
@@ -1404,7 +1416,7 @@ void handleRequest(const string& request, string& responseStr)
             
             // Преобразуем в число
             try {
-                numbers.push_back(stoi(trimmed));
+                numbers.Append(stoi(trimmed));
             } catch (const std::out_of_range&) {
                 responseStr = responseHtml(200, "❌ Ошибка: число слишком большое. Введите числа в диапазоне от -2147483648 до 2147483647");
                 return;
@@ -1414,18 +1426,18 @@ void handleRequest(const string& request, string& responseStr)
             }
         }
         
-        if (numbers.empty()) {
+        if (numbers.GetSize() == 0) {
             responseStr = responseHtml(200, "❌ Ошибка: не удалось распознать числа. Введите числа через запятую. Пример: 1,2,3,4,5");
             return;
         }
         
         // Проверка на слишком длинную последовательность
-        if (numbers.size() > 1000) {
+        if (numbers.GetSize() > 1000) {
             responseStr = responseHtml(200, "❌ Ошибка: слишком много элементов (максимум 1000). Введите меньше чисел.");
             return;
         }
         
-        MutableArraySequence<int> seq(numbers.data(), numbers.size());
+        MutableArraySequence<int> seq(numbers.GetData(), numbers.GetSize());
         string result;
         
         try 
@@ -1560,19 +1572,19 @@ void handleRequest(const string& request, string& responseStr)
             }
             else if (operation == "reduce_max") 
             {
-                if (numbers.empty()) {
+                if (numbers.GetSize() == 0) {
                     result = "❌ Нет элементов для поиска максимума";
                 } else {
-                    int max = Reduce<int, int>(&seq, numbers[0], [](int acc, int x) -> int { return (x > acc) ? x : acc; });
+                    int max = Reduce<int, int>(&seq, numbers.GetData()[0], [](int acc, int x) -> int { return (x > acc) ? x : acc; });
                     result = "Максимум: " + to_string(max);
                 }
             }
             else if (operation == "reduce_min") 
             {
-                if (numbers.empty()) {
+                if (numbers.GetSize() == 0) {
                     result = "❌ Нет элементов для поиска минимума";
                 } else {
-                    int min = Reduce<int, int>(&seq, numbers[0], [](int acc, int x) -> int { return (x < acc) ? x : acc; });
+                    int min = Reduce<int, int>(&seq, numbers.GetData()[0], [](int acc, int x) -> int { return (x < acc) ? x : acc; });
                     result = "Минимум: " + to_string(min);
                 }
             }

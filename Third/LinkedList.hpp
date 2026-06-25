@@ -14,7 +14,7 @@ template <class T> class Node
     Node* next{nullptr};
 
     Node();
-    explicit Node(const T& key);
+    Node(T key);
 };
 
 template <class T> class LinkedList
@@ -38,9 +38,9 @@ template <class T> class LinkedList
     T Get(size_t index) const;
     LinkedList<T>* GetSubList(size_t start, size_t end) const;
     size_t GetLength() const;
-    void Append(const T& item);
-    void Prepend(const T& item);
-    void InsertAt(const T& item, size_t index);
+    void Append(T item);
+    void Prepend(T item);
+    void InsertAt(T item, size_t index);
     LinkedList<T>* Concat(LinkedList<T>* list) const;
     void ClearList();
 };

@@ -22,8 +22,8 @@ template <class T>
 class Option 
 {
     private:
-    T* _value;
-    bool _hasValue;
+    T* value;
+    bool HasValue;
     
     public:
     Option();

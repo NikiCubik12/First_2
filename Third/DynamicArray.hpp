@@ -13,7 +13,7 @@ template <class T> class DynamicArray
 {
     private:
     T* items;
-    size_t size;  
+    size_t size;
 
     public:
     DynamicArray();
@@ -23,9 +23,9 @@ template <class T> class DynamicArray
     DynamicArray(std::initializer_list<T> list);
     ~DynamicArray();
 
-    void Append(const T& item);
-    void InsertAt(const T& item, size_t index);
-    void Prepend(const T& item);
+    void Append(T item);
+    void InsertAt(T item, size_t index);
+    void Prepend(T item);
     void RemoveAt(size_t index);
     T Get(size_t index) const;
     size_t GetSize() const;

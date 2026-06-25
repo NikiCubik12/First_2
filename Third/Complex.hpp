@@ -19,7 +19,6 @@ public:
     Complex(int value);
     Complex(double Re, double Im);
     Complex(const Complex& rhs);
-    
     ~Complex() = default;
     
     Complex& operator=(const Complex& rhs);

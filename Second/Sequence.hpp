@@ -14,7 +14,7 @@ class SequenceException : public std::exception
     
     public:
     SequenceException(const string& msg);
-    const char* what() const noexcept override;
+    const char* what() const noexcept override; 
 };
 
 class IndexOutOfRangeException : public SequenceException

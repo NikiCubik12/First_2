@@ -8,14 +8,14 @@ Sequence<T>* ListSequence<T>::instance()
 }
 
 template <class T>
-Sequence<T>* ListSequence<T>::AppendImpl(const T& item)
+Sequence<T>* ListSequence<T>::AppendImpl(T item)
 {
     items->Append(item);
     return this;
 }
 
 template <class T>
-Sequence<T>* ListSequence<T>::InsertAtImpl(const T& item, size_t index)
+Sequence<T>* ListSequence<T>::InsertAtImpl(T item, size_t index)
 {
     if (index > items->GetLength())
     {
@@ -26,7 +26,7 @@ Sequence<T>* ListSequence<T>::InsertAtImpl(const T& item, size_t index)
 }
 
 template <class T>
-Sequence<T>* ListSequence<T>::PrependImpl(const T& item)
+Sequence<T>* ListSequence<T>::PrependImpl(T item)
 {
     items->Prepend(item);
     return this;

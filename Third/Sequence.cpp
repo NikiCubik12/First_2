@@ -3,9 +3,6 @@ using std::string;
 
 SequenceException::SequenceException(const string& msg) : message(msg) {}
 
-// первый конст - неизменяемое сообщение об ошибке
-// второй конст - метод не модет изменить объект 
-// noexpect - метод не бросает исключения
 const char* SequenceException::what() const noexcept
 { 
     return message.c_str(); 
@@ -20,5 +17,3 @@ NullPointerException::NullPointerException(const string& msg) : SequenceExceptio
 InvalidBitException::InvalidBitException(const string& msg) : SequenceException(msg) {}
 
 DifferentSizeException::DifferentSizeException(const string& msg) : SequenceException(msg) {}
-
-// (поскольку методы не шаблонные, то мы их кидаем в cpp)

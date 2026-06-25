@@ -4,22 +4,22 @@
 #include "MutableArraySequence.hpp"
 
 template <class T>
-Option<T>::Option() : _value(nullptr), _hasValue(false) {}
+Option<T>::Option() : value(nullptr), HasValue(false) {}
 
 template <class T>
-Option<T>::Option(const T& value) : _value(new T(value)), _hasValue(true) {}
+Option<T>::Option(const T& value) : value(new T(value)), HasValue(true) {}
 
 template <class T>
-Option<T>::Option(const Option& other) : _value(nullptr), _hasValue(other._hasValue) 
+Option<T>::Option(const Option& other) : value(nullptr), HasValue(other.HasValue) 
 {
-    if (_hasValue) 
-        _value = new T(*other._value);
+    if (HasValue) 
+        value = new T(*other.value);
 }
 
 template <class T>
 Option<T>::~Option() 
 { 
-    delete _value; 
+    delete value; 
 }
 
 template <class T>
@@ -27,12 +27,12 @@ Option<T>& Option<T>::operator=(const Option& other)
 {
     if (this != &other) 
     {
-        delete _value;
-        _hasValue = other._hasValue;
-        if (_hasValue) 
-            _value = new T(*other._value);
+        delete value;
+        HasValue = other.HasValue;
+        if (HasValue) 
+            value = new T(*other.value);
         else 
-            _value = nullptr;
+            value = nullptr;
     }
     return *this;
 }
@@ -40,91 +40,47 @@ Option<T>& Option<T>::operator=(const Option& other)
 template <class T>
 bool Option<T>::IsSome() const 
 {
-    return _hasValue; 
+    return HasValue; 
 }
 
 template <class T>
 bool Option<T>::IsNone() const 
 { 
-    return !_hasValue; 
+    return !HasValue; 
 }
 
 template <class T>
 T Option<T>::GetValue() const 
 {
-    if (!_hasValue) 
+    if (!HasValue) 
         throw std::runtime_error("Ошибка: Option не содержит значения");
-    return *_value;
+    return *reinterpret_cast<T*>(value);
 }
 
 template <class T>
 T Option<T>::GetValueOrDefault(const T& defaultValue) const 
 {
-    return _hasValue ? *_value : defaultValue;
+    return HasValue ? *reinterpret_cast<T*>(value) : defaultValue;
 }
 
 template <class T>
 template <class R>
-Option<R> Option<T>::Map(R (*func)(T)) const {
-    if (!_hasValue || !func) return Option<R>();
-    return Option<R>(func(*_value));
+Option<R> Option<T>::Map(R (*func)(T)) const 
+{
+    if (!HasValue || !func) return Option<R>();
+    return Option<R>(func(*reinterpret_cast<T*>(value)));
 }
 
 template <class T>
 Option<T> Option<T>::Where(bool (*predicate)(T)) const {
-    if (!_hasValue || !predicate) return Option<T>();
-    return predicate(*_value) ? *this : Option<T>();
+    if (!HasValue || !predicate) return Option<T>();
+    return predicate(*reinterpret_cast<T*>(value)) ? *this : Option<T>();
 }
 
 template <class T>
 T Option<T>::OrElse(const T& defaultValue) const {
-    return _hasValue ? *_value : defaultValue;
+    return HasValue ? *reinterpret_cast<T*>(value) : defaultValue;
 }
-
-
-template <class T>
-Option<T> TryHelpers<T>::TryGet(Sequence<T>* seq, size_t index) 
-{
-    if (!seq || index >= seq->GetLength()) return Option<T>();
-    try 
-    {
-        return Option<T>(seq->Get(index));
-    } 
-    catch (...) 
-    {
-        return Option<T>();
-    }
-}
-
-template <class T>
-Option<T> TryHelpers<T>::TryGetFirst(Sequence<T>* seq) 
-{
-    if (!seq || seq->GetLength() == 0) 
-        return Option<T>();
-    return TryGet(seq, 0);
-}
-
-template <class T>
-Option<T> TryHelpers<T>::TryGetLast(Sequence<T>* seq) 
-{
-    if (!seq || seq->GetLength() == 0) 
-        return Option<T>();
-    return TryGet(seq, seq->GetLength() - 1);
-}
-
-template <class T>
-Option<T> TryHelpers<T>::TryFind(Sequence<T>* seq, bool (*predicate)(T)) 
-{
-    if (!seq || !predicate) return Option<T>();
-    for (size_t i = 0; i < seq->GetLength(); i++) 
-    {
-        T val = seq->Get(i);
-        if (predicate(val)) 
-            return Option<T>(val);
-    }
-    return Option<T>();
-}
-
 
 template <class T, class R>
 MutableArraySequence<R>* MapWithIndex(Sequence<T>* seq, R (*func)(T, size_t)) 
@@ -142,7 +98,6 @@ MutableArraySequence<R>* MapWithIndex(Sequence<T>* seq, R (*func)(T, size_t))
     return result;
 }
 
-
 template <class T, class R>
 MutableArraySequence<R>* Map(Sequence<T>* seq, R (*func)(T)) 
 {
@@ -158,7 +113,6 @@ MutableArraySequence<R>* Map(Sequence<T>* seq, R (*func)(T))
     }
     return result;
 }
-
 
 template <class T>
 MutableArraySequence<T>* Filter(Sequence<T>* seq, bool (*predicate)(T)) {
@@ -179,7 +133,6 @@ MutableArraySequence<T>* Filter(Sequence<T>* seq, bool (*predicate)(T)) {
     return result;
 }
 
-
 template <class T, class R>
 R Reduce(Sequence<T>* seq, R initialValue, R (*func)(R, T)) 
 {
@@ -195,7 +148,6 @@ R Reduce(Sequence<T>* seq, R initialValue, R (*func)(R, T))
     }
     return result;
 }
-
 
 template <class T>
 MutableArraySequence<MutableArraySequence<T>*>* GetAllPrefixes(Sequence<T>* seq) 
@@ -215,7 +167,6 @@ MutableArraySequence<MutableArraySequence<T>*>* GetAllPrefixes(Sequence<T>* seq)
     
     return result;
 }
-
 
 template <class T>
 MutableArraySequence<MutableArraySequence<T>*>* GetAllPostfixes(Sequence<T>* seq) {
@@ -238,8 +189,10 @@ MutableArraySequence<MutableArraySequence<T>*>* GetAllPostfixes(Sequence<T>* seq
 template <class T, class R>
 R ReduceWithIndex(Sequence<T>* seq, R initialValue, R (*func)(R, T, size_t))
 {
-    if (!seq) throw std::invalid_argument("Ошибка: ReduceWithIndex - последовательность не может быть пустой");
-    if (!func) throw std::invalid_argument("Ошибка: ReduceWithIndex - функция не может быть пустой");
+    if (!seq) 
+        throw std::invalid_argument("Ошибка: ReduceWithIndex - последовательность не может быть пустой");
+    if (!func) 
+        throw std::invalid_argument("Ошибка: ReduceWithIndex - функция не может быть пустой");
     
     R result = initialValue;
     for (size_t i = 0; i < seq->GetLength(); i++) {

@@ -3,14 +3,13 @@
 #include "DynamicArray.hpp"
 #include <cmath>
 #include <iostream>
-#include <iostream>
 
 Sequence<int>* BitSequence::instance()
 {
     return new BitSequence(*this);
 }
 
-BitSequence* BitSequence::AppendImpl(const int& item)
+BitSequence* BitSequence::AppendImpl(int item)
 {
     if (item != 0 && item != 1)
     {
@@ -20,7 +19,7 @@ BitSequence* BitSequence::AppendImpl(const int& item)
     return this;
 }
 
-BitSequence* BitSequence::InsertAtImpl(const int& item, size_t index)
+BitSequence* BitSequence::InsertAtImpl(int item, size_t index)
 {
     if (item != 0 && item != 1)
     {
@@ -34,7 +33,7 @@ BitSequence* BitSequence::InsertAtImpl(const int& item, size_t index)
     return this;
 }
 
-BitSequence* BitSequence::PrependImpl(const int& item)
+BitSequence* BitSequence::PrependImpl(int item)
 {
     if (item != 0 && item != 1)
     {

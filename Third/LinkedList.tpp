@@ -2,10 +2,10 @@
 #define LINKED_LIST_TPP
 
 template <class T>
-Node<T>::Node() {}
+Node<T>::Node() : next(nullptr) {}
 
 template <class T>
-Node<T>::Node(const T& key) : key(key), next(nullptr) {}
+Node<T>::Node(T key) : key(key), next(nullptr) {}
 
 template <class T>
 size_t LinkedList<T>::calculateLength() const
@@ -124,7 +124,7 @@ size_t LinkedList<T>::GetLength() const
 }
 
 template <class T>
-void LinkedList<T>::Append(const T& item)
+void LinkedList<T>::Append(T item)
 {
     Node<T>* newNode = new Node<T>(item);
     if (head == nullptr)
@@ -140,7 +140,7 @@ void LinkedList<T>::Append(const T& item)
 }
 
 template <class T>
-void LinkedList<T>::Prepend(const T& item)
+void LinkedList<T>::Prepend(T item)
 {
     Node<T>* newNode = new Node<T>(item);
     if (head == nullptr)
@@ -156,7 +156,7 @@ void LinkedList<T>::Prepend(const T& item)
 }
 
 template <class T>
-void LinkedList<T>::InsertAt(const T& item, size_t index)
+void LinkedList<T>::InsertAt(T item, size_t index)
 {
     size_t length = calculateLength();
     if (index > length)

@@ -8,49 +8,36 @@ Sequence<T>* ImmutableArraySequence<T>::instance()
 }
 
 template <class T>
-Sequence<T>* ImmutableArraySequence<T>::AppendImpl(const T& item)
+Sequence<T>* ImmutableArraySequence<T>::AppendImpl(T item)
 {
-    // Создаём НОВЫЙ массив на основе текущего
     DynamicArray<T>* newData = new DynamicArray<T>(*this->data);
     newData->Append(item);
-    
-    // Создаём НОВУЮ последовательность
     ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(*newData);
     delete newData;
-    
     return result;
 }
 
 template <class T>
-Sequence<T>* ImmutableArraySequence<T>::InsertAtImpl(const T& item, size_t index)
+Sequence<T>* ImmutableArraySequence<T>::InsertAtImpl(T item, size_t index)
 {
     if (index > this->data->GetSize())
     {
-        throw IndexOutOfRangeException("Индекс выходит за границы в ImmutableArraySequence::InsertAtImpl");
+        throw IndexOutOfRangeException("ImmutableArraySequence::InsertAtImpl index=" + std::to_string(index) + " size=" + std::to_string(this->data->GetSize()));
     }
-    
-    // Создаём НОВЫЙ массив с вставленным элементом
     DynamicArray<T>* newData = new DynamicArray<T>(*this->data);
     newData->InsertAt(item, index);
-    
-    // Создаём НОВУЮ последовательность
     ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(*newData);
     delete newData;
-    
     return result;
 }
 
 template <class T>
-Sequence<T>* ImmutableArraySequence<T>::PrependImpl(const T& item)
+Sequence<T>* ImmutableArraySequence<T>::PrependImpl(T item)
 {
-    // Создаём НОВЫЙ массив с добавленным элементом в начало
     DynamicArray<T>* newData = new DynamicArray<T>(*this->data);
     newData->Prepend(item);
-    
-    // Создаём НОВУЮ последовательность
     ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(*newData);
     delete newData;
-    
     return result;
 }
 

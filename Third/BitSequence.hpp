@@ -13,9 +13,9 @@ class BitSequence : public Sequence<int>
 
     protected:
     Sequence<int>* instance() override;
-    BitSequence* AppendImpl(const int& item) override;
-    BitSequence* InsertAtImpl(const int& item, size_t index) override;
-    BitSequence* PrependImpl(const int& item) override;
+    BitSequence* AppendImpl(int item) override;
+    BitSequence* InsertAtImpl(int item, size_t index) override;
+    BitSequence* PrependImpl(int item) override;
 
     public:
     BitSequence();

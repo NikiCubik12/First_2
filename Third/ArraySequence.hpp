@@ -10,9 +10,9 @@ template <class T> class ArraySequence : public Sequence<T>
     DynamicArray<T>* data;
     
     Sequence<T>* instance() override;
-    Sequence<T>* AppendImpl(const T& item) override;
-    Sequence<T>* InsertAtImpl(const T& item, size_t index) override;
-    Sequence<T>* PrependImpl(const T& item) override;
+    Sequence<T>* AppendImpl(T item) override;
+    Sequence<T>* InsertAtImpl(T item, size_t index) override;
+    Sequence<T>* PrependImpl(T item) override;
 
     public:
     ArraySequence();

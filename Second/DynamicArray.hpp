@@ -30,6 +30,8 @@ template <class T> class DynamicArray
     size_t GetSize() const;
     void Set(size_t index, T value);
     void Resize(size_t newSize);
+    T* GetData();
+    const T* GetData() const;
 };
 
 #include "DynamicArray.tpp"
