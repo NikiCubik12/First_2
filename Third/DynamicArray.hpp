@@ -18,7 +18,7 @@ template <class T> class DynamicArray
     public:
     DynamicArray();
     DynamicArray(T* items, size_t size);
-    DynamicArray(const DynamicArray<T>& rhs);
+    DynamicArray(DynamicArray<T>& rhs);
     DynamicArray(LinkedList<T>& list);
     DynamicArray(std::initializer_list<T> list);
     ~DynamicArray();
@@ -28,7 +28,7 @@ template <class T> class DynamicArray
     void Prepend(T item);
     void RemoveAt(size_t index);
     T Get(size_t index) const;
-    size_t GetSize() const;
+    size_t GetSize();
     void Set(size_t index, T value);
     void Resize(size_t newSize);
 };

@@ -3,49 +3,54 @@
 #include "DynamicArray.hpp"
 #include <cmath>
 #include <iostream>
+#include <clocale>
 
-Sequence<int>* BitSequence::instance()
+Sequence<size_t>* BitSequence::instance()
 {
+    setlocale(LC_ALL, "Rus");
     return new BitSequence(*this);
 }
 
-BitSequence* BitSequence::AppendImpl(int item)
+BitSequence* BitSequence::AppendImpl(size_t item)
 {
+    setlocale(LC_ALL, "Rus");
     if (item != 0 && item != 1)
     {
-        throw InvalidBitException("Р‘РёС‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ 0 РёР»Рё 1");
+        throw InvalidBitException("Бит может быть только 0 или 1");
     }
     bits->Append(item);
     return this;
 }
 
-BitSequence* BitSequence::InsertAtImpl(int item, size_t index)
+BitSequence* BitSequence::InsertAtImpl(size_t item, size_t index)
 {
+    setlocale(LC_ALL, "Rus");
     if (item != 0 && item != 1)
     {
-        throw InvalidBitException("Р‘РёС‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ 0 РёР»Рё 1");
+        throw InvalidBitException("Бит может быть только 0 или 1");
     }
     if (index > bits->GetSize())
     {
-        throw IndexOutOfRangeException("РРЅРґРµРєСЃ РІС‹С…РѕРґРёС‚ Р·Р° РіСЂР°РЅРёС†С‹ РІ BitSequence::InsertAtImpl");
+        throw IndexOutOfRangeException("Индекс выходит за границы в BitSequence::InsertAtImpl");
     }
     bits->InsertAt(item, index);
     return this;
 }
 
-BitSequence* BitSequence::PrependImpl(int item)
+BitSequence* BitSequence::PrependImpl(size_t item)
 {
+    setlocale(LC_ALL, "Rus");
     if (item != 0 && item != 1)
     {
-        throw InvalidBitException("Р‘РёС‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ 0 РёР»Рё 1");
+        throw InvalidBitException("Бит может быть только 0 или 1");
     }
     bits->Prepend(item);
     return this;
 }
 
-BitSequence::BitSequence() : bits(new DynamicArray<int>()) {}
+BitSequence::BitSequence() : bits(new DynamicArray<size_t>()) {}
 
-BitSequence::BitSequence(unsigned int a) : bits(new DynamicArray<int>())
+BitSequence::BitSequence(size_t a) : bits(new DynamicArray<size_t>())
 {
     if (a == 0)
     {
@@ -53,8 +58,8 @@ BitSequence::BitSequence(unsigned int a) : bits(new DynamicArray<int>())
         return;
     }
     
-    unsigned int temp = a;
-    DynamicArray<int> reverseBits;
+    size_t temp = a;
+    DynamicArray<size_t> reverseBits;
     
     while (temp > 0)
     {
@@ -68,29 +73,31 @@ BitSequence::BitSequence(unsigned int a) : bits(new DynamicArray<int>())
     }
 }
 
-BitSequence::BitSequence(int* items, size_t size) : bits(new DynamicArray<int>())
+BitSequence::BitSequence(size_t* items, size_t size) : bits(new DynamicArray<size_t>())
 {
+    setlocale(LC_ALL, "Rus");
     for (size_t i = 0; i < size; i++)
     {
         if (items[i] != 0 && items[i] != 1)
         {
             delete bits;
-            throw InvalidBitException("Р‘РёС‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ 0 РёР»Рё 1");
+            throw InvalidBitException("Бит может быть только 0 или 1");
         }
         bits->Append(items[i]);
     }
 }
 
-BitSequence::BitSequence(const BitSequence& rhs) : bits(new DynamicArray<int>(*rhs.bits)) {}
+BitSequence::BitSequence(BitSequence& rhs) : bits(new DynamicArray<size_t>(*rhs.bits)) {}
 
-BitSequence::BitSequence(std::initializer_list<int> list) : bits(new DynamicArray<int>())
+BitSequence::BitSequence(std::initializer_list<size_t> list) : bits(new DynamicArray<size_t>())
 {
-    for (int val : list)
+    setlocale(LC_ALL, "Rus");
+    for (size_t val : list)
     {
         if (val != 0 && val != 1)
         {
             delete bits;
-            throw InvalidBitException("Р‘РёС‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ 0 РёР»Рё 1");
+            throw InvalidBitException("Бит может быть только 0 или 1");
         }
         bits->Append(val);
     }
@@ -101,43 +108,47 @@ BitSequence::~BitSequence()
     delete bits;
 }
 
-int BitSequence::GetFirst()
+size_t BitSequence::GetFirst()
 {
+    setlocale(LC_ALL, "Rus");
     if (bits->GetSize() == 0)
     {
-        throw SequenceEmptyException("BitSequence РїСѓСЃС‚Р° - РЅРµРІРѕР·РјРѕР¶РЅРѕ РїРѕР»СѓС‡РёС‚СЊ РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚");
+        throw SequenceEmptyException("BitSequence пуста - невозможно получить первый элемент");
     }
     return bits->Get(0);
 }
 
-int BitSequence::GetLast()
+size_t BitSequence::GetLast()
 {
+    setlocale(LC_ALL, "Rus");
     if (bits->GetSize() == 0)
     {
-        throw SequenceEmptyException("BitSequence РїСѓСЃС‚Р° - РЅРµРІРѕР·РјРѕР¶РЅРѕ РїРѕР»СѓС‡РёС‚СЊ РїРѕСЃР»РµРґРЅРёР№ СЌР»РµРјРµРЅС‚");
+        throw SequenceEmptyException("BitSequence пуста - невозможно получить последний элемент");
     }
     return bits->Get(bits->GetSize() - 1);
 }
 
-int BitSequence::Get(size_t index)
+size_t BitSequence::Get(size_t index)
 {
+    setlocale(LC_ALL, "Rus");
     if (index >= bits->GetSize())
     {
-        throw IndexOutOfRangeException("РРЅРґРµРєСЃ РІС‹С…РѕРґРёС‚ Р·Р° РіСЂР°РЅРёС†С‹ РІ BitSequence::Get");
+        throw IndexOutOfRangeException("Индекс выходит за границы в BitSequence::Get");
     }
     return bits->Get(index);
 }
 
 BitSequence* BitSequence::GetSubsequence(size_t start, size_t end)
 {
+    setlocale(LC_ALL, "Rus");
     size_t size = bits->GetSize();
     if (start > end || end >= size)
     {
-        throw IndexOutOfRangeException("РќРµРІРµСЂРЅС‹Рµ РЅР°С‡Р°Р»СЊРЅС‹Р№ РёР»Рё РєРѕРЅРµС‡РЅС‹Р№ РёРЅРґРµРєСЃС‹ РІ BitSequence::GetSubsequence");
+        throw IndexOutOfRangeException("Неверные начальный или конечный индексы в BitSequence::GetSubsequence");
     }
     
     size_t length = end - start + 1;
-    int* subseq = new int[length];
+    size_t* subseq = new size_t[length];
     for (size_t i = 0; i < length; i++)
     {
         subseq[i] = bits->Get(start + i);
@@ -153,11 +164,12 @@ size_t BitSequence::GetLength()
     return bits->GetSize();
 }
 
-Sequence<int>* BitSequence::Concat(Sequence<int>* list)
+Sequence<size_t>* BitSequence::Concat(Sequence<size_t>* list)
 {
+    setlocale(LC_ALL, "Rus");
     if (list == nullptr)
     {
-        throw NullPointerException("РќРµРІРѕР·РјРѕР¶РЅРѕ РѕР±СЉРµРґРёРЅРёС‚СЊ СЃ РЅСѓР»РµРІС‹Рј СѓРєР°Р·Р°С‚РµР»РµРј РІ BitSequence::Concat");
+        throw NullPointerException("Невозможно объединить с нулевым указателем в BitSequence::Concat");
     }
     
     BitSequence* result = new BitSequence(*this);
@@ -167,18 +179,19 @@ Sequence<int>* BitSequence::Concat(Sequence<int>* list)
         if (val != 0 && val != 1)
         {
             delete result;
-            throw InvalidBitException("Р‘РёС‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ 0 РёР»Рё 1");
+            throw InvalidBitException("Бит может быть только 0 или 1");
         }
         result->bits->Append(val);
     }
     return result;
 }
 
-BitSequence* BitSequence::BitAnd(const BitSequence* rhs)
+BitSequence* BitSequence::BitAnd(BitSequence* rhs)
 {
+    setlocale(LC_ALL, "Rus");
     if (bits->GetSize() != rhs->bits->GetSize())
     {
-        throw DifferentSizeException("Р Р°Р·РјРµСЂС‹ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚РµР№ РЅРµ СЃРѕРІРїР°РґР°СЋС‚ РґР»СЏ РѕРїРµСЂР°С†РёРё AND");
+        throw DifferentSizeException("Размеры последовательностей не совпадают для операции AND");
     }
     
     BitSequence* result = new BitSequence();
@@ -189,11 +202,12 @@ BitSequence* BitSequence::BitAnd(const BitSequence* rhs)
     return result;
 }
 
-BitSequence* BitSequence::BitOr(const BitSequence* rhs)
+BitSequence* BitSequence::BitOr(BitSequence* rhs)
 {
+    setlocale(LC_ALL, "Rus");
     if (bits->GetSize() != rhs->bits->GetSize())
     {
-        throw DifferentSizeException("Р Р°Р·РјРµСЂС‹ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚РµР№ РЅРµ СЃРѕРІРїР°РґР°СЋС‚ РґР»СЏ РѕРїРµСЂР°С†РёРё OR");
+        throw DifferentSizeException("Размеры последовательностей не совпадают для операции OR");
     }
     
     BitSequence* result = new BitSequence();
@@ -204,11 +218,12 @@ BitSequence* BitSequence::BitOr(const BitSequence* rhs)
     return result;
 }
 
-BitSequence* BitSequence::BitXor(const BitSequence* rhs)
+BitSequence* BitSequence::BitXor(BitSequence* rhs)
 {
+    setlocale(LC_ALL, "Rus");
     if (bits->GetSize() != rhs->bits->GetSize())
     {
-        throw DifferentSizeException("Р Р°Р·РјРµСЂС‹ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚РµР№ РЅРµ СЃРѕРІРїР°РґР°СЋС‚ РґР»СЏ РѕРїРµСЂР°С†РёРё XOR");
+        throw DifferentSizeException("Размеры последовательностей не совпадают для операции XOR");
     }
     
     BitSequence* result = new BitSequence();
@@ -231,9 +246,10 @@ BitSequence* BitSequence::BitNot()
 
 void BitSequence::Print()
 {
+    setlocale(LC_ALL, "Rus");
     if (bits->GetSize() == 0)
     {
-        throw SequenceEmptyException("BitSequence РїСѓСЃС‚Р° - РЅРµРІРѕР·РјРѕР¶РЅРѕ РІС‹РІРµСЃС‚Рё");
+        throw SequenceEmptyException("BitSequence пуста - невозможно вывести");
     }
     for (size_t i = 0; i < bits->GetSize(); i++)
     {

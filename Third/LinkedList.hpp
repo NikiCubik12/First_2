@@ -11,7 +11,7 @@ template <class T> class Node
 {
     public:
     T key;
-    Node* next{nullptr};
+    Node* next {nullptr};
 
     Node();
     Node(T key);

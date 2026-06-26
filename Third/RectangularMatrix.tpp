@@ -10,7 +10,7 @@
 namespace RectangularMatrixDetail
 {
     template <class T>
-    double ValueNorm(const T& value)
+    double ValueNorm(T value)
     {
         return std::fabs(static_cast<double>(value));
     }
@@ -21,12 +21,12 @@ namespace RectangularMatrixDetail
     }
 
     template <class T>
-    T NormResult(double value, const T*)
+    T NormResult(double value, T*)
     {
         return static_cast<T>(value);
     }
 
-    inline Complex NormResult(double value, const Complex*)
+    inline Complex NormResult(double value, Complex*)
     {
         return Complex(value, 0);
     }
@@ -141,7 +141,7 @@ template <class T>
 size_t RectangularMatrix<T>::GetCols() const { return colsCount; }
 
 template <class T>
-RectangularMatrix<T> RectangularMatrix<T>::Add(const RectangularMatrix<T>& other) const
+RectangularMatrix<T> RectangularMatrix<T>::Add(RectangularMatrix<T> other) 
 {
     if (rowsCount != other.rowsCount || colsCount != other.colsCount)
     {
@@ -160,7 +160,7 @@ RectangularMatrix<T> RectangularMatrix<T>::Add(const RectangularMatrix<T>& other
 }
 
 template <class T>
-RectangularMatrix<T> RectangularMatrix<T>::MultiplyScalar(T lambda) const
+RectangularMatrix<T> RectangularMatrix<T>::MultiplyScalar(T lambda) 
 {
     RectangularMatrix<T> result(rowsCount, colsCount);
     for (size_t i = 0; i < rowsCount; i++)
@@ -174,7 +174,7 @@ RectangularMatrix<T> RectangularMatrix<T>::MultiplyScalar(T lambda) const
 }
 
 template <class T>
-T RectangularMatrix<T>::Norm() const
+T RectangularMatrix<T>::Norm() 
 {
     if (rowsCount == 0 || colsCount == 0) return RectangularMatrixDetail::NormResult(0, static_cast<T*>(nullptr));
     
@@ -193,7 +193,7 @@ T RectangularMatrix<T>::Norm() const
 
 
 template <class T>
-string RectangularMatrix<T>::ToString() const
+string RectangularMatrix<T>::ToString() 
 {
     if (rows == nullptr) return "Матрица не создана";
     
@@ -212,7 +212,6 @@ string RectangularMatrix<T>::ToString() const
     return ss.str();
 }
 
-// ==================== ЭЛЕМЕНТАРНЫЕ ПРЕОБРАЗОВАНИЯ СТРОК ====================
 
 template <class T>
 void RectangularMatrix<T>::SwapRows(size_t i, size_t j)
@@ -263,7 +262,6 @@ void RectangularMatrix<T>::AddRowToRow(size_t from, size_t to, T lambda)
     delete oldToRow;
 }
 
-// ==================== ЭЛЕМЕНТАРНЫЕ ПРЕОБРАЗОВАНИЯ СТОЛБЦОВ ====================
 
 template <class T>
 void RectangularMatrix<T>::SwapCols(size_t i, size_t j)
@@ -342,25 +340,25 @@ void RectangularMatrix<T>::AddColToCol(size_t from, size_t to, T lambda)
 }
 
 template <typename T>
-RectangularMatrix<T> operator+(const RectangularMatrix<T>& m1, const RectangularMatrix<T>& m2)
+RectangularMatrix<T> operator+(RectangularMatrix<T> m1, RectangularMatrix<T> m2)
 {
     return m1.Add(m2);
 }
 
 template <typename T>
-RectangularMatrix<T> operator*(const RectangularMatrix<T>& m, T lambda)
+RectangularMatrix<T> operator*(RectangularMatrix<T> m, T lambda)
 {
     return m.MultiplyScalar(lambda);
 }
 
 template <typename T>
-RectangularMatrix<T> operator*(T lambda, const RectangularMatrix<T>& m)
+RectangularMatrix<T> operator*(T lambda, RectangularMatrix<T> m)
 {
     return m * lambda;
 }
 
 template <typename T>
-ostream& operator<<(ostream& out, const RectangularMatrix<T>& m)
+ostream& operator<<(ostream& out, RectangularMatrix<T> m)
 {
     out << m.ToString();
     return out;

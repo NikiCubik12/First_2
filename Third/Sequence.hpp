@@ -13,38 +13,38 @@ class SequenceException : public std::exception
     string message;
     
     public:
-    SequenceException(const string& msg);
+    SequenceException(string msg);
     const char* what() const noexcept override;
 };
 
 class IndexOutOfRangeException : public SequenceException
 {
     public:
-    IndexOutOfRangeException(const string& msg);
+    IndexOutOfRangeException(string msg);
 };
 
 class SequenceEmptyException : public SequenceException
 {
     public:
-    SequenceEmptyException(const string& msg);
+    SequenceEmptyException(string msg);
 };
 
 class NullPointerException : public SequenceException
 {
     public:
-    NullPointerException(const string& msg);
+    NullPointerException(string msg);
 };
 
 class InvalidBitException : public SequenceException
 {
     public:
-    InvalidBitException(const string& msg);
+    InvalidBitException(string msg);
 };
 
 class DifferentSizeException : public SequenceException
 {
     public:
-    DifferentSizeException(const string& msg);
+    DifferentSizeException(string msg);
 };
 
 template <class T> class Sequence

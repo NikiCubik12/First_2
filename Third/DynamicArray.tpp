@@ -14,7 +14,7 @@ DynamicArray<T>::DynamicArray(T* items, size_t size) : items(new T[size]), size(
 }
 
 template <class T>
-DynamicArray<T>::DynamicArray(const DynamicArray<T>& rhs) : items(new T[rhs.size]), size(rhs.size)
+DynamicArray<T>::DynamicArray(DynamicArray<T>& rhs) : items(new T[rhs.size]), size(rhs.size)
 {
     for (size_t i = 0; i < rhs.size; i++)
     {
@@ -40,7 +40,7 @@ template <class T>
 DynamicArray<T>::DynamicArray(std::initializer_list<T> list) : items(new T[list.size()]), size(list.size())
 {
     size_t i = 0;
-    for (const T& val : list)
+    for (T val : list)
     {
         items[i++] = val;
     }
@@ -127,7 +127,7 @@ T DynamicArray<T>::Get(size_t index) const
 }
 
 template <class T>
-size_t DynamicArray<T>::GetSize() const
+size_t DynamicArray<T>::GetSize()
 {
     return size;
 }

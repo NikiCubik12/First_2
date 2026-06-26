@@ -8,7 +8,7 @@ template <class T> class MutableArraySequence : public ArraySequence<T>
     public:
     MutableArraySequence();
     MutableArraySequence(T* items, size_t count);
-    MutableArraySequence(const DynamicArray<T>& list);
+    MutableArraySequence(DynamicArray<T>& list);
     MutableArraySequence(std::initializer_list<T> list);
     
     void Set(size_t index, T value);

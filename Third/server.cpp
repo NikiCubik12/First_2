@@ -34,7 +34,7 @@ using namespace std;
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
 
-bool safeStoi(const string& str, int& result) 
+bool safeStoi(string str, int& result) 
 {
     if (str.empty()) return false;
     try 
@@ -51,7 +51,7 @@ bool safeStoi(const string& str, int& result)
     }
 }
 
-bool safeSizeT(const string& str, size_t& result, size_t maxSize) 
+bool safeSizeT(string str, size_t& result, size_t maxSize) 
 {
     int temp;
     if (!safeStoi(str, temp)) return false;
@@ -60,14 +60,14 @@ bool safeSizeT(const string& str, size_t& result, size_t maxSize)
     return true;
 }
 
-string trim(const string& str) {
+string trim(string str) {
     size_t start = str.find_first_not_of(" \t\n\r");
     if (start == string::npos) return "";
     size_t end = str.find_last_not_of(" \t\n\r");
     return str.substr(start, end - start + 1);
 }
 
-bool hasSpecialChars(const string& str) {
+bool hasSpecialChars(string str) {
     static const string specialChars = "!@#$%^&*()_+={}[]|\\:;\"'<>?,./`~";
     for (char c : str) {
         if (specialChars.find(c) != string::npos) {
@@ -77,7 +77,7 @@ bool hasSpecialChars(const string& str) {
     return false;
 }
 
-bool hasLetters(const string& str) {
+bool hasLetters(string str) {
     for (char c : str) {
         if (isalpha(static_cast<unsigned char>(c))) {
             return true;
@@ -86,7 +86,7 @@ bool hasLetters(const string& str) {
     return false;
 }
 
-string validateValue(const string& value, bool isBitSequence = false) {
+string validateValue(string value, bool isBitSequence = false) {
     string trimmed = trim(value);
     if (trimmed.empty()) {
         return "❌ Ошибка: значение не может быть пустым";
@@ -110,7 +110,7 @@ string validateValue(const string& value, bool isBitSequence = false) {
     return "";
 }
 
-string validateIndex(const string& idx, size_t currentSize, bool allowEqual = false) {
+string validateIndex(string idx, size_t currentSize, bool allowEqual = false) {
     string trimmed = trim(idx);
     if (trimmed.empty()) {
         return "❌ Ошибка: индекс не может быть пустым";
@@ -135,7 +135,7 @@ string validateIndex(const string& idx, size_t currentSize, bool allowEqual = fa
     return "";
 }
 
-string escapeHtml(const string& s) 
+string escapeHtml(string s) 
 {
     string result;
     for (char c : s) 
@@ -371,7 +371,7 @@ private:
     SequenceData seq2;
     SequenceData concatResult;
 
-    string getBaseType(const string& type) const {
+    string getBaseType(string type) const {
         string base = type;
         size_t pos = base.find(" (");
         if (pos != string::npos) base = base.substr(0, pos);
@@ -382,7 +382,7 @@ public:
     SequenceManager() {}
     ~SequenceManager() { seq1.clear(); seq2.clear(); concatResult.clear(); }
     
-    void createSequence(int id, const string& type, const string& impl) {
+    void createSequence(int id, string type, string impl) {
         SequenceData* target = (id == 1) ? &seq1 : &seq2;
         target->clear();
         target->clearTempSubsequences();
@@ -1087,7 +1087,7 @@ string renderFullPage()
 
 // ==================== HTTP ОТВЕТЫ ====================
 
-string response(int code, const string& contentType, const string& body) 
+string response(int code, string contentType, string body) 
 {
     stringstream ss;
     ss << "HTTP/1.1 " << code;
@@ -1104,12 +1104,12 @@ string response(int code, const string& contentType, const string& body)
     return ss.str();
 }
 
-string responseHtml(int code, const string& htmlBody) 
+string responseHtml(int code, string htmlBody) 
 {
     return response(code, "text/html; charset=utf-8", htmlBody);
 }
 
-string responseJson(int code, const string& jsonBody) 
+string responseJson(int code, string jsonBody) 
 {
     return response(code, "application/json", jsonBody);
 }
@@ -1144,7 +1144,7 @@ int weightedSum(int acc, int val, size_t idx)
 
 // ==================== ОБРАБОТКА ЗАПРОСОВ ====================
 
-void handleRequest(const string& request, string& responseStr) 
+void handleRequest(string request, string& responseStr) 
 {
     stringstream ss(request);
     string method, path, version;
@@ -1205,7 +1205,7 @@ void handleRequest(const string& request, string& responseStr)
         
         string operation = params["operation"];
         
-        auto isInt = [](const string& s) -> bool {
+        auto isInt = [](string s) -> bool {
             if (s.empty()) return false;
             size_t start = 0;
             if (s[0] == '-') start = 1;
@@ -1216,7 +1216,7 @@ void handleRequest(const string& request, string& responseStr)
             return true;
         };
         
-        auto isTooLarge = [](const string& s) -> bool {
+        auto isTooLarge = [](string s) -> bool {
             string temp = s;
             if (temp[0] == '-') temp = temp.substr(1);
             if (temp.length() > 10) return true;
@@ -1230,7 +1230,7 @@ void handleRequest(const string& request, string& responseStr)
             return false;
         };
         
-        auto parseMatrix = [&](const string& dataStr, int rows, int cols, const string& name, string& error) -> vector<vector<int>> {
+        auto parseMatrix = [&](string dataStr, int rows, int cols, string name, string& error) -> vector<vector<int>> {
             vector<vector<int>> result(rows, vector<int>(cols, 0));
             vector<int> numbers;
             string num;
@@ -1277,7 +1277,7 @@ void handleRequest(const string& request, string& responseStr)
             return result;
         };
 
-        auto isDouble = [](const string& s) -> bool {
+        auto isDouble = [](string s) -> bool {
             if (s.empty()) return false;
             char* end = nullptr;
             errno = 0;
@@ -1288,7 +1288,7 @@ void handleRequest(const string& request, string& responseStr)
                 && isfinite(value);
         };
 
-        auto parseComplexNumber = [&](const string& raw, Complex& value) -> bool {
+        auto parseComplexNumber = [&](string raw, Complex& value) -> bool {
             string s = trim(raw);
             if (s.empty()) return false;
 
@@ -1339,7 +1339,7 @@ void handleRequest(const string& request, string& responseStr)
             return true;
         };
 
-        auto parseComplexMatrix = [&](const string& dataStr, int rows, int cols, const string& name, string& error) -> vector<vector<Complex>> {
+        auto parseComplexMatrix = [&](string dataStr, int rows, int cols, string name, string& error) -> vector<vector<Complex>> {
             vector<vector<Complex>> result(rows, vector<Complex>(cols));
             vector<string> tokens;
             string token;

@@ -54,13 +54,13 @@ T Option<T>::GetValue() const
 {
     if (!HasValue) 
         throw std::runtime_error("Ошибка: Option не содержит значения");
-    return *value;
+    return *reinterpret_cast<T*>(value);
 }
 
 template <class T>
 T Option<T>::GetValueOrDefault(const T& defaultValue) const 
 {
-    return HasValue ? *value : defaultValue;
+    return HasValue ? *reinterpret_cast<T*>(value) : defaultValue;
 }
 
 template <class T>
@@ -68,18 +68,18 @@ template <class R>
 Option<R> Option<T>::Map(R (*func)(T)) const 
 {
     if (!HasValue || !func) return Option<R>();
-    return Option<R>(func(*value));
+    return Option<R>(func(*reinterpret_cast<T*>(value)));
 }
 
 template <class T>
 Option<T> Option<T>::Where(bool (*predicate)(T)) const {
     if (!HasValue || !predicate) return Option<T>();
-    return predicate(*value) ? *this : Option<T>();
+    return predicate(*reinterpret_cast<T*>(value)) ? *this : Option<T>();
 }
 
 template <class T>
 T Option<T>::OrElse(const T& defaultValue) const {
-    return HasValue ? *value : defaultValue;
+    return HasValue ? *reinterpret_cast<T*>(value) : defaultValue;
 }
 
 

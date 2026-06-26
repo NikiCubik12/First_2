@@ -39,10 +39,10 @@ template <class T>
 ListSequence<T>::ListSequence(T* arr, size_t count) : items(new LinkedList<T>(arr, count)) {}
 
 template <class T>
-ListSequence<T>::ListSequence(const LinkedList<T>& list) : items(new LinkedList<T>(list)) {}
+ListSequence<T>::ListSequence(LinkedList<T> list) : items(new LinkedList<T>(list)) {}
 
 template <class T>
-ListSequence<T>::ListSequence(const ListSequence<T>& other) : items(new LinkedList<T>(*other.items)) {}
+ListSequence<T>::ListSequence(ListSequence<T>& other) : items(new LinkedList<T>(*other.items)) {}
 
 template <class T>
 ListSequence<T>::ListSequence(std::initializer_list<T> list) : items(new LinkedList<T>())

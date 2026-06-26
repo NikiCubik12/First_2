@@ -48,15 +48,15 @@ template <class T>
 ImmutableArraySequence<T>::ImmutableArraySequence(T* items, size_t count) : ArraySequence<T>(items, count) {}
 
 template <class T>
-ImmutableArraySequence<T>::ImmutableArraySequence(const DynamicArray<T>& list) : ArraySequence<T>(list) {}
+ImmutableArraySequence<T>::ImmutableArraySequence(DynamicArray<T> list) : ArraySequence<T>(list) {}
 
 template <class T>
-ImmutableArraySequence<T>::ImmutableArraySequence(const ImmutableArraySequence<T>& other) : ArraySequence<T>(*other.data) {}
+ImmutableArraySequence<T>::ImmutableArraySequence(ImmutableArraySequence<T>& other) : ArraySequence<T>(*other.data) {}
 
 template <class T>
 ImmutableArraySequence<T>::ImmutableArraySequence(std::initializer_list<T> list) : ArraySequence<T>()
 {
-    for (const T& val : list)
+    for (T val : list)
     {
         this->data->Append(val);
     }

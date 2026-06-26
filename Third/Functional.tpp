@@ -7,10 +7,10 @@ template <class T>
 Option<T>::Option() : value(nullptr), HasValue(false) {}
 
 template <class T>
-Option<T>::Option(const T& value) : value(new T(value)), HasValue(true) {}
+Option<T>::Option(T value) : value(new T(value)), HasValue(true) {}
 
 template <class T>
-Option<T>::Option(const Option& other) : value(nullptr), HasValue(other.HasValue) 
+Option<T>::Option(Option& other) : value(nullptr), HasValue(other.HasValue) 
 {
     if (HasValue) 
         value = new T(*other.value);
@@ -23,7 +23,7 @@ Option<T>::~Option()
 }
 
 template <class T>
-Option<T>& Option<T>::operator=(const Option& other) 
+Option<T>& Option<T>::operator=(Option other) 
 {
     if (this != &other) 
     {
@@ -58,7 +58,7 @@ T Option<T>::GetValue() const
 }
 
 template <class T>
-T Option<T>::GetValueOrDefault(const T& defaultValue) const 
+T Option<T>::GetValueOrDefault(T defaultValue) const 
 {
     return HasValue ? *reinterpret_cast<T*>(value) : defaultValue;
 }
@@ -78,7 +78,7 @@ Option<T> Option<T>::Where(bool (*predicate)(T)) const {
 }
 
 template <class T>
-T Option<T>::OrElse(const T& defaultValue) const {
+T Option<T>::OrElse(T defaultValue) const {
     return HasValue ? *reinterpret_cast<T*>(value) : defaultValue;
 }
 

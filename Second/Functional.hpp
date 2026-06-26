@@ -22,7 +22,7 @@ template <class T>
 class Option 
 {
     private:
-    T* value;
+    alignas(T) unsigned char value[sizeof(T)]; 
     bool HasValue;
     
     public:

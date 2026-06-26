@@ -21,18 +21,18 @@ public:
     Complex(const Complex& rhs);
     ~Complex() = default;
     
-    Complex& operator=(const Complex& rhs);
-    Complex& operator+=(const Complex& rhs);
-    Complex operator+(const Complex& rhs) const;
+    Complex& operator=(Complex rhs);
+    Complex& operator+=(Complex rhs);
+    Complex operator+(Complex rhs) const;
     Complex operator*(double lambda) const;
-    Complex operator*(const Complex& other) const;
-    bool operator>(const Complex& other) const;
-    bool operator<(const Complex& other) const;
+    Complex operator*(Complex other) const;
+    bool operator>(Complex other) const;
+    bool operator<(Complex other) const;
     
     double Norm() const;
     string ToString() const;
     
-    friend ostream& operator<<(ostream& out, const Complex& rhs);
+    friend ostream& operator<<(ostream& out, Complex rhs);
 };
 
 #endif

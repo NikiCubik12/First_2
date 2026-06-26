@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <stdexcept>
 #include <string>
-#include <optional>
 #include "Sequence.hpp"
 #include "MutableArraySequence.hpp"
 
@@ -23,26 +22,26 @@ template <class T>
 class Option 
 {
     private:
-    alignas(T) unsigned char value[sizeof(T)];
+    alignas(T) unsigned char value[sizeof(T)]; 
     bool HasValue;
     
     public:
     Option();
-    Option(const T& value);
-    Option(const Option& other);
+    Option(T value);
+    Option(Option& other);
     ~Option();
-    Option& operator=(const Option& other);
+    Option& operator=(Option other);
     
     bool IsSome() const;
     bool IsNone() const;
     T GetValue() const;
-    T GetValueOrDefault(const T& defaultValue) const;
+    T GetValueOrDefault(T defaultValue) const;
     
     template <class R>
     Option<R> Map(R (*func)(T)) const;
     
     Option<T> Where(bool (*predicate)(T)) const;
-    T OrElse(const T& defaultValue) const;
+    T OrElse(T defaultValue) const;
 };
 
 template <class T, class R>

@@ -18,8 +18,8 @@ template <class T> class ListSequence : public Sequence<T>
     public:
     ListSequence();
     ListSequence(T* arr, size_t count);
-    ListSequence(const LinkedList<T>& list);
-    ListSequence(const ListSequence<T>& other);
+    ListSequence(LinkedList<T> list);
+    ListSequence(ListSequence<T>& other);
     ListSequence(std::initializer_list<T> list);
     ~ListSequence();
 

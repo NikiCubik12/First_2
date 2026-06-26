@@ -6,35 +6,35 @@
 #include <cmath>
 #include <cstddef>
 
-class BitSequence : public Sequence<int>
+class BitSequence : public Sequence<size_t>
 {
     private:
-    DynamicArray<int>* bits;
+    DynamicArray<size_t>* bits;
 
     protected:
-    Sequence<int>* instance() override;
-    BitSequence* AppendImpl(int item) override;
-    BitSequence* InsertAtImpl(int item, size_t index) override;
-    BitSequence* PrependImpl(int item) override;
+    Sequence<size_t>* instance() override;
+    BitSequence* AppendImpl(size_t item) override;
+    BitSequence* InsertAtImpl(size_t item, size_t index) override;
+    BitSequence* PrependImpl(size_t item) override;
 
     public:
     BitSequence();
-    BitSequence(unsigned int a);
-    BitSequence(int* items, size_t size);
-    BitSequence(const BitSequence& rhs);
-    BitSequence(std::initializer_list<int> list);
+    BitSequence(size_t a);
+    BitSequence(size_t* items, size_t size);
+    BitSequence(BitSequence& rhs);
+    BitSequence(std::initializer_list<size_t> list);
     ~BitSequence();
 
-    int GetFirst() override;
-    int GetLast() override;
-    int Get(size_t index) override;
+    size_t GetFirst() override;
+    size_t GetLast() override;
+    size_t Get(size_t index) override;
     BitSequence* GetSubsequence(size_t start, size_t end) override;
     size_t GetLength() override;
-    Sequence<int>* Concat(Sequence<int>* list) override;
+    Sequence<size_t>* Concat(Sequence<size_t>* list) override;
 
-    BitSequence* BitAnd(const BitSequence* rhs);
-    BitSequence* BitOr(const BitSequence* rhs);
-    BitSequence* BitXor(const BitSequence* rhs);
+    BitSequence* BitAnd(BitSequence* rhs);
+    BitSequence* BitOr(BitSequence* rhs);
+    BitSequence* BitXor(BitSequence* rhs);
     BitSequence* BitNot();
     void Print();
 };

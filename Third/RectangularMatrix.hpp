@@ -30,10 +30,10 @@ public:
     size_t GetRows() const;
     size_t GetCols() const;
     
-    RectangularMatrix<T> Add(const RectangularMatrix<T>& other) const;
-    RectangularMatrix<T> MultiplyScalar(T lambda) const;
-    T Norm() const;
-    string ToString() const;
+    RectangularMatrix<T> Add(RectangularMatrix<T> other);
+    RectangularMatrix<T> MultiplyScalar(T lambda);
+    T Norm();
+    string ToString();
     
     // Элементарные преобразования строк
     void SwapRows(size_t i, size_t j);
@@ -47,16 +47,16 @@ public:
 };
 
 template <typename T>
-RectangularMatrix<T> operator+(const RectangularMatrix<T>& m1, const RectangularMatrix<T>& m2);
+RectangularMatrix<T> operator+(RectangularMatrix<T> m1, RectangularMatrix<T> m2);
 
 template <typename T>
-RectangularMatrix<T> operator*(const RectangularMatrix<T>& m, T lambda);
+RectangularMatrix<T> operator*(RectangularMatrix<T> m, T lambda);
 
 template <typename T>
-RectangularMatrix<T> operator*(T lambda, const RectangularMatrix<T>& m);
+RectangularMatrix<T> operator*(T lambda, RectangularMatrix<T> m);
 
 template <typename T>
-ostream& operator<<(ostream& out, const RectangularMatrix<T>& m);
+ostream& operator<<(ostream& out, RectangularMatrix<T> m);
 
 #include "RectangularMatrix.tpp"
 

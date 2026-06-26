@@ -14,8 +14,8 @@ template <class T> class ImmutableArraySequence : public ArraySequence<T>
     public:
     ImmutableArraySequence();
     ImmutableArraySequence(T* items, size_t count);
-    ImmutableArraySequence(const DynamicArray<T>& list);
-    ImmutableArraySequence(const ImmutableArraySequence<T>& other);
+    ImmutableArraySequence(DynamicArray<T> list);
+    ImmutableArraySequence(ImmutableArraySequence<T>& other);
     ImmutableArraySequence(std::initializer_list<T> list);
 };
 
