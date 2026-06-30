@@ -32,7 +32,6 @@ public:
     PatternCounter(Sequence<std::string>& patterns, bool allowOverlapping);
 
     void   ConsumeChar(char c);
-    // void   ConsumeStream(ReadOnlyStream<char>& stream);
     void   ConsumeLazy(LazySequence<char>& lazy);
 
     void   Reset();

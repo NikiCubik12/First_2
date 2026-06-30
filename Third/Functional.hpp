@@ -8,17 +8,6 @@
 #include "MutableArraySequence.hpp"
 
 template <class T>
-class ICollection 
-{
-    public:
-    virtual ~ICollection() = default;
-    virtual T Get(size_t index) const = 0;
-    virtual size_t GetSize() const = 0;
-    virtual bool IsEmpty() const = 0;
-    virtual void Clear() = 0;
-};
-
-template <class T>
 class Option 
 {
     private:
@@ -28,20 +17,20 @@ class Option
     public:
     Option();
     Option(T value);
-    Option(Option& other);
+    Option(const Option& other);
     ~Option();
     Option& operator=(Option other);
     
-    bool IsSome() const;
-    bool IsNone() const;
-    T GetValue() const;
-    T GetValueOrDefault(T defaultValue) const;
+    bool IsSome();
+    bool IsNone();
+    T GetValue();
+    T GetValueOrDefault(T defaultValue) ;
     
     template <class R>
-    Option<R> Map(R (*func)(T)) const;
+    Option<R> Map(R (*func)(T)) ;
     
-    Option<T> Where(bool (*predicate)(T)) const;
-    T OrElse(T defaultValue) const;
+    Option<T> Where(bool (*predicate)(T)) ;
+    T OrElse(T defaultValue) ;
 };
 
 template <class T, class R>

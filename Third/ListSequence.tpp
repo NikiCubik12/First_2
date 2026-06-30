@@ -42,12 +42,12 @@ template <class T>
 ListSequence<T>::ListSequence(LinkedList<T> list) : items(new LinkedList<T>(list)) {}
 
 template <class T>
-ListSequence<T>::ListSequence(ListSequence<T>& other) : items(new LinkedList<T>(*other.items)) {}
+ListSequence<T>::ListSequence(const ListSequence<T>& other) : items(new LinkedList<T>(*other.items)) {}
 
 template <class T>
 ListSequence<T>::ListSequence(std::initializer_list<T> list) : items(new LinkedList<T>())
 {
-    for (const T& val : list)
+    for (T val : list)
     {
         items->Append(val);
     }

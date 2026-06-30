@@ -23,14 +23,14 @@ public:
     
     Complex& operator=(Complex rhs);
     Complex& operator+=(Complex rhs);
-    Complex operator+(Complex rhs) const;
-    Complex operator*(double lambda) const;
-    Complex operator*(Complex other) const;
-    bool operator>(Complex other) const;
-    bool operator<(Complex other) const;
+    Complex operator+(Complex rhs);
+    Complex operator*(double lambda);
+    Complex operator*(Complex other);
+    bool operator>(Complex other);
+    bool operator<(Complex other);
     
-    double Norm() const;
-    string ToString() const;
+    double Norm();
+    string ToString();
     
     friend ostream& operator<<(ostream& out, Complex rhs);
 };

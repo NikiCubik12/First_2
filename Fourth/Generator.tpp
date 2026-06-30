@@ -96,7 +96,6 @@ Generator<T>::Generator(const Generator<T>& other)
 {
     AllocateHistory();
     
-    // Копируем модификации
     Modification* curr = other.mods_;
     while (curr)
     {

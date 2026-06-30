@@ -3,36 +3,47 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include "DynamicArray.hpp"
 
 template <typename T>
 class BoundedQueue
 {
 private:
-    T*     data_;
-    size_t capacity_;
-    size_t size_;
-    size_t head_;
-
-    size_t TailIndex() const { return (head_ + size_) % capacity_; }
+    DynamicArray<T> data_;
 
 public:
-    explicit BoundedQueue(size_t capacity);
-    BoundedQueue(const BoundedQueue<T>& other);
-    BoundedQueue<T>& operator=(const BoundedQueue<T>& other);
-    ~BoundedQueue();
+    BoundedQueue() : data_() {}
+    explicit BoundedQueue(size_t /*capacity*/) : data_() {}
 
-    size_t Size()     const { return size_; }
-    size_t Capacity() const { return capacity_; }
-    bool   IsFull()   const { return size_ == capacity_; }
-    bool   IsEmpty()  const { return size_ == 0; }
+    size_t Size()     const { return data_.GetSize(); }
+    bool   IsEmpty()  const { return data_.GetSize() == 0; }
+    bool   IsFull()   const { return false; }
 
-    void Push(const T& value);
+    void Push(const T& value)
+    {
+        data_.Append(value);
+    }
 
-    const T& Front() const;
-    const T& Back()  const;
-    const T& At(size_t i) const;
+    const T& Front() const
+    {
+        if (data_.GetSize() == 0)
+            throw std::out_of_range("BoundedQueue::Front: очередь пуста");
+        return data_.GetRef(0);
+    }
+
+    const T& Back() const
+    {
+        if (data_.GetSize() == 0)
+            throw std::out_of_range("BoundedQueue::Back: очередь пуста");
+        return data_.GetRef(data_.GetSize() - 1);
+    }
+
+    const T& At(size_t i) const
+    {
+        if (i >= data_.GetSize())
+            throw std::out_of_range("BoundedQueue::At: индекс вне диапазона");
+        return data_.GetRef(i);
+    }
 };
-
-#include "BoundedQueue.tpp"
 
 #endif

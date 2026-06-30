@@ -87,7 +87,7 @@ BitSequence::BitSequence(size_t* items, size_t size) : bits(new DynamicArray<siz
     }
 }
 
-BitSequence::BitSequence(BitSequence& rhs) : bits(new DynamicArray<size_t>(*rhs.bits)) {}
+BitSequence::BitSequence(const BitSequence& rhs) : bits(new DynamicArray<size_t>(*rhs.bits)) {}
 
 BitSequence::BitSequence(std::initializer_list<size_t> list) : bits(new DynamicArray<size_t>())
 {

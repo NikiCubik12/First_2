@@ -192,7 +192,6 @@ LazySequence<U>* LazySequence<T>::Map(std::function<U(T)> f)
     LazySequence<U>* result = new LazySequence<U>();
     result->cache_.clear();
     result->isInfinite_ = isInfinite_;
-    result->exhausted_  = isInfinite_ ? false : false;
 
     auto srcCache = std::make_shared<SimpleVector<T>>();
     *srcCache = cache_;
@@ -221,10 +220,9 @@ LazySequence<U>* LazySequence<T>::Map(std::function<U(T)> f)
         ++(*idx);
         return Optional<U>::Some(v);
     };
+    result->exhausted_ = false;
     if (!isInfinite_ && exhausted_ && cache_.empty())
         result->exhausted_ = true;
-    else
-        result->exhausted_ = false;
     return result;
 }
 

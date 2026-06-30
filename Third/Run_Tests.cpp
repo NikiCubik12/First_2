@@ -41,6 +41,7 @@ int main()
     run_test(test_DynamicArray_constructor_and_getters, "DynamicArray: конструктор из массива + GetSize + Get");
     run_test(test_DynamicArray_copy_constructor, "DynamicArray: копирующий конструктор");
     run_test(test_DynamicArray_copy_from_list, "DynamicArray: конструктор из LinkedList");
+    run_test(test_DynamicArray_get, "DynamicArray: Get");
     run_test(test_DynamicArray_set, "DynamicArray: Set");
     run_test(test_DynamicArray_append, "DynamicArray: Append");
     run_test(test_DynamicArray_prepend, "DynamicArray: Prepend");

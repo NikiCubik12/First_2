@@ -1,100 +1,86 @@
 #include <iostream>
-#include "MutableArraySequence.hpp"
-#include "Generator.hpp"
-#include "LazySequence.hpp"
-#include <clocale>
+#include <string>
 using namespace std;
 
-class Box {
-private:
-    int value;
-
-public:
-    explicit Box(int x) {
-        value = x;
+int* prefix_func(const string& s)
+{
+    int* mas = new int[s.length()]{};
+    string help = "";
+    for (int i = 0; i < s.length() - 1; i++)
+    {
+        help += s[i];
+        for (int j = 0; j < i - 1; j++)
+        {
+            if (help.substr(0, j+1) == help.substr(help.length() - 1 - j))
+                mas[i] = j+1;
+        }
     }
-
-    void print() {
-        cout << "Box value = " << value << endl;
-    }
-};
-
-void show(Box b) {
-    b.print();
+    return mas;
 }
 
-int main() {
-    Box b1(10);     
-    Box b2 = 20; // "конфликт"  
+int* prefix_func1(const string& s)
+{
+    int* mas = new int[s.length()]{};
+    mas[0] = 0;
+    for (int i = 1; i < s.length() - 1; i++) // i - индекс элементов в суффиксе
+    {
+        int k = mas[i - 1]; // k - длина подстроки и индекс элементов в префиксе
+        while (k > 0 && s[i] != s[k])
+            k = mas[k - 1]; // зануляем k
+        if (s[i] == s[k])
+            k++;
+        mas[i] = k;
+    }
+    return mas;
+}
 
-    show(b1);       
-    show(30);       
+int* KMP(const string& P, const string& T)
+{
+    int p_len = P.length();
+    int t_len = T.length();
+    int* mas = new int[p_len + t_len + 1] {};
+    int* p = prefix_func1(P + "#" + T);
+    int count = 0;
+    for (int i = 0; i < t_len - 1; i++)
+    {
+        if (p[p_len + i+1] == p_len)
+            mas[count++] = i - p_len;
+    }
+    return mas;
+}
+
+void print(int* mas, int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (i < count - 1)
+            cout << mas[i] << ", ";
+        else   
+            cout << mas[i] << endl;
+    }
+}
+
+int main()
+{
+    string s = "abcabcd";
+    string p = "aba";
+    string t = "babac";
+    int* array = prefix_func(s);
+    int* arr = prefix_func1(s);
+    int* a = KMP(p, t);
+    print(array, s.length());
+    print(arr, s.length());
+    print(a, p.length() + t.length() + 1);
+    delete[] array;
 
     return 0;
 }
 
-
-// вспомогательная функция как в Run_Tests.cpp
-// static MutableArraySequence<int> ilist(std::initializer_list<int> vals)
-// {
-//     MutableArraySequence<int> s;
-//     for (int v : vals) s.Append(v);
-//     return s;
-// }
-
-// int main()
-// {
-//     setlocale(LC_ALL, "Rus");
-//     // --- 1. Числа Фибоначчи (бесконечный генератор) ---
-//     // auto fibInit = ilist({1, 1});
-//     // Generator<int> fibGen([](const BoundedQueue<int>& q) {
-//     //     return q.At(0) + q.At(1);
-//     // }, fibInit, 2);
-
-//     // LazySequence<int> fibs(fibGen);
-
-//     // std::cout << "Фибоначчи (первые 8): ";
-//     // for (size_t i = 0; i < 8; ++i)
-//     //     std::cout << fibs.Get(i) << " ";
-//     // std::cout << "\n";
-//     // std::cout << "Материализовано: " << fibs.GetMaterializedCount() << "\n";
-//     // std::cout << "Бесконечная: " << (fibs.IsInfinite() ? "да" : "нет") << "\n\n";
-
-//     // // --- 2. Map: возводим в квадрат ---
-//     // auto* squares = fibs.Map<int>([](int x) { return x * x; });
-
-//     // std::cout << "Квадраты Фибоначчи (первые 6): ";
-//     // for (size_t i = 0; i < 6; ++i)
-//     //     std::cout << squares->Get(i) << " ";
-//     // std::cout << "\n\n";
-
-//     // // --- 3. Where: только чётные ---
-//     // auto* evens = fibs.Where([](int x) { return x % 2 == 0; });
-
-//     // std::cout << "Чётные Фибоначчи (первые 4): ";
-//     // for (size_t i = 0; i < 4; ++i)
-//     //     std::cout << evens->Get(i) << " ";
-//     // std::cout << "\n\n";
-
-//     // // --- 4. Конечный генератор: степени двойки ---
-//     // auto powInit = ilist({1});
-//     // Generator<int> powGen([](const BoundedQueue<int>& q) {
-//     //     return q.Back() * 2;
-//     // }, powInit, 1, 6); // maxCount = 6
-
-//     // LazySequence<int> powers(powGen);
-
-//     // std::cout << "Степени двойки (конечная, 6 штук): ";
-//     // for (size_t i = 0; i < powers.GetLength(); ++i)
-//     //     std::cout << powers.Get(i) << " ";
-//     // std::cout << "\n";
-//     // std::cout << "Мощность: " << powers.GetCardinality().GetFinite() << "\n\n";
-
-//     // // --- 5. Reduce: сумма ---
-//     // int sum = powers.Reduce([](int a, int b) { return a + b; }, 0);
-//     // std::cout << "Сумма степеней двойки: " << sum << "\n";
-
-//     // delete squares;
-//     // delete evens;
-//     // return 0;
-// }
+// abcabcd
+// a - 0
+// ab - 0
+// abc - 0
+// abca - 1
+// abcab - 2
+// abcabc - 3
+// abcabcd - 0

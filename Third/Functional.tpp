@@ -10,7 +10,7 @@ template <class T>
 Option<T>::Option(T value) : value(new T(value)), HasValue(true) {}
 
 template <class T>
-Option<T>::Option(Option& other) : value(nullptr), HasValue(other.HasValue) 
+Option<T>::Option(const Option& other) : value(nullptr), HasValue(other.HasValue) 
 {
     if (HasValue) 
         value = new T(*other.value);
@@ -38,19 +38,19 @@ Option<T>& Option<T>::operator=(Option other)
 }
 
 template <class T>
-bool Option<T>::IsSome() const 
+bool Option<T>::IsSome()  
 {
     return HasValue; 
 }
 
 template <class T>
-bool Option<T>::IsNone() const 
+bool Option<T>::IsNone()  
 { 
     return !HasValue; 
 }
 
 template <class T>
-T Option<T>::GetValue() const 
+T Option<T>::GetValue()  
 {
     if (!HasValue) 
         throw std::runtime_error("Ошибка: Option не содержит значения");
@@ -58,27 +58,27 @@ T Option<T>::GetValue() const
 }
 
 template <class T>
-T Option<T>::GetValueOrDefault(T defaultValue) const 
+T Option<T>::GetValueOrDefault(T defaultValue)  
 {
     return HasValue ? *reinterpret_cast<T*>(value) : defaultValue;
 }
 
 template <class T>
 template <class R>
-Option<R> Option<T>::Map(R (*func)(T)) const 
+Option<R> Option<T>::Map(R (*func)(T))  
 {
     if (!HasValue || !func) return Option<R>();
     return Option<R>(func(*reinterpret_cast<T*>(value)));
 }
 
 template <class T>
-Option<T> Option<T>::Where(bool (*predicate)(T)) const {
+Option<T> Option<T>::Where(bool (*predicate)(T))  {
     if (!HasValue || !predicate) return Option<T>();
     return predicate(*reinterpret_cast<T*>(value)) ? *this : Option<T>();
 }
 
 template <class T>
-T Option<T>::OrElse(T defaultValue) const {
+T Option<T>::OrElse(T defaultValue)  {
     return HasValue ? *reinterpret_cast<T*>(value) : defaultValue;
 }
 

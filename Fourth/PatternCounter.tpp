@@ -110,7 +110,6 @@ inline int PatternCounter::Goto(int s, char c) const
 {
     unsigned char uc = static_cast<unsigned char>(c);
     
-    // Для доступа из const метода используем const_cast
     PatternCounter* nonConst = const_cast<PatternCounter*>(this);
     
     while (s != 0 && nonConst->nodes_.Get(s).next[uc] == -1)
@@ -149,12 +148,6 @@ inline void PatternCounter::ConsumeChar(char c)
     ++position_;
     EmitMatches(state_);
 }
-
-// inline void PatternCounter::ConsumeStream(ReadOnlyStream<char>& stream)
-// {
-//     while (!stream.IsEndOfStream())
-//         ConsumeChar(stream.Read());
-// }
 
 inline void PatternCounter::ConsumeLazy(LazySequence<char>& lazy)
 {

@@ -51,7 +51,7 @@ template <class T>
 ImmutableArraySequence<T>::ImmutableArraySequence(DynamicArray<T> list) : ArraySequence<T>(list) {}
 
 template <class T>
-ImmutableArraySequence<T>::ImmutableArraySequence(ImmutableArraySequence<T>& other) : ArraySequence<T>(*other.data) {}
+ImmutableArraySequence<T>::ImmutableArraySequence(const ImmutableArraySequence<T>& other) : ArraySequence<T>(*other.data) {}
 
 template <class T>
 ImmutableArraySequence<T>::ImmutableArraySequence(std::initializer_list<T> list) : ArraySequence<T>()

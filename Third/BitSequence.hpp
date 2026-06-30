@@ -21,7 +21,7 @@ class BitSequence : public Sequence<size_t>
     BitSequence();
     BitSequence(size_t a);
     BitSequence(size_t* items, size_t size);
-    BitSequence(BitSequence& rhs);
+    BitSequence(const BitSequence& rhs);
     BitSequence(std::initializer_list<size_t> list);
     ~BitSequence();
 

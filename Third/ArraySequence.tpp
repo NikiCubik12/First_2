@@ -39,16 +39,16 @@ template <class T>
 ArraySequence<T>::ArraySequence(T* items, size_t count) : data(new DynamicArray<T>(items, count)) {}
 
 template <class T>
-ArraySequence<T>::ArraySequence(DynamicArray<T> array) : data(new DynamicArray<T>(array)) {}
+ArraySequence<T>::ArraySequence(const DynamicArray<T>& array) : data(new DynamicArray<T>(array)) {}
 
 template <class T>
-ArraySequence<T>::ArraySequence(LinkedList<T> list) : data(new DynamicArray<T>(list)) {}
+ArraySequence<T>::ArraySequence(const LinkedList<T>& list) : data(new DynamicArray<T>(list)) {}
 
 template <class T>
-ArraySequence<T>::ArraySequence(ArraySequence<T>& other) : data(new DynamicArray<T>(*other.data)) {}
+ArraySequence<T>::ArraySequence(const ArraySequence<T>& other) : data(new DynamicArray<T>(*other.data)) {}
 
 template <class T>
-ArraySequence<T>::ArraySequence(std::initializer_list<T> list) : data(new DynamicArray<T>())
+ArraySequence<T>::ArraySequence(const std::initializer_list<T>& list) : data(new DynamicArray<T>())
 {
     for (T val : list)
     {

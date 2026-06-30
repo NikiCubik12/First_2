@@ -15,7 +15,7 @@ namespace RectangularMatrixDetail
         return std::fabs(static_cast<double>(value));
     }
 
-    inline double ValueNorm(const Complex& value)
+    inline double ValueNorm(Complex value)
     {
         return value.Norm();
     }
@@ -106,9 +106,12 @@ RectangularMatrix<T>::~RectangularMatrix()
 template <class T>
 T RectangularMatrix<T>::Get(size_t i, size_t j) const
 {
-    if (rows == nullptr) throw runtime_error("Матрица не создана");
-    if (i >= rowsCount) throw out_of_range("Строка вне границ");
-    if (j >= colsCount) throw out_of_range("Столбец вне границ");
+    if (rows == nullptr) 
+        throw runtime_error("Матрица не создана");
+    if (i >= rowsCount) 
+        throw out_of_range("Строка вне границ");
+    if (j >= colsCount) 
+        throw out_of_range("Столбец вне границ");
     return rows->Get(i)->Get(j);
 }
 
@@ -135,10 +138,10 @@ void RectangularMatrix<T>::Set(size_t i, size_t j, T value)
 }
 
 template <class T>
-size_t RectangularMatrix<T>::GetRows() const { return rowsCount; }
+size_t RectangularMatrix<T>::GetRows()  { return rowsCount; }
 
 template <class T>
-size_t RectangularMatrix<T>::GetCols() const { return colsCount; }
+size_t RectangularMatrix<T>::GetCols()  { return colsCount; }
 
 template <class T>
 RectangularMatrix<T> RectangularMatrix<T>::Add(RectangularMatrix<T> other) 

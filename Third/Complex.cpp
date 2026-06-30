@@ -25,37 +25,37 @@ Complex& Complex::operator+=(Complex rhs)
     return *this;
 }
 
-Complex Complex::operator+(Complex rhs) const 
+Complex Complex::operator+(Complex rhs) 
 {
     return Complex(Re + rhs.Re, Im + rhs.Im);
 }
 
-Complex Complex::operator*(double lambda) const 
+Complex Complex::operator*(double lambda) 
 {
     return Complex(Re * lambda, Im * lambda);
 }
 
-Complex Complex::operator*(Complex other) const 
+Complex Complex::operator*(Complex other) 
 {
     return Complex(Re * other.Re - Im * other.Im, Re * other.Im + Im * other.Re);
 }
 
-bool Complex::operator>(Complex other) const 
+bool Complex::operator>(Complex other) 
 {
     return (Re*Re + Im*Im) > (other.Re*other.Re + other.Im*other.Im);
 }
 
-bool Complex::operator<(Complex other) const 
+bool Complex::operator<(Complex other) 
 {
     return (Re*Re + Im*Im) < (other.Re*other.Re + other.Im*other.Im);
 }
 
-double Complex::Norm() const 
+double Complex::Norm()  
 {
     return sqrt(Re * Re + Im * Im);
 }
 
-string Complex::ToString() const 
+string Complex::ToString() 
 {
     stringstream ss;
     if (Im == 0) 

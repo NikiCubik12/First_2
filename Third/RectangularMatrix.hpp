@@ -27,8 +27,8 @@ public:
     
     T Get(size_t i, size_t j) const;
     void Set(size_t i, size_t j, T value);
-    size_t GetRows() const;
-    size_t GetCols() const;
+    size_t GetRows();
+    size_t GetCols();
     
     RectangularMatrix<T> Add(RectangularMatrix<T> other);
     RectangularMatrix<T> MultiplyScalar(T lambda);

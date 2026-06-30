@@ -2,7 +2,7 @@
 #define GENERATOR_HPP
 
 #include <cstddef>
-// #include <functional>
+#include <functional>
 #include <stdexcept>
 #include "BoundedQueue.hpp"
 #include "Sequence.hpp"
@@ -27,14 +27,11 @@ private:
     Rule                       rule_;
     size_t                     window_;
     MutableArraySequence<T>    initials_;
-
     BoundedQueue<T>*           history_;
     size_t                     emitted_;
     size_t                     baseEmitted_;
-
     bool                       hasBound_;
     size_t                     maxCount_;
-
     Modification*              mods_;
     size_t                     modCount_;
 
@@ -45,15 +42,8 @@ private:
     void ClearMods();
 
 public:
-    Generator(const Rule& rule,
-              Sequence<T>& initials,
-              size_t window);
-
-    Generator(const Rule& rule,
-              Sequence<T>& initials,
-              size_t window,
-              size_t maxCount);
-
+    Generator(const Rule& rule, Sequence<T>& initials, size_t window);
+    Generator(const Rule& rule, Sequence<T>& initials, size_t window, size_t maxCount);
     Generator(const Generator<T>& other);
     Generator<T>& operator=(const Generator<T>& other);
     ~Generator();

@@ -33,7 +33,7 @@ void print_separator()
     cout << "------------------------------------------------------------" << endl;
 }
 
-void print_test_header(const string& name)
+void print_test_header(string name)
 {
     cout << "\n============================================================" << endl;
     cout << "  " << name << endl;
@@ -54,7 +54,7 @@ string array_to_string(size_t* arr, size_t size)
     return ss.str();
 }
 
-void check_size_t(size_t expected, size_t got, const string& testName, const string& input = "", const string& context = "")
+void check_size_t(size_t expected, size_t got, string testName, string input = "", string context = "")
 {
     totalTests++;
     if (expected == got) {
@@ -98,7 +98,7 @@ void test_DynamicArray_empty_constructor_and_getters()
         cout << "  Проверка: arr.GetSize()" << endl;
         check_size_t(0, arr.GetSize(), "GetSize()", "нет параметров", "пустой конструктор + геттеры");
         cout << "  [OK] Пустой конструктор и GetSize работают корректно" << endl;
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests++;
     }
@@ -128,7 +128,7 @@ void test_DynamicArray_constructor_and_getters()
         
         cout << "  [OK] Конструктор из массива и геттеры работают корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -164,7 +164,7 @@ void test_DynamicArray_copy_constructor()
         
         cout << "  [OK] Копирующий конструктор работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 6;
     }
@@ -196,7 +196,51 @@ void test_DynamicArray_copy_from_list()
         
         cout << "  [OK] Конструктор из LinkedList работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
+        cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
+        totalTests += 4;
+    }
+}
+
+void test_DynamicArray_get()
+{
+    size_t mas[3] = {10, 20, 30};
+    string input = array_to_string(mas, 3);
+    try 
+    {
+        DynamicArray<size_t> arr(mas, 3);
+        cout << "  Результат: arr создан" << endl;
+        cout << "  Проверка: arr.GetSize()" << endl;
+        check_size_t(3, arr.GetSize(), "GetSize()", "массив " + input, "Getter");
+        
+        cout << "  Проверка элементов:" << endl;
+        size_t expected[3] = {10, 20, 30};
+        for (int i = 0; i < 3; i++)
+        {
+            try 
+            {
+                totalTests++;
+                size_t val = arr.Get(i);
+                if (val == expected[i])
+                {
+                    cout << "  [OK] arr.Get(" << i << ") = " << val << endl;
+                    passedTests++;
+                }
+                else 
+                {
+                    cout << "  [ОШИБКА] arr.Get(" << i << ") = " << val << ", ожидалось " << expected[i] << endl;
+                }
+            }
+            catch (std::exception e) 
+            {
+                cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
+                totalTests++;
+            }
+        } 
+        cout << "  [OK] работает корректно" << endl;
+    } 
+    catch (std::exception e) 
+    {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -227,7 +271,7 @@ void test_DynamicArray_set()
         
         cout << "  [OK] Set работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 3;
     }
@@ -260,7 +304,7 @@ void test_DynamicArray_append()
         
         cout << "  [OK] Append работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 5;
     }
@@ -293,7 +337,7 @@ void test_DynamicArray_prepend()
         
         cout << "  [OK] Prepend работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 5;
     }
@@ -326,7 +370,7 @@ void test_DynamicArray_insert_at()
         
         cout << "  [OK] InsertAt работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 5;
     }
@@ -358,7 +402,7 @@ void test_DynamicArray_resize()
         
         cout << "  [OK] Resize (увеличение) работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -389,7 +433,7 @@ void test_DynamicArray_resize_smaller()
         
         cout << "  [OK] Resize (уменьшение) работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 3;
     }
@@ -408,7 +452,7 @@ void test_LinkedList_empty_constructor_and_getters()
         cout << "  Проверка: list.GetLength()" << endl;
         check_size_t(0, list.GetLength(), "GetLength()", "нет параметров", "пустой конструктор + геттеры (список)");
         cout << "  [OK] Пустой конструктор и GetLength работают корректно" << endl;
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests++;
     }
@@ -444,7 +488,7 @@ void test_LinkedList_constructor_and_getters()
         
         cout << "  [OK] Конструктор из массива и геттеры работают корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 6;
     }
@@ -476,7 +520,7 @@ void test_LinkedList_copy_constructor()
         
         cout << "  [OK] Копирующий конструктор работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -507,7 +551,7 @@ void test_LinkedList_append()
         
         cout << "  [OK] Append работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -538,7 +582,7 @@ void test_LinkedList_prepend()
         
         cout << "  [OK] Prepend работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -568,7 +612,7 @@ void test_LinkedList_insert_at()
         
         cout << "  [OK] InsertAt работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -609,7 +653,7 @@ void test_LinkedList_concat()
         
         delete result;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 6;
     }
@@ -643,7 +687,7 @@ void test_LinkedList_get_sublist()
         
         delete sublist;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -670,7 +714,7 @@ void test_LinkedList_clear()
         
         cout << "  [OK] ClearList работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests++;
     }
@@ -689,7 +733,7 @@ void test_BitSequence_empty_constructor_and_getters()
         cout << "  Проверка: bits.GetLength()" << endl;
         check_size_t(0, bits.GetLength(), "GetLength()", "нет параметров", "пустой конструктор + геттеры BitSequence");
         cout << "  [OK] Пустой конструктор и GetLength работают корректно" << endl;
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests++;
     }
@@ -725,7 +769,7 @@ void test_BitSequence_constructor_and_getters()
         
         cout << "  [OK] Конструктор из массива и геттеры работают корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 6;
     }
@@ -757,7 +801,7 @@ void test_BitSequence_copy_constructor()
         
         cout << "  [OK] Копирующий конструктор работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -785,7 +829,7 @@ void test_BitSequence_from_unsigned_int()
         
         cout << "  [OK] Конструктор из числа работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -816,7 +860,7 @@ void test_BitSequence_append()
         
         cout << "  [OK] Append работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -846,7 +890,7 @@ void test_BitSequence_insert_at()
         
         cout << "  [OK] InsertAt работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -884,7 +928,7 @@ void test_BitSequence_concat()
         
         delete result;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 5;
     }
@@ -921,7 +965,7 @@ void test_BitSequence_bit_and()
         
         delete result;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -958,7 +1002,7 @@ void test_BitSequence_bit_or()
         
         delete result;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -995,7 +1039,7 @@ void test_BitSequence_bit_xor()
         
         delete result;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -1029,7 +1073,7 @@ void test_BitSequence_bit_not()
         
         delete result;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 4;
     }
@@ -1055,7 +1099,7 @@ void test_BitSequence_invalid_value()
         cout << "  Сообщение: " << e.what() << endl;
         totalTests++;
         passedTests++;
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ОШИБКА] Поймано другое исключение: " << e.what() << endl;
         totalTests++;
     }
@@ -1084,7 +1128,7 @@ void test_initializer_list_dynamic_array()
         
         cout << "  [OK] initializer_list DynamicArray работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 6;
     }
@@ -1116,7 +1160,7 @@ void test_initializer_list_array_sequence()
         
         cout << "  [OK] initializer_list ArraySequence работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 6;
     }
@@ -1148,7 +1192,7 @@ void test_initializer_list_list_sequence()
         
         cout << "  [OK] initializer_list ListSequence работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 6;
     }
@@ -1182,7 +1226,7 @@ void test_initializer_list_bit_sequence()
         
         cout << "  [OK] initializer_list BitSequence работает корректно" << endl;
         
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ИСКЛЮЧЕНИЕ] " << e.what() << endl;
         totalTests += 7;
     }
@@ -1199,12 +1243,12 @@ void test_initializer_list_bit_sequence_invalid()
         BitSequence seq = {1, 0, 2, 0, 1};
         cout << "  [ОШИБКА] Исключение не выброшено!" << endl;
         totalTests++;
-    } catch (const InvalidBitException& e) {
+    } catch (InvalidBitException e) {
         cout << "  [OK] Поймано InvalidBitException" << endl;
         cout << "  Сообщение: " << e.what() << endl;
         totalTests++;
         passedTests++;
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
         cout << "  [ОШИБКА] Поймано другое исключение: " << e.what() << endl;
         totalTests++;
     }

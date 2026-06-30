@@ -1,14 +1,12 @@
-// #include <chrono>
 #include <clocale>
-// #include <fstream>
 #include <iostream>
-// #include <memory>
 #include <random>
 #include <sstream>
 #include <string>
 #include <cstring>
 #include <map>
 #include <cctype>
+#include <fstream>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -32,14 +30,6 @@
 
 // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
 
-std::string trim(const std::string& str)
-{
-    size_t start = str.find_first_not_of(" \t\n\r");
-    if (start == std::string::npos) return "";
-    size_t end = str.find_last_not_of(" \t\n\r");
-    return str.substr(start, end - start + 1);
-}
-
 std::string escapeHtml(const std::string& s)
 {
     std::string result;
@@ -52,6 +42,23 @@ std::string escapeHtml(const std::string& s)
         else result += c;
     }
     return result;
+}
+
+std::string urlDecode(const std::string& value)
+{
+    std::string decoded;
+    for (size_t i = 0; i < value.length(); ++i)
+    {
+        if (value[i] == '+') decoded += ' ';
+        else if (value[i] == '%' && i + 2 < value.length())
+        {
+            char hex[3] = {value[i+1], value[i+2], 0};
+            decoded += static_cast<char>(strtol(hex, NULL, 16));
+            i += 2;
+        }
+        else decoded += value[i];
+    }
+    return decoded;
 }
 
 // ==================== ГЛОБАЛЬНОЕ СОСТОЯНИЕ ====================
@@ -67,8 +74,10 @@ struct AppState
     size_t processedCount;
     MutableArraySequence<std::pair<std::string, size_t>> lastResults;
     std::string lastErrorMessage;
+    bool isProcessing;
     
-    AppState() : allowOverlap(true), lazyLength(1000000), lazyAlphabet("ab"), processedCount(0) {}
+    AppState() : allowOverlap(true), lazyLength(1000000), 
+                 lazyAlphabet("ab"), processedCount(0), isProcessing(false) {}
 };
 
 static AppState g_state;
@@ -123,158 +132,210 @@ std::string renderMainPage()
     ss << ".section h3 { color: #764ba2; margin: 16px 0 12px 0; font-size: 18px; }\n";
     ss << "label { display: block; font-weight: 600; color: #555; margin-bottom: 8px; }\n";
     ss << "input[type=\"text\"], input[type=\"number\"], textarea, select { width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px; margin-bottom: 12px; }\n";
-    ss << "textarea { font-family: monospace; resize: vertical; }\n";
+    ss << "input[type=\"file\"] { width: 100%; padding: 8px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px; margin-bottom: 12px; background: white; }\n";
+    ss << "textarea { font-family: monospace; resize: vertical; min-height: 100px; }\n";
     ss << "button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 10px; margin-bottom: 10px; }\n";
     ss << "button:hover { transform: translateY(-1px); }\n";
-    ss << ".pattern-list { background: white; border-radius: 12px; padding: 16px; margin-top: 12px; }\n";
-    ss << ".pattern-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }\n";
-    ss << ".pattern-item span { font-family: monospace; background: #e9ecef; padding: 4px 8px; border-radius: 4px; }\n";
-    ss << ".pattern-item button { background: #dc3545; padding: 4px 12px; font-size: 12px; margin: 0; }\n";
-    ss << ".add-pattern { display: flex; gap: 10px; margin-top: 12px; }\n";
-    ss << ".add-pattern input { flex: 1; margin: 0; }\n";
+    ss << "button:disabled { opacity: 0.5; cursor: not-allowed; }\n";
+    ss << ".pattern-list { background: white; border-radius: 12px; padding: 16px; margin-top: 12px; max-height: 200px; overflow-y: auto; }\n";
+    ss << ".pattern-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 4px 8px; border-radius: 4px; }\n";
+    ss << ".pattern-item:hover { background: #f1f3f5; }\n";
+    ss << ".pattern-item span { font-family: monospace; background: #e9ecef; padding: 4px 8px; border-radius: 4px; flex: 1; }\n";
+    ss << ".pattern-item button { background: #dc3545; padding: 4px 12px; font-size: 12px; margin: 0; border-radius: 4px; }\n";
+    ss << ".pattern-item button:hover { background: #c82333; }\n";
+    ss << ".add-pattern { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }\n";
+    ss << ".add-pattern input { flex: 1; min-width: 150px; margin: 0; }\n";
     ss << ".add-pattern button { margin: 0; }\n";
     ss << ".results-table { width: 100%; border-collapse: collapse; margin-top: 16px; }\n";
     ss << ".results-table th, .results-table td { padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6; }\n";
     ss << ".results-table th { background: #667eea; color: white; }\n";
     ss << ".results-table tr:hover { background: #f1f3f5; }\n";
     ss << ".error { background: #fee; color: #dc3545; padding: 12px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #dc3545; }\n";
-    ss << ".success { background: #e8f4e8; color: #28a745; padding: 12px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #28a745; }\n";
     ss << ".info { background: #e7f3ff; padding: 12px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #667eea; }\n";
     ss << ".row { display: flex; gap: 20px; flex-wrap: wrap; }\n";
     ss << ".col { flex: 1; min-width: 250px; }\n";
-    ss << "hr { margin: 20px 0; border: none; border-top: 1px solid #dee2e6; }\n";
+    ss << ".file-status { margin-top: 8px; font-size: 12px; color: #666; }\n";
     ss << "</style>\n";
+    
+    // ==================== JAVASCRIPT ====================
     ss << "<script>\n";
+    ss << "let isProcessing = false;\n\n";
+    
     ss << "async function apiCall(endpoint, data) {\n";
-    ss << "  const formData = new URLSearchParams();\n";
-    ss << "  for (const [key, value] of Object.entries(data)) formData.append(key, value);\n";
-    ss << "  const response = await fetch(endpoint, { method: 'POST', body: formData });\n";
-    ss << "  const html = await response.text();\n";
-    ss << "  document.open();\n";
-    ss << "  document.write(html);\n";
-    ss << "  document.close();\n";
-    ss << "}\n";
+    ss << "  if (isProcessing) {\n";
+    ss << "    alert('Подождите, выполняется предыдущий запрос...');\n";
+    ss << "    return;\n";
+    ss << "  }\n";
+    ss << "  isProcessing = true;\n";
+    ss << "  document.querySelectorAll('button').forEach(b => b.disabled = true);\n";
+    ss << "  try {\n";
+    ss << "    const formData = new URLSearchParams();\n";
+    ss << "    for (const [key, value] of Object.entries(data)) {\n";
+    ss << "      formData.append(key, value);\n";
+    ss << "    }\n";
+    ss << "    const response = await fetch(endpoint, { method: 'POST', body: formData });\n";
+    ss << "    if (!response.ok) throw new Error('HTTP error: ' + response.status);\n";
+    ss << "    const html = await response.text();\n";
+    ss << "    const parser = new DOMParser();\n";
+    ss << "    const doc = parser.parseFromString(html, 'text/html');\n";
+    ss << "    const newContent = doc.querySelector('.content');\n";
+    ss << "    const oldContent = document.querySelector('.content');\n";
+    ss << "    if (newContent && oldContent) {\n";
+    ss << "      oldContent.innerHTML = newContent.innerHTML;\n";
+    ss << "    } else {\n";
+    ss << "      document.open(); document.write(html); document.close();\n";
+    ss << "    }\n";
+    ss << "  } catch (error) {\n";
+    ss << "    console.error('API Error:', error);\n";
+    ss << "    alert('Ошибка: ' + error.message);\n";
+    ss << "  } finally {\n";
+    ss << "    isProcessing = false;\n";
+    ss << "    document.querySelectorAll('button').forEach(b => b.disabled = false);\n";
+    ss << "  }\n";
+    ss << "}\n\n";
+    
     ss << "function addPattern() {\n";
     ss << "  const input = document.getElementById('new-pattern');\n";
-    ss << "  const pattern = input.value.trim();\n";
-    ss << "  if (pattern) apiCall('/api/add-pattern', { pattern: pattern });\n";
+    ss << "  const pattern = input ? input.value.trim() : '';\n";
+    ss << "  if (pattern) { apiCall('/api/add-pattern', { pattern: pattern }); input.value = ''; }\n";
     ss << "  else alert('Введите подстроку');\n";
-    ss << "}\n";
+    ss << "}\n\n";
+    
     ss << "function removePattern(index) {\n";
     ss << "  apiCall('/api/remove-pattern', { index: index });\n";
-    ss << "}\n";
+    ss << "}\n\n";
+    
     ss << "function clearPatterns() {\n";
     ss << "  if (confirm('Удалить все подстроки?')) apiCall('/api/clear-patterns', {});\n";
-    ss << "}\n";
-    ss << "function runSearch(source) {\n";
-    ss << "  let data = { source: source };\n";
-    ss << "  if (source === 'keyboard') data.text = document.getElementById('keyboard-text').value;\n";
-    ss << "  if (source === 'file') data.path = document.getElementById('file-path').value;\n";
-    ss << "  if (source === 'lazy') {\n";
-    ss << "    data.length = document.getElementById('lazy-length').value;\n";
-    ss << "    data.alphabet = document.getElementById('lazy-alphabet').value;\n";
-    ss << "  }\n";
-    ss << "  data.overlap = document.getElementById('allow-overlap').checked ? '1' : '0';\n";
-    ss << "  apiCall('/api/search', data);\n";
-    ss << "}\n";
+    ss << "}\n\n";
+    
     ss << "function setExample() {\n";
     ss << "  apiCall('/api/example', {});\n";
+    ss << "}\n\n";
+    
+    ss << "function runSearch(source) {\n";
+    ss << "  const overlap = document.getElementById('allow-overlap');\n";
+    ss << "  const data = { source: source, overlap: overlap ? (overlap.checked ? '1' : '0') : '0' };\n";
+    ss << "  if (source === 'keyboard') {\n";
+    ss << "    const text = document.getElementById('keyboard-text');\n";
+    ss << "    if (text) data.text = text.value;\n";
+    ss << "    apiCall('/api/search', data);\n";
+    ss << "  } else if (source === 'file') {\n";
+    ss << "    const fileInput = document.getElementById('file-input');\n";
+    ss << "    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {\n";
+    ss << "      alert('Выберите файл');\n";
+    ss << "      return;\n";
+    ss << "    }\n";
+    ss << "    const status = document.getElementById('file-status');\n";
+    ss << "    if (status) status.textContent = 'Загрузка...';\n";
+    ss << "    const reader = new FileReader();\n";
+    ss << "    reader.onload = function(e) {\n";
+    ss << "      data.text = e.target.result;\n";
+    ss << "      apiCall('/api/search', data);\n";
+    ss << "      if (status) status.textContent = 'Файл загружен';\n";
+    ss << "    };\n";
+    ss << "    reader.onerror = function() { if (status) status.textContent = 'Ошибка чтения файла'; };\n";
+    ss << "    reader.readAsText(fileInput.files[0]);\n";
+    ss << "  } else if (source === 'lazy') {\n";
+    ss << "    const length = document.getElementById('lazy-length');\n";
+    ss << "    const alphabet = document.getElementById('lazy-alphabet');\n";
+    ss << "    if (length) data.length = length.value;\n";
+    ss << "    if (alphabet) data.alphabet = alphabet.value;\n";
+    ss << "    apiCall('/api/search', data);\n";
+    ss << "  }\n";
     ss << "}\n";
     ss << "</script>\n";
+    
     ss << "</head>\n";
     ss << "<body>\n";
     ss << "<div class=\"container\">\n";
-    ss << "<h1>Поиск подстрок в потоке данных</h1>\n";
+    ss << "<h1>🔍 Поиск подстрок в потоке данных</h1>\n";
     ss << "<div class=\"content\">\n";
     
-    // Сообщения
     if (!g_state.lastErrorMessage.empty())
-        ss << "<div class=\"error\">" << escapeHtml(g_state.lastErrorMessage) << "</div>\n";
+        ss << "<div class=\"error\">⚠️ " << escapeHtml(g_state.lastErrorMessage) << "</div>\n";
     
     // Подстроки
     ss << "<div class=\"section\">\n";
-    ss << "<h2>Подстроки для поиска</h2>\n";
+    ss << "<h2>📝 Подстроки для поиска</h2>\n";
     ss << "<div class=\"pattern-list\">\n";
-    for (size_t i = 0; i < g_state.patterns.GetLength(); ++i)
+    if (g_state.patterns.GetLength() == 0)
     {
-        ss << "<div class=\"pattern-item\">\n";
-        ss << "<span>\"" << escapeHtml(g_state.patterns.Get(i)) << "\"</span>\n";
-        ss << "<button onclick=\"removePattern(" << i << ")\">Удалить</button>\n";
-        ss << "</div>\n";
+        ss << "<div style=\"color: #999; text-align: center; padding: 20px;\">Нет добавленных подстрок</div>\n";
+    }
+    else
+    {
+        for (size_t i = 0; i < g_state.patterns.GetLength(); ++i)
+        {
+            ss << "<div class=\"pattern-item\">\n";
+            ss << "<span>\"" << escapeHtml(g_state.patterns.Get(i)) << "\"</span>\n";
+            ss << "<button onclick=\"removePattern(" << i << ")\">✕</button>\n";
+            ss << "</div>\n";
+        }
     }
     ss << "<div class=\"add-pattern\">\n";
-    ss << "<input type=\"text\" id=\"new-pattern\" placeholder=\"Новая подстрока\">\n";
-    ss << "<button onclick=\"addPattern()\">Добавить</button>\n";
-    ss << "<button onclick=\"clearPatterns()\" style=\"background:#6c757d\">Очистить все</button>\n";
-    ss << "<button onclick=\"setExample()\" style=\"background:#28a745\">Пример (ushers)</button>\n";
+    ss << "<input type=\"text\" id=\"new-pattern\" placeholder=\"Новая подстрока\" onkeypress=\"if(event.key==='Enter') addPattern()\">\n";
+    ss << "<button onclick=\"addPattern()\">➕ Добавить</button>\n";
+    ss << "<button onclick=\"clearPatterns()\" style=\"background:#6c757d\">🗑️ Очистить все</button>\n";
+    ss << "<button onclick=\"setExample()\" style=\"background:#28a745\">📋 Пример</button>\n";
     ss << "</div>\n";
     ss << "</div>\n";
     ss << "</div>\n";
     
     // Источник данных
     ss << "<div class=\"section\">\n";
-    ss << "<h2>Источник данных</h2>\n";
+    ss << "<h2>📂 Источник данных</h2>\n";
     ss << "<div class=\"row\">\n";
     
-    // Клавиатура
     ss << "<div class=\"col\">\n";
-    ss << "<h3>Ручной ввод</h3>\n";
-    ss << "<textarea id=\"keyboard-text\" rows=\"4\" placeholder=\"Введите текст для поиска...\">" << escapeHtml(g_state.sourceText) << "</textarea>\n";
-    ss << "<button onclick=\"runSearch('keyboard')\">Поискать</button>\n";
+    ss << "<h3>⌨️ Ручной ввод</h3>\n";
+    ss << "<textarea id=\"keyboard-text\" rows=\"4\" placeholder=\"Введите текст...\">" << escapeHtml(g_state.sourceText) << "</textarea>\n";
+    ss << "<button onclick=\"runSearch('keyboard')\">🔍 Поискать</button>\n";
     ss << "</div>\n";
     
-    // Файл
     ss << "<div class=\"col\">\n";
-    ss << "<h3>Файл</h3>\n";
-    ss << "<input type=\"text\" id=\"file-path\" placeholder=\"Путь к файлу\" value=\"" << escapeHtml(g_state.filePath) << "\">\n";
-    ss << "<button onclick=\"runSearch('file')\">Открыть и поискать</button>\n";
+    ss << "<h3>📄 Файл</h3>\n";
+    ss << "<input type=\"file\" id=\"file-input\" accept=\".txt,.log,.csv\">\n";
+    ss << "<button onclick=\"runSearch('file')\">📤 Загрузить и поискать</button>\n";
+    ss << "<div class=\"file-status\" id=\"file-status\"></div>\n";
     ss << "</div>\n";
     
-    // Генерация
     ss << "<div class=\"col\">\n";
-    ss << "<h3>Генерация (ленивая последовательность)</h3>\n";
+    ss << "<h3>⚡ Генерация</h3>\n";
     ss << "<label>Длина:</label>\n";
     ss << "<input type=\"number\" id=\"lazy-length\" value=\"" << g_state.lazyLength << "\" min=\"1\" max=\"10000000\">\n";
     ss << "<label>Алфавит:</label>\n";
     ss << "<input type=\"text\" id=\"lazy-alphabet\" value=\"" << escapeHtml(g_state.lazyAlphabet) << "\" maxlength=\"26\">\n";
-    ss << "<button onclick=\"runSearch('lazy')\">Сгенерировать и поискать</button>\n";
+    ss << "<button onclick=\"runSearch('lazy')\">🎲 Сгенерировать и поискать</button>\n";
     ss << "</div>\n";
     
     ss << "</div>\n";
     
-    // Настройки
     ss << "<div style=\"margin-top: 16px;\">\n";
     ss << "<label style=\"display: inline-block; margin-right: 20px;\">\n";
     ss << "<input type=\"checkbox\" id=\"allow-overlap\"" << (g_state.allowOverlap ? " checked" : "") << ">\n";
-    ss << " Разрешить перекрывающиеся вхождения\n";
+    ss << " 🔄 Разрешить перекрывающиеся вхождения\n";
     ss << "</label>\n";
     ss << "</div>\n";
     ss << "</div>\n";
     
-    // Результаты
-    if (g_state.lastResults.GetLength()> 0)
+    if (g_state.lastResults.GetLength() > 0)
     {
         ss << "<div class=\"section\">\n";
-        ss << "<h2>Результаты поиска</h2>\n";
-        ss << "<div class=\"info\">Обработано символов: " << g_state.processedCount << "</div>\n";
+        ss << "<h2>📊 Результаты</h2>\n";
+        ss << "<div class=\"info\">📌 Обработано символов: " << g_state.processedCount << "</div>\n";
         ss << "<table class=\"results-table\">\n";
-        ss << "<thead>\n<tr><th>Подстрока</th><th>Количество вхождений</th></tr>\n</thead>\n";
+        ss << "<thead><tr><th>Подстрока</th><th>Количество</th></tr></thead>\n";
         ss << "<tbody>\n";
         for (size_t i = 0; i < g_state.lastResults.GetLength(); ++i)
         {
             std::pair<std::string, size_t> p = g_state.lastResults.Get(i);
             ss << "<tr><td>\"" << escapeHtml(p.first) << "\"</td><td>" << p.second << "</td></tr>\n";
         }
-        ss << "</tbody>\n";
-        ss << "</table>\n";
-        ss << "</div>\n";
+        ss << "</tbody></table></div>\n";
     }
     
-    ss << "</div>\n";
-    ss << "</div>\n";
-    ss << "</body>\n";
-    ss << "</html>\n";
-    
+    ss << "</div></div></body></html>\n";
     return ss.str();
 }
 
@@ -309,9 +370,8 @@ void handleRequest(const std::string& request, std::string& response)
 
     std::stringstream ss(request);
     std::string method, path, version;
-    ss>> method>> path>> version;
+    ss >> method >> path >> version;
     
-    // GET запросы
     if (method == "GET" && (path == "/" || path == "/index.html"))
     {
         response = htmlResponse(200, renderMainPage());
@@ -324,7 +384,6 @@ void handleRequest(const std::string& request, std::string& response)
         return;
     }
     
-    // POST запросы
     if (method == "POST")
     {
         size_t bodyPos = request.find("\r\n\r\n");
@@ -340,37 +399,24 @@ void handleRequest(const std::string& request, std::string& response)
             {
                 std::string key = pair.substr(0, eqPos);
                 std::string value = pair.substr(eqPos + 1);
-                // URL decode
-                std::string decoded;
-                for (size_t i = 0; i < value.length(); ++i)
-                {
-                    if (value[i] == '+') decoded += ' ';
-                    else if (value[i] == '%' && i + 2 < value.length())
-                    {
-                        char hex[3] = {value[i+1], value[i+2], 0};
-                        decoded += static_cast<char>(strtol(hex, NULL, 16));
-                        i += 2;
-                    }
-                    else decoded += value[i];
-                }
-                params[key] = decoded;
+                params[key] = urlDecode(value);
             }
         }
         
         if (path == "/api/add-pattern")
         {
-            std::map<std::string, std::string>::iterator it = params.find("pattern");
+            auto it = params.find("pattern");
             if (it != params.end() && !it->second.empty())
                 g_state.patterns.Append(it->second);
             g_state.lastErrorMessage.clear();
         }
         else if (path == "/api/remove-pattern")
         {
-            std::map<std::string, std::string>::iterator it = params.find("index");
+            auto it = params.find("index");
             if (it != params.end())
             {
                 int idx = std::stoi(it->second);
-                if (idx>= 0 && static_cast<size_t>(idx) < g_state.patterns.GetLength())
+                if (idx >= 0 && static_cast<size_t>(idx) < g_state.patterns.GetLength())
                 {
                     MutableArraySequence<std::string> newPatterns;
                     for (size_t i = 0; i < g_state.patterns.GetLength(); ++i)
@@ -400,47 +446,46 @@ void handleRequest(const std::string& request, std::string& response)
         }
         else if (path == "/api/search")
         {
-            std::string source = params["source"];
-            bool overlap = (params["overlap"] == "1");
-            g_state.allowOverlap = overlap;
-            
-            if (g_state.patterns.GetLength() == 0)
+            if (g_state.isProcessing)
             {
-                g_state.lastErrorMessage = "Добавьте хотя бы одну подстроку для поиска";
+                g_state.lastErrorMessage = "Поиск уже выполняется";
                 response = htmlResponse(200, renderMainPage());
                 return;
             }
             
+            g_state.isProcessing = true;
+            
             try
             {
+                std::string source = params["source"];
+                bool overlap = (params["overlap"] == "1");
+                g_state.allowOverlap = overlap;
+                
+                if (g_state.patterns.GetLength() == 0)
+                {
+                    g_state.lastErrorMessage = "Добавьте хотя бы одну подстроку";
+                    g_state.isProcessing = false;
+                    response = htmlResponse(200, renderMainPage());
+                    return;
+                }
+                
                 PatternCounter pc(g_state.patterns, overlap);
                 
                 if (source == "keyboard")
                 {
                     std::string text = params["text"];
                     g_state.sourceText = text;
-                    
                     for (size_t i = 0; i < text.length(); ++i)
                         pc.ConsumeChar(text[i]);
                     g_state.processedCount = text.length();
                 }
                 else if (source == "file")
                 {
-                    std::string pathStr = params["path"];
-                    g_state.filePath = pathStr;
-                    
-                    std::ifstream file(pathStr.c_str(), std::ios::binary);
-                    if (!file.is_open())
-                    {
-                        g_state.lastErrorMessage = "Не удалось открыть файл: " + pathStr;
-                        response = htmlResponse(200, renderMainPage());
-                        return;
-                    }
-                    
-                    char c;
-                    while (file.get(c))
-                        pc.ConsumeChar(c);
-                    g_state.processedCount = pc.GetProcessedCount();
+                    std::string text = params["text"];
+                    g_state.sourceText = text;
+                    for (size_t i = 0; i < text.length(); ++i)
+                        pc.ConsumeChar(text[i]);
+                    g_state.processedCount = text.length();
                 }
                 else if (source == "lazy")
                 {
@@ -451,13 +496,13 @@ void handleRequest(const std::string& request, std::string& response)
                     g_state.lazyLength = length;
                     g_state.lazyAlphabet = alphabet;
                     
-                    // Простой генератор без захвата алфавита по ссылке
                     std::string alphabetCopy = alphabet;
                     auto rule = [alphabetCopy](const BoundedQueue<char>&) -> char {
                         static std::mt19937 rng(42);
-                        std::uniform_int_distribution<size_t> dist(0, alphabetCopy.size() - 1);
+                        static std::uniform_int_distribution<size_t> dist(0, alphabetCopy.size() - 1);
                         return alphabetCopy[dist(rng)];
                     };
+                    
                     MutableArraySequence<char> init;
                     init.Append(alphabet[0]);
                     Generator<char> gen(rule, init, 1, length);
@@ -469,12 +514,9 @@ void handleRequest(const std::string& request, std::string& response)
                 }
                 
                 Sequence<std::pair<std::string, size_t>>* results = pc.GetCounts();
-                
-                // Копируем результаты вручную
                 g_state.lastResults = MutableArraySequence<std::pair<std::string, size_t>>();
                 for (size_t i = 0; i < results->GetLength(); ++i)
                     g_state.lastResults.Append(results->Get(i));
-                
                 delete results;
                 g_state.lastErrorMessage.clear();
             }
@@ -482,6 +524,8 @@ void handleRequest(const std::string& request, std::string& response)
             {
                 g_state.lastErrorMessage = e.what();
             }
+            
+            g_state.isProcessing = false;
         }
         
         response = htmlResponse(200, renderMainPage());
@@ -505,7 +549,7 @@ void* clientHandler(void* arg)
     char buffer[65536];
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     
-    if (bytesRead> 0)
+    if (bytesRead > 0)
     {
         buffer[bytesRead] = '\0';
         std::string request(buffer);

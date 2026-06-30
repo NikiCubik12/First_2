@@ -17,10 +17,10 @@ template <class T> class ArraySequence : public Sequence<T>
     public:
     ArraySequence();
     ArraySequence(T* items, size_t count);
-    ArraySequence(DynamicArray<T> array);
-    ArraySequence(LinkedList<T> list);
-    ArraySequence(ArraySequence<T>& other);
-    ArraySequence(std::initializer_list<T> list);
+    ArraySequence(const DynamicArray<T>& array);
+    ArraySequence(const LinkedList<T>& list);
+    ArraySequence(const ArraySequence<T>& other);
+    ArraySequence(const std::initializer_list<T>& list); 
     ~ArraySequence();
 
     T GetFirst() override;

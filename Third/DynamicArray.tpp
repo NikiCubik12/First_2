@@ -14,7 +14,7 @@ DynamicArray<T>::DynamicArray(T* items, size_t size) : items(new T[size]), size(
 }
 
 template <class T>
-DynamicArray<T>::DynamicArray(DynamicArray<T>& rhs) : items(new T[rhs.size]), size(rhs.size)
+DynamicArray<T>::DynamicArray(const DynamicArray<T>& rhs) : items(new T[rhs.size]), size(rhs.size)
 {
     for (size_t i = 0; i < rhs.size; i++)
     {
@@ -117,7 +117,7 @@ void DynamicArray<T>::Set(size_t index, T value)
 }
 
 template <class T>
-T DynamicArray<T>::Get(size_t index) const
+T DynamicArray<T>::Get(size_t index)
 {
     if (index >= size)
     {
@@ -125,6 +125,16 @@ T DynamicArray<T>::Get(size_t index) const
     }
     return items[index];
 }
+
+// template <class T>
+// static T DynamicArray<T>::Get(const DynamicArray& arr, size_t index)
+// {
+//      if (index >= arr.size)
+//      {
+//          throw IndexOutOfRangeException("Ошибка: индекс выходит за границы");
+//      }
+//      return arr.items[index];
+// }
 
 template <class T>
 size_t DynamicArray<T>::GetSize()

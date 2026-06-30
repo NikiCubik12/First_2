@@ -33,15 +33,15 @@ template <class T> class LinkedList
     LinkedList(std::initializer_list<T> list);
     ~LinkedList();
 
-    T GetFirst() const;
-    T GetLast() const;
-    T Get(size_t index) const;
-    LinkedList<T>* GetSubList(size_t start, size_t end) const;
-    size_t GetLength() const;
+    T GetFirst();
+    T GetLast();
+    T Get(size_t index);
+    LinkedList<T>* GetSubList(size_t start, size_t end);
+    size_t GetLength();
     void Append(T item);
     void Prepend(T item);
     void InsertAt(T item, size_t index);
-    LinkedList<T>* Concat(LinkedList<T>* list) const;
+    LinkedList<T>* Concat(LinkedList<T>* list);
     void ClearList();
 };
 

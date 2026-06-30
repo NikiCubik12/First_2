@@ -57,7 +57,7 @@ LinkedList<T>::LinkedList(const LinkedList<T>& list) : head(nullptr), tail(nullp
 template <class T>
 LinkedList<T>::LinkedList(std::initializer_list<T> list) : head(nullptr), tail(nullptr)
 {
-    for (const T& val : list)
+    for (T val : list)
     {
         Append(val);
     }
@@ -70,7 +70,7 @@ LinkedList<T>::~LinkedList()
 }
 
 template <class T>
-T LinkedList<T>::GetFirst() const
+T LinkedList<T>::GetFirst()
 {
     if (head == nullptr)
     {
@@ -80,7 +80,7 @@ T LinkedList<T>::GetFirst() const
 }
 
 template <class T>
-T LinkedList<T>::GetLast() const
+T LinkedList<T>::GetLast() 
 {
     if (tail == nullptr)
     {
@@ -90,7 +90,7 @@ T LinkedList<T>::GetLast() const
 }
 
 template <class T>
-T LinkedList<T>::Get(size_t index) const
+T LinkedList<T>::Get(size_t index) 
 {
     Node<T>* node = getNode(index);
     if (node == nullptr)
@@ -101,7 +101,7 @@ T LinkedList<T>::Get(size_t index) const
 }
 
 template <class T>
-LinkedList<T>* LinkedList<T>::GetSubList(size_t start, size_t end) const
+LinkedList<T>* LinkedList<T>::GetSubList(size_t start, size_t end) 
 {
     size_t length = calculateLength();
     if (start > end || end >= length)
@@ -118,7 +118,7 @@ LinkedList<T>* LinkedList<T>::GetSubList(size_t start, size_t end) const
 }
 
 template <class T>
-size_t LinkedList<T>::GetLength() const
+size_t LinkedList<T>::GetLength() 
 {
     return calculateLength();
 }
@@ -185,7 +185,7 @@ void LinkedList<T>::InsertAt(T item, size_t index)
 }
 
 template <class T>
-LinkedList<T>* LinkedList<T>::Concat(LinkedList<T>* list) const
+LinkedList<T>* LinkedList<T>::Concat(LinkedList<T>* list) 
 {
     if (list == nullptr)
     {
